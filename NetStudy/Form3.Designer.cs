@@ -81,8 +81,9 @@
             Controls.Add(textBox2);
             Controls.Add(textBox1);
             Controls.Add(button2);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form3";
-            Text = "Form3";
+            Text = "Xác thực tài khoản NetStudy";
             ResumeLayout(false);
             PerformLayout();
         }

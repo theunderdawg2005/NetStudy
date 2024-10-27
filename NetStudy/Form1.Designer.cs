@@ -93,8 +93,9 @@
             Controls.Add(button1);
             Controls.Add(textBox2);
             Controls.Add(textBox1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
-            Text = "Form1";
+            Text = "Đăng nhập vào NetStudy";
             ResumeLayout(false);
             PerformLayout();
         }

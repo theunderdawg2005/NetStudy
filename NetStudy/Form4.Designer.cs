@@ -69,8 +69,9 @@
             Controls.Add(button2);
             Controls.Add(textBox2);
             Controls.Add(textBox1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form4";
-            Text = "Form4";
+            Text = "Tạo lại mật khẩu NetStudy";
             ResumeLayout(false);
             PerformLayout();
         }
