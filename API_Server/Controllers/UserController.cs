@@ -18,11 +18,13 @@ namespace API_Server.Controllers
         private readonly MongoDbService _context;
         private readonly EmailService _emailService;
         private readonly JwtService _jwtService;
-        public UserController(MongoDbService context, EmailService emailService, JwtService jwtService)
+        private readonly UserService _userService;
+        public UserController(MongoDbService context, EmailService emailService, JwtService jwtService, UserService userService)
         {
             _context = context;
             _emailService = emailService;
             _jwtService = jwtService;
+            _userService = userService;
         }
 
         private static readonly ConcurrentDictionary<string, User> _users = new ConcurrentDictionary<string, User>();
@@ -266,7 +268,7 @@ namespace API_Server.Controllers
 
             return Ok("Xóa người dùng thành công.");
         }
-        //Chỉnh sửa thông tin người dùng
+        //Chỉnh sửa thông tin người dùng (chưa hoàn thiện)
         [HttpPatch("{username}")]
         [Authorize]
         public async Task<IActionResult> UpdateUser(string username, [FromBody] JsonPatchDocument<User> patchDoc)
@@ -290,6 +292,32 @@ namespace API_Server.Controllers
             await _context.Users.ReplaceOneAsync(filter, user);
 
             return Ok(user);
+        }
+
+        [Authorize]
+        [HttpGet("search")]
+        public async Task<ActionResult<List<User>>> SearchUsers(string query)
+        {
+            var users = await _userService.SearchUserAsync(query);
+            if(users == null || users.Count == 0)
+            {
+                return NotFound("Không tìm thấy người dùng");
+            }       
+            return Ok(users);
+        }
+
+        [Authorize]
+        [HttpGet("{userId}/suggest-friends")]
+        public async Task<ActionResult<List<User>>> SuggestFriends(string userId)
+        {
+            var friends = await _userService.SuggestFriendAsync(userId);
+
+            if(friends == null || friends.Count == 0)
+            {
+                return NotFound("No friends was found");
+            }
+
+            return Ok(friends);
         }
     }
 }
