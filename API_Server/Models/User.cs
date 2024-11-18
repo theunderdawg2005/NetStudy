@@ -14,7 +14,10 @@ namespace API_Server.Models
         public DateTime DateOfBirth { get; set; }
         public string? Password { get; set; }
         public string? PasswordHash { get; set; }
+        public List<string> Friends { get; set; } = new List<string>();
+        public List<string> ChatGroup { get; set; } = new List<string>();
         public bool IsEmailVerified { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
     }
 }

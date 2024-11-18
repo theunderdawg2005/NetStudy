@@ -12,12 +12,17 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-// Add email service
+
+// Add service
 builder.Services.AddSingleton<EmailService>();
 
 builder.Services.AddSingleton<MongoDbService>();
 
 builder.Services.AddSingleton<JwtService>();
+
+builder.Services.AddSingleton<UserService>();
+
+builder.Services.AddSingleton<ChatGroupService>();
 
 // Add services to the container.
 
@@ -26,7 +31,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 });
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+//var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = builder.Configuration["JwtSettings:Secret"] ?? throw new ArgumentNullException("JwtSettings:Secret cannot be null");
 
 builder.Services.AddAuthentication(options =>
@@ -34,7 +39,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
+.AddJwtBearer( options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -42,13 +47,13 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
 });
 
-
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
