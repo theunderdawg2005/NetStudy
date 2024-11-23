@@ -61,5 +61,14 @@ namespace API_Server.Services
 
             return suggestFriends;
         }
+        public async Task<bool> AddFriend(string userId, string friendId)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.Id.ToString(), userId);
+            var update = Builders<User>.Update.AddToSet(u => u.Friends, friendId);
+
+            var res = await users.UpdateOneAsync(filter, update);
+
+            return res.ModifiedCount > 0;
+        }
     }
 }

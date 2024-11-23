@@ -319,5 +319,44 @@ namespace API_Server.Controllers
 
             return Ok(friends);
         }
+        [Authorize]
+        [HttpPost("add-friend/{friendId}")]
+        public async Task<IActionResult> AddFriend(string friendId)
+        {
+            // Lấy access token từ cookies
+            if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
+            {
+                return BadRequest("Yêu cầu không hợp lệ.");
+            }
+
+            // Xác minh token và lấy username
+            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            if (claimsPrincipal == null)
+            {
+                return Unauthorized("Access token không hợp lệ 1.");
+            }
+
+            var usernameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
+            if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
+            {
+                return Unauthorized("Access token không hợp lệ 2");
+            }
+            var user = await _context.Users.Find(u => u.Username == usernameClaim.Value).FirstOrDefaultAsync();
+            var userId = user.Id.ToString();
+            var friend = await _userService.GetUserById(friendId);
+
+            if (friend == null)
+            {
+                return NotFound("Friend not found!");
+            }
+
+            var success = await _userService.AddFriend(userId, friendId);
+            if (!success)
+            {
+                return StatusCode(500, "Failed to add friend");
+            }
+
+            return Ok("Friend added successfully");
+        }
     }
 }

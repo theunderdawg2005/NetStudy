@@ -17,7 +17,7 @@ namespace API_Server.Models
         
         public string Creator { get; set; }
 
-        // Mảng lưu các thành viên trong group
+        // Mảng lưu các thành viên (username) trong group
         public List<string> Members { get; set; } = new List<string>();
     }
 }

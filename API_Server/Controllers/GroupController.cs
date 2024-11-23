@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
+using System.Security.Claims;
 
 namespace API_Server.Controllers
 {
@@ -37,22 +38,22 @@ namespace API_Server.Controllers
             var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
             if (claimsPrincipal == null)
             {
-                return Unauthorized("Access token không hợp lệ 1.");
+                return Unauthorized("Access token không hợp lệ!");
             }
 
-            var usernameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
-            if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
+            var userNameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
+            if (userNameClaim == null || string.IsNullOrEmpty(userNameClaim.Value))
             {
-                return Unauthorized("Access token không hợp lệ 2");
+                return Unauthorized("Access token không hợp lệ !");
             }
-            var username = usernameClaim.Value;
-
-
-            if (username == null)
+            var user = await _context.Users.Find(u => u.Username == userNameClaim.Value).FirstOrDefaultAsync();
+            // var creatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = user.Id.ToString();
+            if (userId == null)
             {
                 return NotFound("Không tìm thấy người dùng.");
             }
-            group.Creator = username;
+            group.Creator = userId;
             if (!group.Members.Contains(group.Creator))
             {
                 group.Members.Add(group.Creator);
