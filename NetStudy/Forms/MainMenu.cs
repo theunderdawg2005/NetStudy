@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Xml;
 using FontAwesome.Sharp;
 using NetStudy.Forms;
+using Newtonsoft.Json.Linq;
 
 namespace NetStudy.Forms
 {
@@ -20,8 +21,10 @@ namespace NetStudy.Forms
         private IconButton currentBtn;
         private Panel leftBorderBtn;
         private Form currentChildForm;
+        private JObject UserInfo;
+        private string accessToken;
         //Constructor
-        public MainMenu()
+        public MainMenu(string accessToken, JObject info)
         {
             InitializeComponent();
             leftBorderBtn = new Panel();
@@ -32,6 +35,8 @@ namespace NetStudy.Forms
             this.ControlBox = false;
             this.DoubleBuffered = true;
             this.MaximizedBounds = Screen.FromHandle(this.Handle).WorkingArea;
+            this.accessToken = accessToken;
+            UserInfo = info;
         }
         //Structs
         private struct RGBColors
