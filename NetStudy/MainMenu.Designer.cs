@@ -30,31 +30,163 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainMenu));
             panelMenu = new Panel();
+            btnmatch = new FontAwesome.Sharp.IconButton();
+            btnexam = new FontAwesome.Sharp.IconButton();
+            btnclass = new FontAwesome.Sharp.IconButton();
+            btnchat = new FontAwesome.Sharp.IconButton();
+            btndocument = new FontAwesome.Sharp.IconButton();
+            btndashboard = new FontAwesome.Sharp.IconButton();
             panelLogo = new Panel();
-            iconButton1 = new FontAwesome.Sharp.IconButton();
-            iconButton2 = new FontAwesome.Sharp.IconButton();
-            iconButton3 = new FontAwesome.Sharp.IconButton();
-            iconButton4 = new FontAwesome.Sharp.IconButton();
-            iconButton5 = new FontAwesome.Sharp.IconButton();
-            iconButton6 = new FontAwesome.Sharp.IconButton();
             panelMenu.SuspendLayout();
             SuspendLayout();
             // 
             // panelMenu
             // 
             panelMenu.BackColor = Color.FromArgb(31, 30, 68);
-            panelMenu.Controls.Add(iconButton6);
-            panelMenu.Controls.Add(iconButton5);
-            panelMenu.Controls.Add(iconButton4);
-            panelMenu.Controls.Add(iconButton3);
-            panelMenu.Controls.Add(iconButton2);
-            panelMenu.Controls.Add(iconButton1);
+            panelMenu.Controls.Add(btnmatch);
+            panelMenu.Controls.Add(btnexam);
+            panelMenu.Controls.Add(btnclass);
+            panelMenu.Controls.Add(btnchat);
+            panelMenu.Controls.Add(btndocument);
+            panelMenu.Controls.Add(btndashboard);
             panelMenu.Controls.Add(panelLogo);
             panelMenu.Dock = DockStyle.Left;
             panelMenu.Location = new Point(0, 0);
             panelMenu.Name = "panelMenu";
             panelMenu.Size = new Size(220, 631);
             panelMenu.TabIndex = 0;
+            // 
+            // btnmatch
+            // 
+            btnmatch.Dock = DockStyle.Top;
+            btnmatch.FlatAppearance.BorderSize = 0;
+            btnmatch.FlatStyle = FlatStyle.Flat;
+            btnmatch.ForeColor = Color.Gainsboro;
+            btnmatch.IconChar = FontAwesome.Sharp.IconChar.Handshake;
+            btnmatch.IconColor = Color.Gainsboro;
+            btnmatch.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnmatch.IconSize = 32;
+            btnmatch.ImageAlign = ContentAlignment.MiddleLeft;
+            btnmatch.Location = new Point(0, 440);
+            btnmatch.Name = "btnmatch";
+            btnmatch.Padding = new Padding(10, 0, 20, 0);
+            btnmatch.Size = new Size(220, 60);
+            btnmatch.TabIndex = 6;
+            btnmatch.Text = "Bạn học";
+            btnmatch.TextAlign = ContentAlignment.MiddleLeft;
+            btnmatch.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnmatch.UseVisualStyleBackColor = true;
+            btnmatch.Click += this.btnmatch_Click;
+            // 
+            // btnexam
+            // 
+            btnexam.Dock = DockStyle.Top;
+            btnexam.FlatAppearance.BorderSize = 0;
+            btnexam.FlatStyle = FlatStyle.Flat;
+            btnexam.ForeColor = Color.Gainsboro;
+            btnexam.IconChar = FontAwesome.Sharp.IconChar.PenRuler;
+            btnexam.IconColor = Color.Gainsboro;
+            btnexam.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnexam.IconSize = 32;
+            btnexam.ImageAlign = ContentAlignment.MiddleLeft;
+            btnexam.Location = new Point(0, 380);
+            btnexam.Name = "btnexam";
+            btnexam.Padding = new Padding(10, 0, 20, 0);
+            btnexam.Size = new Size(220, 60);
+            btnexam.TabIndex = 5;
+            btnexam.Text = "Ôn tập";
+            btnexam.TextAlign = ContentAlignment.MiddleLeft;
+            btnexam.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnexam.UseVisualStyleBackColor = true;
+            btnexam.Click += this.btnexam_Click;
+            // 
+            // btnclass
+            // 
+            btnclass.Dock = DockStyle.Top;
+            btnclass.FlatAppearance.BorderSize = 0;
+            btnclass.FlatStyle = FlatStyle.Flat;
+            btnclass.ForeColor = Color.Gainsboro;
+            btnclass.IconChar = FontAwesome.Sharp.IconChar.UsersRectangle;
+            btnclass.IconColor = Color.Gainsboro;
+            btnclass.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnclass.IconSize = 32;
+            btnclass.ImageAlign = ContentAlignment.MiddleLeft;
+            btnclass.Location = new Point(0, 320);
+            btnclass.Name = "btnclass";
+            btnclass.Padding = new Padding(10, 0, 20, 0);
+            btnclass.Size = new Size(220, 60);
+            btnclass.TabIndex = 4;
+            btnclass.Text = "Lớp học";
+            btnclass.TextAlign = ContentAlignment.MiddleLeft;
+            btnclass.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnclass.UseVisualStyleBackColor = true;
+            btnclass.Click += this.btnclass_Click;
+            // 
+            // btnchat
+            // 
+            btnchat.Dock = DockStyle.Top;
+            btnchat.FlatAppearance.BorderSize = 0;
+            btnchat.FlatStyle = FlatStyle.Flat;
+            btnchat.ForeColor = Color.Gainsboro;
+            btnchat.IconChar = FontAwesome.Sharp.IconChar.Comment;
+            btnchat.IconColor = Color.Gainsboro;
+            btnchat.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnchat.IconSize = 32;
+            btnchat.ImageAlign = ContentAlignment.MiddleLeft;
+            btnchat.Location = new Point(0, 260);
+            btnchat.Name = "btnchat";
+            btnchat.Padding = new Padding(10, 0, 20, 0);
+            btnchat.Size = new Size(220, 60);
+            btnchat.TabIndex = 3;
+            btnchat.Text = "Đoạn chat";
+            btnchat.TextAlign = ContentAlignment.MiddleLeft;
+            btnchat.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnchat.UseVisualStyleBackColor = true;
+            btnchat.Click += this.btnchat_Click;
+            // 
+            // btndocument
+            // 
+            btndocument.Dock = DockStyle.Top;
+            btndocument.FlatAppearance.BorderSize = 0;
+            btndocument.FlatStyle = FlatStyle.Flat;
+            btndocument.ForeColor = Color.Gainsboro;
+            btndocument.IconChar = FontAwesome.Sharp.IconChar.File;
+            btndocument.IconColor = Color.Gainsboro;
+            btndocument.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btndocument.IconSize = 32;
+            btndocument.ImageAlign = ContentAlignment.MiddleLeft;
+            btndocument.Location = new Point(0, 200);
+            btndocument.Name = "btndocument";
+            btndocument.Padding = new Padding(10, 0, 20, 0);
+            btndocument.Size = new Size(220, 60);
+            btndocument.TabIndex = 2;
+            btndocument.Text = "Tài liệu";
+            btndocument.TextAlign = ContentAlignment.MiddleLeft;
+            btndocument.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btndocument.UseVisualStyleBackColor = true;
+            btndocument.Click += this.btndocument_Click;
+            // 
+            // btndashboard
+            // 
+            btndashboard.Dock = DockStyle.Top;
+            btndashboard.FlatAppearance.BorderSize = 0;
+            btndashboard.FlatStyle = FlatStyle.Flat;
+            btndashboard.ForeColor = Color.Gainsboro;
+            btndashboard.IconChar = FontAwesome.Sharp.IconChar.Star;
+            btndashboard.IconColor = Color.Gainsboro;
+            btndashboard.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btndashboard.IconSize = 32;
+            btndashboard.ImageAlign = ContentAlignment.MiddleLeft;
+            btndashboard.Location = new Point(0, 140);
+            btndashboard.Name = "btndashboard";
+            btndashboard.Padding = new Padding(10, 0, 20, 0);
+            btndashboard.Size = new Size(220, 60);
+            btndashboard.TabIndex = 1;
+            btndashboard.Text = "Tổng quan";
+            btndashboard.TextAlign = ContentAlignment.MiddleLeft;
+            btndashboard.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btndashboard.UseVisualStyleBackColor = true;
+            btndashboard.Click += this.btndashboard_Click;
             // 
             // panelLogo
             // 
@@ -63,132 +195,6 @@
             panelLogo.Name = "panelLogo";
             panelLogo.Size = new Size(220, 140);
             panelLogo.TabIndex = 0;
-            // 
-            // iconButton1
-            // 
-            iconButton1.Dock = DockStyle.Top;
-            iconButton1.FlatAppearance.BorderSize = 0;
-            iconButton1.FlatStyle = FlatStyle.Flat;
-            iconButton1.ForeColor = Color.Gainsboro;
-            iconButton1.IconChar = FontAwesome.Sharp.IconChar.Star;
-            iconButton1.IconColor = Color.Gainsboro;
-            iconButton1.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconButton1.IconSize = 32;
-            iconButton1.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton1.Location = new Point(0, 140);
-            iconButton1.Name = "iconButton1";
-            iconButton1.Padding = new Padding(10, 0, 20, 0);
-            iconButton1.Size = new Size(220, 60);
-            iconButton1.TabIndex = 1;
-            iconButton1.Text = "Tổng quan";
-            iconButton1.TextAlign = ContentAlignment.MiddleLeft;
-            iconButton1.TextImageRelation = TextImageRelation.ImageBeforeText;
-            iconButton1.UseVisualStyleBackColor = true;
-            // 
-            // iconButton2
-            // 
-            iconButton2.Dock = DockStyle.Top;
-            iconButton2.FlatAppearance.BorderSize = 0;
-            iconButton2.FlatStyle = FlatStyle.Flat;
-            iconButton2.ForeColor = Color.Gainsboro;
-            iconButton2.IconChar = FontAwesome.Sharp.IconChar.File;
-            iconButton2.IconColor = Color.Gainsboro;
-            iconButton2.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconButton2.IconSize = 32;
-            iconButton2.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton2.Location = new Point(0, 200);
-            iconButton2.Name = "iconButton2";
-            iconButton2.Padding = new Padding(10, 0, 20, 0);
-            iconButton2.Size = new Size(220, 60);
-            iconButton2.TabIndex = 2;
-            iconButton2.Text = "Tài liệu";
-            iconButton2.TextAlign = ContentAlignment.MiddleLeft;
-            iconButton2.TextImageRelation = TextImageRelation.ImageBeforeText;
-            iconButton2.UseVisualStyleBackColor = true;
-            // 
-            // iconButton3
-            // 
-            iconButton3.Dock = DockStyle.Top;
-            iconButton3.FlatAppearance.BorderSize = 0;
-            iconButton3.FlatStyle = FlatStyle.Flat;
-            iconButton3.ForeColor = Color.Gainsboro;
-            iconButton3.IconChar = FontAwesome.Sharp.IconChar.Comment;
-            iconButton3.IconColor = Color.Gainsboro;
-            iconButton3.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconButton3.IconSize = 32;
-            iconButton3.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton3.Location = new Point(0, 260);
-            iconButton3.Name = "iconButton3";
-            iconButton3.Padding = new Padding(10, 0, 20, 0);
-            iconButton3.Size = new Size(220, 60);
-            iconButton3.TabIndex = 3;
-            iconButton3.Text = "Đoạn chat";
-            iconButton3.TextAlign = ContentAlignment.MiddleLeft;
-            iconButton3.TextImageRelation = TextImageRelation.ImageBeforeText;
-            iconButton3.UseVisualStyleBackColor = true;
-            // 
-            // iconButton4
-            // 
-            iconButton4.Dock = DockStyle.Top;
-            iconButton4.FlatAppearance.BorderSize = 0;
-            iconButton4.FlatStyle = FlatStyle.Flat;
-            iconButton4.ForeColor = Color.Gainsboro;
-            iconButton4.IconChar = FontAwesome.Sharp.IconChar.UsersRectangle;
-            iconButton4.IconColor = Color.Gainsboro;
-            iconButton4.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconButton4.IconSize = 32;
-            iconButton4.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton4.Location = new Point(0, 320);
-            iconButton4.Name = "iconButton4";
-            iconButton4.Padding = new Padding(10, 0, 20, 0);
-            iconButton4.Size = new Size(220, 60);
-            iconButton4.TabIndex = 4;
-            iconButton4.Text = "Lớp học";
-            iconButton4.TextAlign = ContentAlignment.MiddleLeft;
-            iconButton4.TextImageRelation = TextImageRelation.ImageBeforeText;
-            iconButton4.UseVisualStyleBackColor = true;
-            // 
-            // iconButton5
-            // 
-            iconButton5.Dock = DockStyle.Top;
-            iconButton5.FlatAppearance.BorderSize = 0;
-            iconButton5.FlatStyle = FlatStyle.Flat;
-            iconButton5.ForeColor = Color.Gainsboro;
-            iconButton5.IconChar = FontAwesome.Sharp.IconChar.PenRuler;
-            iconButton5.IconColor = Color.Gainsboro;
-            iconButton5.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconButton5.IconSize = 32;
-            iconButton5.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton5.Location = new Point(0, 380);
-            iconButton5.Name = "iconButton5";
-            iconButton5.Padding = new Padding(10, 0, 20, 0);
-            iconButton5.Size = new Size(220, 60);
-            iconButton5.TabIndex = 5;
-            iconButton5.Text = "Ôn tập";
-            iconButton5.TextAlign = ContentAlignment.MiddleLeft;
-            iconButton5.TextImageRelation = TextImageRelation.ImageBeforeText;
-            iconButton5.UseVisualStyleBackColor = true;
-            // 
-            // iconButton6
-            // 
-            iconButton6.Dock = DockStyle.Top;
-            iconButton6.FlatAppearance.BorderSize = 0;
-            iconButton6.FlatStyle = FlatStyle.Flat;
-            iconButton6.ForeColor = Color.Gainsboro;
-            iconButton6.IconChar = FontAwesome.Sharp.IconChar.Handshake;
-            iconButton6.IconColor = Color.Gainsboro;
-            iconButton6.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconButton6.IconSize = 32;
-            iconButton6.ImageAlign = ContentAlignment.MiddleLeft;
-            iconButton6.Location = new Point(0, 440);
-            iconButton6.Name = "iconButton6";
-            iconButton6.Padding = new Padding(10, 0, 20, 0);
-            iconButton6.Size = new Size(220, 60);
-            iconButton6.TabIndex = 6;
-            iconButton6.Text = "Bạn học";
-            iconButton6.TextAlign = ContentAlignment.MiddleLeft;
-            iconButton6.TextImageRelation = TextImageRelation.ImageBeforeText;
-            iconButton6.UseVisualStyleBackColor = true;
             // 
             // MainMenu
             // 
@@ -206,12 +212,12 @@
         #endregion
 
         private Panel panelMenu;
-        private FontAwesome.Sharp.IconButton iconButton1;
+        private FontAwesome.Sharp.IconButton btndashboard;
         private Panel panelLogo;
-        private FontAwesome.Sharp.IconButton iconButton6;
-        private FontAwesome.Sharp.IconButton iconButton5;
-        private FontAwesome.Sharp.IconButton iconButton4;
-        private FontAwesome.Sharp.IconButton iconButton3;
-        private FontAwesome.Sharp.IconButton iconButton2;
+        private FontAwesome.Sharp.IconButton btnmatch;
+        private FontAwesome.Sharp.IconButton btnexam;
+        private FontAwesome.Sharp.IconButton btnclass;
+        private FontAwesome.Sharp.IconButton btnchat;
+        private FontAwesome.Sharp.IconButton btndocument;
     }
 }
