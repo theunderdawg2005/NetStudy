@@ -10,7 +10,9 @@ namespace API_Server.Services
         private readonly IMongoCollection<ChatGroup> chatGroups;    
         public UserService(MongoDbService db) {
             users = db.Users;
+            chatGroups = db.ChatGroup;
         }
+         
         public async Task<List<User>> GetAllUserAsync() => await users.Find(_ =>  true).ToListAsync();
 
         public async Task<List<User>> SearchUserAsync(string query)
@@ -31,6 +33,10 @@ namespace API_Server.Services
         public async Task<User> GetUserById(string id)
         {
             return await users.Find(u => u.Id.ToString() == id).FirstOrDefaultAsync();
+        }
+        public async Task<User> GetUserByUserName(string userName)
+        {
+            return await users.Find(u => u.Username == userName).FirstOrDefaultAsync();
         }
         public async Task<List<ChatGroup>> GetGroupByUserId(string userId)
         {

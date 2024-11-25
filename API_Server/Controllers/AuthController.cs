@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using MongoDB.Driver;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API_Server.Controllers
 {
@@ -103,6 +104,43 @@ namespace API_Server.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("handle-token")]
+        public async Task<IActionResult> HandleRefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            string refreshToken = request.RefreshToken;
+            string userName = request.Username;
+            try
+            {
+                var newAccessToken = await _jwtService.NewGenerateAccessToken(refreshToken, userName);
+
+                return Ok(new
+                {
+                    accessToken = newAccessToken
+                }
+                );
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+
+            }
+        }
+
+        [Authorize]
+        [HttpGet("get-refresh-token")]
+        public async Task<IActionResult> GetRefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            var tokenData = await _jwtService.GetRefreshToken(request.RefreshToken);
+            if (tokenData == null)
+            {
+                return BadRequest("Token not found!");
+            }
+            else
+            {
+                return Ok(tokenData);
             }
         }
     }

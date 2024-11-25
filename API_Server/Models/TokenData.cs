@@ -12,5 +12,6 @@ namespace API_Server.Models
         public DateTime? RefreshTokenExpiryTime { get; set; }
         public string? Username { get; set; }
         public string Jti { get; set; } = string.Empty;
+        public List<string> RefreshTokensUsed { get; set; } = new List<string>();
     }
 }
