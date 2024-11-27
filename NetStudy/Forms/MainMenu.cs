@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Xml;
 using FontAwesome.Sharp;
 using NetStudy.Forms;
+using NetStudy.Services;
 using Newtonsoft.Json.Linq;
 
 namespace NetStudy.Forms
@@ -23,6 +24,11 @@ namespace NetStudy.Forms
         private Form currentChildForm;
         private JObject UserInfo;
         private string accessToken;
+        private readonly HttpClient httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(@"https://localhost:7070/")
+        };
+        private TokenService _tokenService;
         //Constructor
         public MainMenu(string accessToken, JObject info)
         {
@@ -36,6 +42,14 @@ namespace NetStudy.Forms
             this.DoubleBuffered = true;
             this.MaximizedBounds = Screen.FromHandle(this.Handle).WorkingArea;
             this.accessToken = accessToken;
+            var tokenService = new TokenService(httpClient);
+            _tokenService = tokenService;
+            var clientHandler = new ClientHandler(tokenService, new HttpClientHandler());
+            httpClient = new HttpClient(clientHandler)
+            {
+                BaseAddress = new Uri(@"https://localhost:7070/")
+            };
+            _tokenService.SetTokens(accessToken);
             UserInfo = info;
         }
         //Structs
@@ -149,7 +163,8 @@ namespace NetStudy.Forms
         private void btnMatch_Click(object sender, EventArgs e)
         {
             ActivateButton(sender, RGBColors.color6);
-            OpenChildForm(new FormMatch());
+            
+            OpenChildForm(new FormMatch(UserInfo,accessToken));
         }
 
         //Drag Form

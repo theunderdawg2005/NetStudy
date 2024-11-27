@@ -54,6 +54,7 @@ namespace NetStudy
                     this.Hide();
                     var accessToken = res["accessToken"].ToString();
                     MainMenu menu = new MainMenu(accessToken, res);
+                    MessageBox.Show($"Access Token: {accessToken}", "Token");
                     menu.ShowDialog();
                     this.Close();
                 }    

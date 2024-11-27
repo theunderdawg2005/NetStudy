@@ -162,7 +162,10 @@ namespace API_Server.Controllers
             return Ok(new
             {
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                Name = user.Name,
+                Username = user.Username,
+                Email = user.Email
             });
         }
         //API cho logout
@@ -301,9 +304,27 @@ namespace API_Server.Controllers
             var users = await _userService.SearchUserAsync(query);
             if(users == null || users.Count == 0)
             {
-                return NotFound("Không tìm thấy người dùng");
-            }       
-            return Ok(users);
+                return NotFound(new
+                {
+                    message = "Không tìm thấy người dùng",
+                    total = 0
+                });
+            }
+
+            var res = users.Select(user => new
+            {
+                id = user.Id.ToString(),
+                name = user.Name,
+                username = user.Username,
+                email = user.Email,
+                dateOfBirth = user.DateOfBirth
+                
+            });
+            return Ok(new
+            {
+                total = users.Count,
+                data = res
+            });
         }
 
         [Authorize]
