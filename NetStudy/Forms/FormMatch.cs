@@ -33,21 +33,9 @@ namespace NetStudy.Forms
             InitializeComponent();
             UserInfo = info;
             accessToken = token;
-            labelUsername.Text = UserInfo["username"].ToString();
+            label1.Text = info["name"].ToString();
         }
-        public async void GetPage()
-        {
-            int total = friends.Count;
-            comboPage.Items.Clear();
-            for (int i = 0; i < friends.Count; i++)
-            {
-                comboPage.Items.Add(i);
-            }
-
-            int pageSize = 2;
-
-
-        }
+     
         public async Task<(List<User>, int)> GetFriendSearching(string searchString, int pageSize)
         {
             if (!string.IsNullOrEmpty(accessToken))
@@ -77,7 +65,6 @@ namespace NetStudy.Forms
                 else
                 {
                     throw new Exception($"Lỗi khi gọi API: {response.StatusCode}");
-                    return (new List<User>(), 0);
                 }
 
             }
@@ -114,7 +101,7 @@ namespace NetStudy.Forms
 
                 Label lblEmail = new Label
                 {
-                    Text = $"Email: {user.Name}",
+                    Text = $"Email: {user.Email}",
                     AutoSize = true,
                     Font = new Font("Cambria", 10),
                     ForeColor = Color.Gainsboro
