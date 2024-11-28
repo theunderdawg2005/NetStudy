@@ -32,7 +32,7 @@ namespace NetStudy
         {
             string username = txtUsername.Text;
             string password = txtPassword.Text;
-            if(string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 MessageBox.Show("Tài khoản hoặc mật khẩu không hợp lệ!", "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -49,7 +49,7 @@ namespace NetStudy
                 var response = await httpClient.PostAsync("api/user/login", content);
                 var info = await response.Content.ReadAsStringAsync();
                 JObject res = JObject.Parse(info);
-                if(response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode)
                 {
                     this.Hide();
                     var accessToken = res["accessToken"].ToString();
@@ -57,7 +57,7 @@ namespace NetStudy
                     MessageBox.Show($"Access Token: {accessToken}", "Token");
                     menu.ShowDialog();
                     this.Close();
-                }    
+                }
                 else
                 {
                     MessageBox.Show(info);
@@ -68,11 +68,19 @@ namespace NetStudy
             {
                 MessageBox.Show(ex.Message + '\n' + ex.StackTrace, "Error...");
             }
-        }    
+        }
         public void linkClear_LinkClicked_1(object sender, LinkLabelLinkClickedEventArgs e)
         {
             txtUsername.Clear();
-            txtPassword.Clear();    
+            txtPassword.Clear();
+        }
+
+        private void linkRegister_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            this.Hide();
+            FormRegister register = new FormRegister();
+            register.ShowDialog();
+            this.Close();
         }
     }
 }

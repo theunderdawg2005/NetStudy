@@ -144,6 +144,7 @@
             linkRegister.TabIndex = 7;
             linkRegister.TabStop = true;
             linkRegister.Text = "Sign up";
+            linkRegister.LinkClicked += linkRegister_LinkClicked;
             // 
             // label2
             // 
@@ -186,7 +187,7 @@
             linkClear.TabIndex = 12;
             linkClear.TabStop = true;
             linkClear.Text = "Clear fields";
-            linkClear.LinkClicked += this.linkClear_LinkClicked_1;
+            linkClear.LinkClicked += linkClear_LinkClicked_1;
             // 
             // FormLogin
             // 

@@ -103,7 +103,8 @@ namespace API_Server.Controllers
             //Tạo user để thêm dữ liệu vào database
             var newUser = new User
             {
-                Name = tempUser.Username,
+                
+                Name = tempUser.Name,
                 Username = tempUser.Username,
                 PasswordHash = tempUser.PasswordHash,
                 DateOfBirth = tempUser.DateOfBirth,
@@ -113,7 +114,11 @@ namespace API_Server.Controllers
             };
             newUser.IsEmailVerified = true;
             await _context.Users.InsertOneAsync(newUser);
-            return Ok("Đăng kí thành công. Email của bạn đã được xác nhận.");
+            return Ok(new
+            {
+                message = "Đăng kí thành công!",
+                info = newUser
+            });
         }
         //API cho Login
         [HttpPost("login")]
