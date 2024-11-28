@@ -159,10 +159,12 @@ namespace API_Server.Controllers
             };
             Response.Cookies.Append("accessToken", accessToken, cookieOptions);
             //Trả về refresh token và access token
+
             return Ok(new
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
+                Id = user.Id.ToString(),
                 Name = user.Name,
                 Username = user.Username,
                 Email = user.Email
@@ -338,7 +340,20 @@ namespace API_Server.Controllers
                 return NotFound("No friends was found");
             }
 
-            return Ok(friends);
+            var result = friends.Select(user => new
+            {
+                id = user.Id.ToString(),
+                name = user.Name,
+                username = user.Username,
+                email = user.Email
+            }
+            );
+
+            return Ok(new
+            {
+                total = friends.Count,
+                data = result
+            });
         }
         [Authorize]
         [HttpPost("add-friend/{friendId}")]

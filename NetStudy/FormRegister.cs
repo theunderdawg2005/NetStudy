@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace NetStudy
 {
-    public partial class Form2 : Form
+    public partial class FormRegister : Form
     {
-        public Form2()
+        public FormRegister()
         {
             InitializeComponent();
         }

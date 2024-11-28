@@ -35,7 +35,39 @@ namespace NetStudy.Forms
             accessToken = token;
             label1.Text = info["name"].ToString();
         }
-     
+
+        public async Task<(List<User>, int)> GetFriendRequest()
+        {
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            }
+
+            try
+            {
+                string userId = UserInfo["id"].ToString();
+                var response = await httpClient.GetAsync($"api/user/{userId}/suggest-friends");
+                if (response.IsSuccessStatusCode)
+                {
+                    var res = await response.Content.ReadAsStringAsync();
+                    JObject info = JObject.Parse(res);
+                    total = int.Parse(info["total"].ToString());
+                    totalPages = (int)Math.Ceiling((double)total / pageSize);
+                    List<User> friends = info["data"].ToObject<List<User>>();
+
+                    return (friends, totalPages);
+                }
+                else
+                {
+                    throw new Exception($"Lỗi khi gọi API: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return (new List<User>(), 0);
+            }
+        }
         public async Task<(List<User>, int)> GetFriendSearching(string searchString, int pageSize)
         {
             if (!string.IsNullOrEmpty(accessToken))
@@ -139,6 +171,15 @@ namespace NetStudy.Forms
 
             comboPage.SelectedIndex = currPage - 1;
         }
+
+        private async Task LoadFriends()
+        {
+            var (friends, totalPages) = await GetFriendRequest();
+            this.totalPages = totalPages;
+            CreatePanel(friends);
+            UpdatePage(totalPages);
+            comboPage.SelectedIndex = currPage - 1;
+        }
         private void panelDesk_Paint(object sender, PaintEventArgs e)
         {
 
@@ -151,10 +192,21 @@ namespace NetStudy.Forms
 
         private async void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboPage.SelectedIndex >= 0)
+            if(txtSearch.Text.Length == 0)
             {
-                currPage = comboPage.SelectedIndex + 1;
-                await LoadUsers();
+                if (comboPage.SelectedIndex >= 0)
+                {
+                    currPage = comboPage.SelectedIndex + 1;
+                    await LoadFriends();
+                }
+            }
+            else
+            {
+                if (comboPage.SelectedIndex >= 0)
+                {
+                    currPage = comboPage.SelectedIndex + 1;
+                    await LoadUsers();
+                }
             }
         }
 
