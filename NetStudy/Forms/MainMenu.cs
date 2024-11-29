@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,6 +51,7 @@ namespace NetStudy.Forms
                 BaseAddress = new Uri(@"https://localhost:7070/")
             };
             _tokenService.SetTokens(accessToken);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             UserInfo = info;
         }
         //Structs
@@ -148,7 +150,8 @@ namespace NetStudy.Forms
         private void btnChat_Click(object sender, EventArgs e)
         {
             ActivateButton(sender, RGBColors.color3);
-            OpenChildForm(new FormChat());
+            string username = UserInfo["username"].ToString();
+            OpenChildForm(new FormChat(accessToken, username));
         }
         private void btnClass_Click(object sender, EventArgs e)
         {
@@ -163,8 +166,8 @@ namespace NetStudy.Forms
         private void btnMatch_Click(object sender, EventArgs e)
         {
             ActivateButton(sender, RGBColors.color6);
-            
-            OpenChildForm(new FormMatch(UserInfo,accessToken));
+
+            OpenChildForm(new FormMatch(UserInfo, accessToken));
         }
 
         //Drag Form
@@ -176,6 +179,11 @@ namespace NetStudy.Forms
         {
             ReleaseCapture();
             SendMessage(this.Handle, 0x112, 0xf012, 0);
+        }
+
+        private void panelDesktop_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

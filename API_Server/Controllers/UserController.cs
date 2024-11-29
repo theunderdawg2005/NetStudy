@@ -335,7 +335,7 @@ namespace API_Server.Controllers
 
             if(friends == null || friends.Count == 0)
             {
-                return NotFound("No friends was found");
+                return NotFound("Không tìm thấy");
             }
 
             return Ok(friends);

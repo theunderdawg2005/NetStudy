@@ -61,7 +61,7 @@
             panelMenu.Controls.Add(panelLogo);
             panelMenu.Dock = DockStyle.Left;
             panelMenu.Location = new Point(0, 0);
-            panelMenu.Margin = new Padding(4, 4, 4, 4);
+            panelMenu.Margin = new Padding(4);
             panelMenu.Name = "panelMenu";
             panelMenu.Size = new Size(275, 789);
             panelMenu.TabIndex = 0;
@@ -78,7 +78,7 @@
             btnMatch.IconSize = 32;
             btnMatch.ImageAlign = ContentAlignment.MiddleLeft;
             btnMatch.Location = new Point(0, 550);
-            btnMatch.Margin = new Padding(4, 4, 4, 4);
+            btnMatch.Margin = new Padding(4);
             btnMatch.Name = "btnMatch";
             btnMatch.Padding = new Padding(12, 0, 25, 0);
             btnMatch.Size = new Size(275, 75);
@@ -101,7 +101,7 @@
             btnExam.IconSize = 32;
             btnExam.ImageAlign = ContentAlignment.MiddleLeft;
             btnExam.Location = new Point(0, 475);
-            btnExam.Margin = new Padding(4, 4, 4, 4);
+            btnExam.Margin = new Padding(4);
             btnExam.Name = "btnExam";
             btnExam.Padding = new Padding(12, 0, 25, 0);
             btnExam.Size = new Size(275, 75);
@@ -124,7 +124,7 @@
             btnClass.IconSize = 32;
             btnClass.ImageAlign = ContentAlignment.MiddleLeft;
             btnClass.Location = new Point(0, 400);
-            btnClass.Margin = new Padding(4, 4, 4, 4);
+            btnClass.Margin = new Padding(4);
             btnClass.Name = "btnClass";
             btnClass.Padding = new Padding(12, 0, 25, 0);
             btnClass.Size = new Size(275, 75);
@@ -147,7 +147,7 @@
             btnChat.IconSize = 32;
             btnChat.ImageAlign = ContentAlignment.MiddleLeft;
             btnChat.Location = new Point(0, 325);
-            btnChat.Margin = new Padding(4, 4, 4, 4);
+            btnChat.Margin = new Padding(4);
             btnChat.Name = "btnChat";
             btnChat.Padding = new Padding(12, 0, 25, 0);
             btnChat.Size = new Size(275, 75);
@@ -170,7 +170,7 @@
             btnDocument.IconSize = 32;
             btnDocument.ImageAlign = ContentAlignment.MiddleLeft;
             btnDocument.Location = new Point(0, 250);
-            btnDocument.Margin = new Padding(4, 4, 4, 4);
+            btnDocument.Margin = new Padding(4);
             btnDocument.Name = "btnDocument";
             btnDocument.Padding = new Padding(12, 0, 25, 0);
             btnDocument.Size = new Size(275, 75);
@@ -193,7 +193,7 @@
             btnDashboard.IconSize = 32;
             btnDashboard.ImageAlign = ContentAlignment.MiddleLeft;
             btnDashboard.Location = new Point(0, 175);
-            btnDashboard.Margin = new Padding(4, 4, 4, 4);
+            btnDashboard.Margin = new Padding(4);
             btnDashboard.Name = "btnDashboard";
             btnDashboard.Padding = new Padding(12, 0, 25, 0);
             btnDashboard.Size = new Size(275, 75);
@@ -209,7 +209,7 @@
             panelLogo.Controls.Add(btnHome);
             panelLogo.Dock = DockStyle.Top;
             panelLogo.Location = new Point(0, 0);
-            panelLogo.Margin = new Padding(4, 4, 4, 4);
+            panelLogo.Margin = new Padding(4);
             panelLogo.Name = "panelLogo";
             panelLogo.Size = new Size(275, 175);
             panelLogo.TabIndex = 0;
@@ -218,7 +218,7 @@
             // 
             btnHome.Image = (Image)resources.GetObject("btnHome.Image");
             btnHome.Location = new Point(28, 39);
-            btnHome.Margin = new Padding(4, 4, 4, 4);
+            btnHome.Margin = new Padding(4);
             btnHome.Name = "btnHome";
             btnHome.Size = new Size(202, 104);
             btnHome.SizeMode = PictureBoxSizeMode.Zoom;
@@ -233,7 +233,7 @@
             panelTitleBar.Controls.Add(iconCurrentChildForm);
             panelTitleBar.Dock = DockStyle.Top;
             panelTitleBar.Location = new Point(275, 0);
-            panelTitleBar.Margin = new Padding(4, 4, 4, 4);
+            panelTitleBar.Margin = new Padding(4);
             panelTitleBar.Name = "panelTitleBar";
             panelTitleBar.Size = new Size(1205, 93);
             panelTitleBar.TabIndex = 1;
@@ -258,7 +258,7 @@
             iconCurrentChildForm.IconFont = FontAwesome.Sharp.IconFont.Auto;
             iconCurrentChildForm.IconSize = 40;
             iconCurrentChildForm.Location = new Point(35, 28);
-            iconCurrentChildForm.Margin = new Padding(4, 4, 4, 4);
+            iconCurrentChildForm.Margin = new Padding(4);
             iconCurrentChildForm.Name = "iconCurrentChildForm";
             iconCurrentChildForm.Size = new Size(40, 40);
             iconCurrentChildForm.TabIndex = 0;
@@ -269,10 +269,11 @@
             panelDesktop.BackColor = Color.FromArgb(34, 33, 74);
             panelDesktop.Dock = DockStyle.Fill;
             panelDesktop.Location = new Point(275, 93);
-            panelDesktop.Margin = new Padding(4, 4, 4, 4);
+            panelDesktop.Margin = new Padding(4);
             panelDesktop.Name = "panelDesktop";
             panelDesktop.Size = new Size(1205, 696);
             panelDesktop.TabIndex = 2;
+            panelDesktop.Paint += panelDesktop_Paint;
             // 
             // MainMenu
             // 
@@ -283,7 +284,7 @@
             Controls.Add(panelTitleBar);
             Controls.Add(panelMenu);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Margin = new Padding(4, 4, 4, 4);
+            Margin = new Padding(4);
             Name = "MainMenu";
             Text = "NETSTUDY";
             panelMenu.ResumeLayout(false);
