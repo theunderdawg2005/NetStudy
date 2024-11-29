@@ -103,7 +103,8 @@ namespace API_Server.Controllers
             //Tạo user để thêm dữ liệu vào database
             var newUser = new User
             {
-                Name = tempUser.Username,
+                
+                Name = tempUser.Name,
                 Username = tempUser.Username,
                 PasswordHash = tempUser.PasswordHash,
                 DateOfBirth = tempUser.DateOfBirth,
@@ -113,7 +114,11 @@ namespace API_Server.Controllers
             };
             newUser.IsEmailVerified = true;
             await _context.Users.InsertOneAsync(newUser);
-            return Ok("Đăng kí thành công. Email của bạn đã được xác nhận.");
+            return Ok(new
+            {
+                message = "Đăng kí thành công!",
+                info = newUser
+            });
         }
         //API cho Login
         [HttpPost("login")]
@@ -159,10 +164,12 @@ namespace API_Server.Controllers
             };
             Response.Cookies.Append("accessToken", accessToken, cookieOptions);
             //Trả về refresh token và access token
+
             return Ok(new
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
+                Id = user.Id.ToString(),
                 Name = user.Name,
                 Username = user.Username,
                 Email = user.Email
@@ -338,7 +345,20 @@ namespace API_Server.Controllers
                 return NotFound("Không tìm thấy");
             }
 
-            return Ok(friends);
+            var result = friends.Select(user => new
+            {
+                id = user.Id.ToString(),
+                name = user.Name,
+                username = user.Username,
+                email = user.Email
+            }
+            );
+
+            return Ok(new
+            {
+                total = friends.Count,
+                data = result
+            });
         }
         [Authorize]
         [HttpPost("add-friend/{friendId}")]

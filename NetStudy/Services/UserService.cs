@@ -27,5 +27,29 @@ namespace NetStudy.Services
 
             return await response.Content.ReadAsStringAsync();
         }
+
+        public async Task<string> Register(dynamic registerModel)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(registerModel);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await httpClient.PostAsync("api/user/register", content);
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+        public async Task<HttpResponseMessage> VerifyOtp(dynamic otpModel)
+        {
+     
+                var json = JsonConvert.SerializeObject(otpModel);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                return await httpClient.PostAsync("api/user/Verify-Otp", content);
+        }
+            
     }
 }
