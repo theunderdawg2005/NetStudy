@@ -22,10 +22,15 @@ namespace API_Server.Services
             return await _chatGroups.Find(g => g.Id.ToString() == groupId).FirstOrDefaultAsync();
         }
 
-        // thêm user vào group
-        public async Task AddUserToGroup(string groupId, string userId)
+        public async Task<ChatGroup> GetGroupByName(string groupName)
         {
-            var update = Builders<ChatGroup>.Update.AddToSet(g => g.Members, userId);
+            return await _chatGroups.Find(g => g.Name == groupName).FirstOrDefaultAsync();
+        }
+
+        // thêm user vào group
+        public async Task AddUserToGroup(string groupId, string userName)
+        {
+            var update = Builders<ChatGroup>.Update.AddToSet(g => g.Members, userName);
             await _chatGroups.UpdateOneAsync(g => g.Id.ToString() == groupId, update);
         }
 

@@ -42,6 +42,7 @@
             txtSearch = new TextBox();
             panel1 = new Panel();
             flowLayoutPanel1 = new FlowLayoutPanel();
+            btnRequest = new Button();
             panelPage.SuspendLayout();
             panelBottom.SuspendLayout();
             panelTop.SuspendLayout();
@@ -63,6 +64,7 @@
             // panelBottom
             // 
             panelBottom.BackColor = Color.FromArgb(26, 25, 62);
+            panelBottom.Controls.Add(btnRequest);
             panelBottom.Controls.Add(label1);
             panelBottom.Controls.Add(comboBox1);
             panelBottom.Controls.Add(label2);
@@ -161,7 +163,7 @@
             btnSearch.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnSearch.IconSize = 35;
             btnSearch.ImageAlign = ContentAlignment.MiddleLeft;
-            btnSearch.Location = new Point(888, 12);
+            btnSearch.Location = new Point(930, 12);
             btnSearch.Name = "btnSearch";
             btnSearch.Size = new Size(142, 43);
             btnSearch.TabIndex = 3;
@@ -176,7 +178,7 @@
             labeltitle.AutoSize = true;
             labeltitle.Font = new Font("Cambria", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
             labeltitle.ForeColor = Color.Gainsboro;
-            labeltitle.Location = new Point(57, 20);
+            labeltitle.Location = new Point(99, 20);
             labeltitle.Name = "labeltitle";
             labeltitle.Size = new Size(159, 26);
             labeltitle.TabIndex = 2;
@@ -188,7 +190,7 @@
             txtSearch.BorderStyle = BorderStyle.None;
             txtSearch.Font = new Font("Cambria", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
             txtSearch.ForeColor = Color.Gainsboro;
-            txtSearch.Location = new Point(222, 20);
+            txtSearch.Location = new Point(264, 20);
             txtSearch.Name = "txtSearch";
             txtSearch.Size = new Size(650, 26);
             txtSearch.TabIndex = 1;
@@ -196,7 +198,7 @@
             // panel1
             // 
             panel1.BackColor = Color.Indigo;
-            panel1.Location = new Point(222, 50);
+            panel1.Location = new Point(264, 50);
             panel1.Name = "panel1";
             panel1.Size = new Size(650, 3);
             panel1.TabIndex = 0;
@@ -211,6 +213,20 @@
             flowLayoutPanel1.Size = new Size(1205, 576);
             flowLayoutPanel1.TabIndex = 3;
             // 
+            // btnRequest
+            // 
+            btnRequest.BackColor = Color.SlateBlue;
+            btnRequest.FlatAppearance.BorderSize = 0;
+            btnRequest.FlatStyle = FlatStyle.Flat;
+            btnRequest.Font = new Font("Cambria", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnRequest.ForeColor = Color.Gainsboro;
+            btnRequest.Location = new Point(691, 5);
+            btnRequest.Name = "btnRequest";
+            btnRequest.Size = new Size(196, 43);
+            btnRequest.TabIndex = 4;
+            btnRequest.Text = "Lời mời kết bạn (0)";
+            btnRequest.UseVisualStyleBackColor = false;
+            // 
             // FormMatch
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -222,6 +238,7 @@
             Margin = new Padding(4);
             Name = "FormMatch";
             Text = "FormMatch";
+            Load += FormMatch_Load;
             panelPage.ResumeLayout(false);
             panelPage.PerformLayout();
             panelBottom.ResumeLayout(false);
@@ -246,5 +263,6 @@
         private TextBox txtSearch;
         private FontAwesome.Sharp.IconButton btnSearch;
         private Label labeltitle;
+        private Button btnRequest;
     }
 }

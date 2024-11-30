@@ -38,19 +38,76 @@ namespace API_Server.Services
         {
             return await users.Find(u => u.Username == userName).FirstOrDefaultAsync();
         }
-        public async Task<List<ChatGroup>> GetGroupByUserId(string userId)
+        public async Task UpdateUser(User user)
         {
-            return await chatGroups.Find(group => group.Members.Contains(userId)).ToListAsync();
+            await users.ReplaceOneAsync(u => u.Username == user.Username, user);
         }
-
-        public async Task AddGroupToUser(string userId, string groupId)
+        public async Task AddGroupToUser(string username, string groupId)
         {
             var update = Builders<User>.Update.AddToSet(u => u.ChatGroup, groupId);
-            await users.UpdateOneAsync(u => u.Id.ToString() == userId, update);
+            await users.UpdateOneAsync(u => u.Username == username, update);
         }
-        public async Task<List<User>> SuggestFriendAsync(string userId)
+
+        public async Task<bool> SendRequest(string username, string targetUsername)
         {
-            var userFound = await users.Find(u => u.Id.ToString() == userId).FirstOrDefaultAsync();
+            var user = await GetUserByUserName(username);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+            var targetUser = await GetUserByUserName(targetUsername);
+            if (targetUser == null)
+            {
+                throw new Exception("targetUser not found");
+            }
+
+            if (user.Friends.Contains(targetUser.Username))
+            {
+                throw new Exception("Been Friend!");
+            }
+
+            if (targetUser.FriendRequests.Contains(user.Username))
+            {
+                throw new Exception("Request been sent!");
+            }
+
+            targetUser.FriendRequests.Add(username);
+
+            await UpdateUser(targetUser);
+            return true;
+        }
+
+        public async Task<bool> AcceptFriendRequest(string username, string requestUsername)
+        {
+            var user = await GetUserByUserName(username);
+            if (user == null)
+            {
+                throw new Exception("User not found!");
+            }
+            var requestUser = await GetUserByUserName(requestUsername);
+            if (requestUser == null)
+            {
+                throw new Exception("Request user not found!");
+            }
+
+            if (!user.FriendRequests.Contains(requestUser.Username))
+            {
+                throw new Exception("No request from this user!");
+            }
+            user.FriendRequests.Remove(requestUsername);
+            user.Friends.Add(requestUser.Username);
+            requestUser.Friends.Add(user.Username);
+            await UpdateUser(user);
+            await UpdateUser(requestUser); return true;
+        }
+        public async Task<List<string>> GetListFriendIdByUsername(string username)
+        {
+            var user = await users.Find(u => u.Username == username).FirstOrDefaultAsync();
+            return user.Friends;
+        }
+        public async Task<List<User>> SuggestFriendAsync(string username)
+        {
+            var userFound = await GetUserByUserName(username);
             if (userFound == null) { return null; }
 
             var userGroups = userFound.ChatGroup;
@@ -60,10 +117,10 @@ namespace API_Server.Services
                 .ToListAsync();
             var allMembers = members.SelectMany(m => m).Distinct().ToList();
 
-            allMembers.Remove(userId);
+            allMembers.Remove(username);
             allMembers.RemoveAll(m => userFound.Friends.Contains(m));
 
-            var suggestFriends = await users.Find(u => allMembers.Contains(u.Id.ToString())).ToListAsync();
+            var suggestFriends = await users.Find(u => allMembers.Contains(u.Username)).ToListAsync();
 
             return suggestFriends;
         }

@@ -26,7 +26,7 @@ namespace NetStudy
         public FormLogin()
         {
             InitializeComponent();
-            userService = new UserService();
+            
         }
         public async void btnLogin_Click_1(object sender, EventArgs e)
         {
@@ -54,7 +54,7 @@ namespace NetStudy
                     this.Hide();
                     var accessToken = res["accessToken"].ToString();
                     MainMenu menu = new MainMenu(accessToken, res);
-                    MessageBox.Show($"Access Token: {accessToken}", "Token");
+                    //MessageBox.Show($"Access Token: {accessToken}", "Token");
                     menu.ShowDialog();
                     this.Close();
                 }

@@ -1,4 +1,6 @@
-﻿using NetStudy.Models;
+﻿using FontAwesome.Sharp;
+using NetStudy.Models;
+using NetStudy.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -18,35 +20,46 @@ namespace NetStudy.Forms
     {
         public static readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri(@"https://localhost:7070/")
+            BaseAddress = new Uri(@"https://localhost:7070/"),
+            Timeout = TimeSpan.FromMinutes(5)
         };
         private JObject UserInfo;
         private string accessToken;
-        private static JArray friends;
-        private JArray userSearching;
+        private List<string> friendsList = new List<string>();
+
         private int total;
         private int totalPages = 1;
         private int currPage = 1;
         private const int pageSize = 2;
+        private UserService userService;
+
         public FormMatch(JObject info, string token)
         {
             InitializeComponent();
             UserInfo = info;
             accessToken = token;
             label1.Text = info["name"].ToString();
-        }
-
-        public async Task<(List<User>, int)> GetFriendRequest()
-        {
+            userService = new UserService();
             if (!string.IsNullOrEmpty(accessToken))
             {
                 httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
             }
+            
+        }
+        private async void FormMatch_Load(object sender, EventArgs e)
+        {
+            friendsList = await LoadFriendList();
+        }
+        
+
+        public async Task<(List<User>, int)> GetFriendRequest()
+        {
+
 
             try
             {
-                string userId = UserInfo["id"].ToString();
-                var response = await httpClient.GetAsync($"api/user/{userId}/suggest-friends");
+                string username = UserInfo["username"].ToString();
+                var response = await httpClient.GetAsync($"api/user/{username}/suggest-friends");
                 if (response.IsSuccessStatusCode)
                 {
                     var res = await response.Content.ReadAsStringAsync();
@@ -70,10 +83,6 @@ namespace NetStudy.Forms
         }
         public async Task<(List<User>, int)> GetFriendSearching(string searchString, int pageSize)
         {
-            if (!string.IsNullOrEmpty(accessToken))
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-            }
 
             try
             {
@@ -107,7 +116,7 @@ namespace NetStudy.Forms
             }
         }
 
-        private void CreatePanel(List<User> users)
+        private void CreatePanel(List<User> users, string username)
         {
             flowLayoutPanel1.Controls.Clear();
 
@@ -139,10 +148,50 @@ namespace NetStudy.Forms
                     ForeColor = Color.Gainsboro
                 };
 
+                IconButton btnFriend = new IconButton
+                {
+                    Location = new Point(1024, 20),
+                    Size = new Size(150, 40),
+                    Font = new Font("Arial", 10, FontStyle.Regular),
+                    BackColor = Color.FromArgb(0, 117, 214),
+
+
+                    FlatStyle = FlatStyle.Flat,
+                    Cursor = Cursors.Hand,
+                    ForeColor = Color.Gainsboro,
+                };
+
+                if (IsFriend(user.Username))
+                {
+                    btnFriend.Text = "Đã kết bạn";
+
+                    btnFriend.TextAlign = ContentAlignment.MiddleLeft;
+                    btnFriend.TextImageRelation = TextImageRelation.ImageBeforeText;
+                    btnFriend.IconChar = IconChar.Check;
+                    btnFriend.IconSize = 30;
+                    btnFriend.IconColor = Color.Gainsboro;
+                    btnFriend.ImageAlign = ContentAlignment.MiddleLeft;
+                    btnFriend.Enabled = true;
+                    btnFriend.BackColor = Color.FromArgb(26, 25, 62);
+                    btnFriend.ForeColor = Color.Gainsboro;
+                }
+                else
+                {
+
+                    btnFriend.Text = "Kết bạn";
+
+                    btnFriend.Click += async (sender, e) =>
+                    {
+                        await userService.SendFriendRequest(username, user.Username, btnFriend, accessToken);
+                    };
+                }
+
+
                 userPanel.Controls.Add(lblName);
                 lblName.Location = new Point(10, 10);
                 userPanel.Controls.Add(lblEmail);
                 lblEmail.Location = new Point(10, 40);
+                userPanel.Controls.Add(btnFriend);
 
                 flowLayoutPanel1.Controls.Add(userPanel);
             }
@@ -157,26 +206,70 @@ namespace NetStudy.Forms
 
             comboPage.Enabled = totalPages > 1;
         }
-        private async Task LoadUsers()
+        public async Task<List<string>> LoadFriendList()
         {
-            string searchString = txtSearch.Text;
+            string username = UserInfo["username"].ToString();
+            if(string.IsNullOrEmpty(username))
+            {
+                MessageBox.Show("Tên bị null bro", $"Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }    
 
-            var (users, totalPages) = await GetFriendSearching(searchString, pageSize);
+            try
+            {
+                
 
-            this.totalPages = totalPages;
+                var response = await httpClient.GetAsync($"api/user/get-friend-list/{username}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var res = await response.Content.ReadAsStringAsync();
+                    var friendData = JObject.Parse(res);
 
-            CreatePanel(users);
+                    List<string> friendList = friendData["data"].ToObject<List<string>>();
 
-            UpdatePage(totalPages);
+                    return friendList;
+                }
+                else
+                {
+                    MessageBox.Show("Không thể tải danh sách bạn bè.", $"Thông báo: {response.StatusCode}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return new List<string>();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách bạn bè: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return new List<string>();
+            }
+        }
+        private async Task LoadUsersSearching()
+        {
+            string username = UserInfo["username"].ToString();
+            try
+            {
 
-            comboPage.SelectedIndex = currPage - 1;
+                string searchString = txtSearch.Text;
+
+                var (users, totalPages) = await GetFriendSearching(searchString, pageSize);
+
+                this.totalPages = totalPages;
+
+                CreatePanel(users, username);
+
+                UpdatePage(totalPages);
+
+                comboPage.SelectedIndex = currPage - 1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách người dùng: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        private async Task LoadFriends()
+        private async Task LoadFriendsRequest()
         {
+            string username = UserInfo["username"].ToString();
             var (friends, totalPages) = await GetFriendRequest();
             this.totalPages = totalPages;
-            CreatePanel(friends);
+            CreatePanel(friends, username);
             UpdatePage(totalPages);
             comboPage.SelectedIndex = currPage - 1;
         }
@@ -192,12 +285,13 @@ namespace NetStudy.Forms
 
         private async void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(txtSearch.Text.Length == 0)
+
+            if (txtSearch.Text.Length == 0)
             {
                 if (comboPage.SelectedIndex >= 0)
                 {
                     currPage = comboPage.SelectedIndex + 1;
-                    await LoadFriends();
+                    await LoadFriendsRequest();
                 }
             }
             else
@@ -205,7 +299,7 @@ namespace NetStudy.Forms
                 if (comboPage.SelectedIndex >= 0)
                 {
                     currPage = comboPage.SelectedIndex + 1;
-                    await LoadUsers();
+                    await LoadUsersSearching();
                 }
             }
         }
@@ -213,7 +307,20 @@ namespace NetStudy.Forms
         private async void btnSearch_Click(object sender, EventArgs e)
         {
             currPage = 1;
-            await LoadUsers();
+            await LoadUsersSearching();
         }
+        private bool IsFriend(string username)
+        {
+
+            if (string.IsNullOrEmpty(username) || friendsList == null)
+            {
+                return false;
+            }
+
+            // Ensure case-insensitive comparison
+            return friendsList.Any(f => string.Equals(f.Trim(), username.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        
     }
 }

@@ -217,7 +217,11 @@ namespace API_Server.Controllers
                 Response.Cookies.Delete("accessToken");
             }
 
-            return Ok("Đăng xuất thành công.");
+            return Ok(new
+            {
+                status = 200,
+                message = "Đăng xuất thành công."
+            });
         }
         //Lấy data của người dùng
         [HttpGet("{username}")]
@@ -258,6 +262,7 @@ namespace API_Server.Controllers
             {
                 return BadRequest("Yêu cầu không hợp lệ.");
             }
+
 
             // Xác minh token và lấy username
             var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
@@ -313,8 +318,8 @@ namespace API_Server.Controllers
             {
                 return NotFound(new
                 {
-                    message = "Không tìm thấy người dùng",
-                    total = 0
+                    total = 0,
+                    message = "Không tìm thấy người dùng"
                 });
             }
 
@@ -335,14 +340,18 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
-        [HttpGet("{userId}/suggest-friends")]
-        public async Task<ActionResult<List<User>>> SuggestFriends(string userId)
+        [HttpGet("{username}/suggest-friends")]
+        public async Task<ActionResult<List<User>>> SuggestFriends(string username)
         {
-            var friends = await _userService.SuggestFriendAsync(userId);
+            var friends = await _userService.SuggestFriendAsync(username);
 
             if(friends == null || friends.Count == 0)
             {
-                return NotFound("No friends was found");
+                return NotFound(new
+                {
+                    total = 0,
+                    message = "No friends was found!"
+                });
             }
 
             var result = friends.Select(user => new
@@ -361,43 +370,121 @@ namespace API_Server.Controllers
             });
         }
         [Authorize]
-        [HttpPost("add-friend/{friendId}")]
-        public async Task<IActionResult> AddFriend(string friendId)
+        [HttpPost("add-friend/{username}/{targetUsername}")]
+        public async Task<IActionResult> SendFriendRequest(string targetUsername, string username)
         {
-            // Lấy access token từ cookies
-            if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
-            {
-                return BadRequest("Yêu cầu không hợp lệ.");
-            }
+            //if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
+            //{
+            //    return BadRequest("Yêu cầu không hợp lệ.");
+            //}
+
+            //var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer", "");
+            //if (accessToken == null)
+            //{
+            //    return BadRequest(new
+            //    {
+            //        message = "Yêu cầu không hợp lệ."
+            //    });
+            //}
 
             // Xác minh token và lấy username
-            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
-            if (claimsPrincipal == null)
-            {
-                return Unauthorized("Access token không hợp lệ 1.");
-            }
+            //var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            //if (claimsPrincipal == null)
+            //{
+            //    return Unauthorized(new
+            //    {
+            //        message = "Access token không hợp lệ 123",
+            //        token = accessToken
+            //    });
+            //}
 
-            var usernameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
-            if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
+            //var usernameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
+            //if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
+            //{
+            //    return Unauthorized("Access token không hợp lệ 2");
+            //}
+            //var username = usernameClaim.Value;
+            try
             {
-                return Unauthorized("Access token không hợp lệ 2");
-            }
-            var user = await _context.Users.Find(u => u.Username == usernameClaim.Value).FirstOrDefaultAsync();
-            var userId = user.Id.ToString();
-            var friend = await _userService.GetUserById(friendId);
+                await _userService.SendRequest(username, targetUsername);
+                return Ok(new
+                {
+                    message = "Gửi yêu cầu thành công!"
 
-            if (friend == null)
+                });
+            }
+            catch (Exception ex)
             {
-                return NotFound("Friend not found!");
+                return BadRequest(ex.Message);
             }
+        }
 
-            var success = await _userService.AddFriend(userId, friendId);
-            if (!success)
+        [Authorize]
+        [HttpPost("accept-request/{username}/{requestUsername}")]
+        public async Task<IActionResult> AcceptFriendRequest(string username, string requestUsername)
+        {
+            //if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
+            //{
+            //    return BadRequest("Yêu cầu không hợp lệ.");
+            //}
+
+            //var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer", "");
+            //if (accessToken == null)
+            //{
+            //    return BadRequest(new
+            //    {
+            //        message = "Yêu cầu không hợp lệ."
+            //    });
+            //}
+
+            //// Xác minh token và lấy username
+            //var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            //if (claimsPrincipal == null)
+            //{
+            //    return Unauthorized("Access token không hợp lệ 1.");
+            //}
+
+            //var usernameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
+            //if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
+            //{
+            //    return Unauthorized("Access token không hợp lệ 2");
+            //}
+            //var username = usernameClaim.Value;
+            try
             {
-                return StatusCode(500, "Failed to add friend");
+                await _userService.AcceptFriendRequest(username, requestUsername);
+                return Ok(new
+                {
+                    message = "Đã chấp nhận kết bạn!"
+                });
             }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-            return Ok("Friend added successfully");
+        [Authorize]
+        [HttpGet("get-friend-list/{username}")]
+        public async Task<ActionResult<List<string>>> GetListFriend(string username)
+        {
+            try
+            {
+                var friends = await _userService.GetListFriendIdByUsername(username);
+                return Ok(new
+                {
+                    total = friends.Count,
+                    data = friends
+                });
+
+            }
+            catch (Exception ex) 
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
         }
     }
 }
