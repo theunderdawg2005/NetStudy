@@ -1,8 +1,10 @@
 ﻿using API_Server.Models;
 using MongoDB.Driver;
 using API_Server.Services;
+using API_Server.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.SignalR;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +26,11 @@ builder.Services.AddSingleton<UserService>();
 
 builder.Services.AddSingleton<ChatGroupService>();
 
+builder.Services.AddSingleton<SingleChatService>();
+
 // Add services to the container.
+
+builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -78,7 +84,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapHub<ChatHub>("/chatHub");
+
 app.Run();
-
-
-
