@@ -87,6 +87,29 @@ namespace API_Server.Services
                 return null;
             }
         }
+        public bool IsValidate(string authHeader)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+                {
+                    return false;
+                }
+
+                var accessToken = authHeader.Substring("Bearer ".Length).Trim();
+
+                var claimsPrincipal = ValidateToken(accessToken);
+                if (claimsPrincipal == null)
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         public async Task<TokenData> GetRefreshToken(string token)
         {
             var refreshToken = await _tokenData.Find(rt => rt.RefreshToken == token).FirstOrDefaultAsync();

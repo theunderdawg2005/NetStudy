@@ -60,7 +60,7 @@ namespace NetStudy
                 }
                 else
                 {
-                    MessageBox.Show(info);
+                    MessageBox.Show("Tài khoản hoặc mật khẩu không hợp lệ!", "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
             }

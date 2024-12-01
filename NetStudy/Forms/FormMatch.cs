@@ -49,6 +49,8 @@ namespace NetStudy.Forms
         private async void FormMatch_Load(object sender, EventArgs e)
         {
             friendsList = await LoadFriendList();
+            var (user, total) = await userService.GetReqList(UserInfo["username"].ToString(), accessToken);
+            btnRequest.Text = $"Friend Request ({total})";
             //await LoadFriendsRequest();
         }
 
@@ -215,7 +217,7 @@ namespace NetStudy.Forms
             string username = UserInfo["username"].ToString();
             if (string.IsNullOrEmpty(username))
             {
-                MessageBox.Show("Tên bị null bro", $"Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Không tìm thấy người dùng", $"Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             try
