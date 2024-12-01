@@ -103,7 +103,7 @@ namespace API_Server.Controllers
             //Tạo user để thêm dữ liệu vào database
             var newUser = new User
             {
-                
+
                 Name = tempUser.Name,
                 Username = tempUser.Username,
                 PasswordHash = tempUser.PasswordHash,
@@ -314,7 +314,7 @@ namespace API_Server.Controllers
         public async Task<ActionResult<List<User>>> SearchUsers(string query)
         {
             var users = await _userService.SearchUserAsync(query);
-            if(users == null || users.Count == 0)
+            if (users == null || users.Count == 0)
             {
                 return NotFound(new
                 {
@@ -330,7 +330,7 @@ namespace API_Server.Controllers
                 username = user.Username,
                 email = user.Email,
                 dateOfBirth = user.DateOfBirth
-                
+
             });
             return Ok(new
             {
@@ -345,7 +345,7 @@ namespace API_Server.Controllers
         {
             var friends = await _userService.SuggestFriendAsync(username);
 
-            if(friends == null || friends.Count == 0)
+            if (friends == null || friends.Count == 0)
             {
                 return NotFound(new
                 {
@@ -370,7 +370,7 @@ namespace API_Server.Controllers
             });
         }
         [Authorize]
-        [HttpPost("add-friend/{username}/{targetUsername}")]
+        [HttpPost("{username}/add-friend/{targetUsername}")]
         public async Task<IActionResult> SendFriendRequest(string targetUsername, string username)
         {
             //if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
@@ -420,7 +420,7 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
-        [HttpPost("accept-request/{username}/{requestUsername}")]
+        [HttpPost("{username}/accept-request/{requestUsername}")]
         public async Task<IActionResult> AcceptFriendRequest(string username, string requestUsername)
         {
             //if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
@@ -478,13 +478,101 @@ namespace API_Server.Controllers
                 });
 
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return BadRequest(new
                 {
                     message = ex.Message
                 });
             }
+        }
+
+        [Authorize]
+        [HttpGet("get-request-list/{username}")]
+        public async Task<IActionResult> GetReqList(string username)
+        {
+            try
+            {
+                var reqList = await _userService.GetRequestList(username);
+                var res = reqList.Select(u => new
+                {
+                    id = u.Id.ToString(),
+                    name = u.Name,
+                    username = u.Username,
+                    email = u.Email
+                });
+                return Ok(new
+                {
+                    total = reqList.Count,
+                    data = res
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("{username}/remove-request/{reqUsername}")]
+        public async Task<IActionResult> RemoveRequest(string reqUsername,string username)
+        {
+            //if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
+            //{
+            //    return Unauthorized(new
+            //    {
+            //        message = "Yêu cầu không hợp lệ!"
+            //    });
+            //}
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+            {
+                return Unauthorized(new
+                {
+                    message = "Access token không hợp lệ!"
+                });
+            }
+
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            var claimsPrincipal = _jwtService.ValidateToken(accessToken);
+            if (claimsPrincipal == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Token không hợp lệ!"
+                });
+            }
+
+           
+            try
+            {
+                var res = await _userService.DeleteRequest(username, reqUsername);
+                if (res)
+                {
+                    return Ok(new
+                    {
+                        message = "Xóa yêu cầu kết bạn thành công!"
+                    });
+
+                }
+                return BadRequest(new
+                {
+                    message = "Không thể xóa yêu cầu kết bạn!"
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+
         }
     }
 }

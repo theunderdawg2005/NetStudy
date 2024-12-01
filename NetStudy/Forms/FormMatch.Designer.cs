@@ -30,6 +30,7 @@
         {
             panelPage = new Panel();
             panelBottom = new Panel();
+            btnRequest = new Button();
             label1 = new Label();
             comboBox1 = new ComboBox();
             label2 = new Label();
@@ -42,7 +43,6 @@
             txtSearch = new TextBox();
             panel1 = new Panel();
             flowLayoutPanel1 = new FlowLayoutPanel();
-            btnRequest = new Button();
             panelPage.SuspendLayout();
             panelBottom.SuspendLayout();
             panelTop.SuspendLayout();
@@ -73,6 +73,21 @@
             panelBottom.Name = "panelBottom";
             panelBottom.Size = new Size(1205, 53);
             panelBottom.TabIndex = 3;
+            // 
+            // btnRequest
+            // 
+            btnRequest.BackColor = Color.SlateBlue;
+            btnRequest.FlatAppearance.BorderSize = 0;
+            btnRequest.FlatStyle = FlatStyle.Flat;
+            btnRequest.Font = new Font("Cambria", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnRequest.ForeColor = Color.Gainsboro;
+            btnRequest.Location = new Point(691, 5);
+            btnRequest.Name = "btnRequest";
+            btnRequest.Size = new Size(196, 43);
+            btnRequest.TabIndex = 4;
+            btnRequest.Text = "Lời mời kết bạn (0)";
+            btnRequest.UseVisualStyleBackColor = false;
+            btnRequest.Click += btnRequest_Click;
             // 
             // label1
             // 
@@ -212,20 +227,6 @@
             flowLayoutPanel1.Name = "flowLayoutPanel1";
             flowLayoutPanel1.Size = new Size(1205, 576);
             flowLayoutPanel1.TabIndex = 3;
-            // 
-            // btnRequest
-            // 
-            btnRequest.BackColor = Color.SlateBlue;
-            btnRequest.FlatAppearance.BorderSize = 0;
-            btnRequest.FlatStyle = FlatStyle.Flat;
-            btnRequest.Font = new Font("Cambria", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnRequest.ForeColor = Color.Gainsboro;
-            btnRequest.Location = new Point(691, 5);
-            btnRequest.Name = "btnRequest";
-            btnRequest.Size = new Size(196, 43);
-            btnRequest.TabIndex = 4;
-            btnRequest.Text = "Lời mời kết bạn (0)";
-            btnRequest.UseVisualStyleBackColor = false;
             // 
             // FormMatch
             // 

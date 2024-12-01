@@ -48,6 +48,24 @@ namespace API_Server.Services
             await users.UpdateOneAsync(u => u.Username == username, update);
         }
 
+        
+
+        public async Task<List<User>> GetRequestList(string username)
+        {
+            var user = await GetUserByUserName(username);
+            if (user == null)
+            {
+                throw new Exception("User not found!");
+            }
+            List<string> list = user.FriendRequests;
+            List<User> reqList = new List<User>();
+            foreach(var req in list)
+            {
+                User userReq = await GetUserByUserName(req);
+                reqList.Add(userReq);
+            }    
+            return reqList;
+        }
         public async Task<bool> SendRequest(string username, string targetUsername)
         {
             var user = await GetUserByUserName(username);
@@ -76,7 +94,6 @@ namespace API_Server.Services
             await UpdateUser(targetUser);
             return true;
         }
-
         public async Task<bool> AcceptFriendRequest(string username, string requestUsername)
         {
             var user = await GetUserByUserName(username);
@@ -132,6 +149,23 @@ namespace API_Server.Services
             var res = await users.UpdateOneAsync(filter, update);
 
             return res.ModifiedCount > 0;
+        }
+        public async Task<bool> DeleteRequest(string username, string reqUsername)
+        {
+            try
+            {
+                var user = await GetUserByUserName(username);
+                if (user == null) { throw new Exception("User not found!"); }
+                var reqUser = await GetUserByUserName(reqUsername);
+                if (reqUser == null) { throw new Exception("reqUser not found!"); }
+                user.FriendRequests.Remove(reqUser.Username);
+                await UpdateUser(user);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi xóa yêu cầu: {ex.Message}");
+            }
         }
     }
 }

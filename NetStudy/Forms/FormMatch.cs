@@ -44,13 +44,14 @@ namespace NetStudy.Forms
             {
                 httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
             }
-            
+
         }
         private async void FormMatch_Load(object sender, EventArgs e)
         {
             friendsList = await LoadFriendList();
+            //await LoadFriendsRequest();
         }
-        
+
 
         public async Task<(List<User>, int)> GetFriendRequest()
         {
@@ -116,12 +117,14 @@ namespace NetStudy.Forms
             }
         }
 
-        private void CreatePanel(List<User> users, string username)
+        private async void CreatePanel(List<User> users, string username)
         {
             flowLayoutPanel1.Controls.Clear();
 
             foreach (var user in users)
             {
+                var (list, total) = await userService.GetReqList(user.Username, accessToken);
+                
                 Panel userPanel = new Panel
                 {
                     Width = flowLayoutPanel1.Width - 20,
@@ -183,6 +186,7 @@ namespace NetStudy.Forms
                     btnFriend.Click += async (sender, e) =>
                     {
                         await userService.SendFriendRequest(username, user.Username, btnFriend, accessToken);
+                        
                     };
                 }
 
@@ -209,14 +213,14 @@ namespace NetStudy.Forms
         public async Task<List<string>> LoadFriendList()
         {
             string username = UserInfo["username"].ToString();
-            if(string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(username))
             {
                 MessageBox.Show("Tên bị null bro", $"Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }    
+            }
 
             try
             {
-                
+
 
                 var response = await httpClient.GetAsync($"api/user/get-friend-list/{username}");
                 if (response.IsSuccessStatusCode)
@@ -321,6 +325,10 @@ namespace NetStudy.Forms
             return friendsList.Any(f => string.Equals(f.Trim(), username.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
-        
+        private void btnRequest_Click(object sender, EventArgs e)
+        {
+            AcceptFriends acpt = new AcceptFriends(UserInfo, accessToken);
+            acpt.ShowDialog();
+        }
     }
 }

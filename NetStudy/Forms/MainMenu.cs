@@ -45,13 +45,9 @@ namespace NetStudy.Forms
             this.accessToken = accessToken;
             var tokenService = new TokenService(httpClient);
             _tokenService = tokenService;
-            var clientHandler = new ClientHandler(tokenService, new HttpClientHandler());
-            httpClient = new HttpClient(clientHandler)
-            {
-                BaseAddress = new Uri(@"https://localhost:7070/")
-            };
+           
             _tokenService.SetTokens(accessToken);
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             UserInfo = info;
         }
         //Structs
