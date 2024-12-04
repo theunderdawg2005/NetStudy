@@ -7,25 +7,39 @@ namespace API_Server.Services
     public class UserService
     {
         private readonly IMongoCollection<User> users;
-        private readonly IMongoCollection<ChatGroup> chatGroups;    
+        private readonly IMongoCollection<ChatGroup> chatGroups; 
+        private readonly MongoDbService dbService;
         public UserService(MongoDbService db) {
-            users = db.Users;
-            chatGroups = db.ChatGroup;
+            dbService = db;
+            users = dbService.Users;
+            chatGroups = dbService.ChatGroup;
         }
          
         public async Task<List<User>> GetAllUserAsync() => await users.Find(_ =>  true).ToListAsync();
 
-        public async Task<List<User>> SearchUserAsync(string query)
+        public async Task<(List<User>, int)>SearchUserAsync(string query, int page, int pageSize, string username)
         {
-            var filter = Builders<User>.Filter.Or(
+            if(page <= 0 || pageSize <= 0)
+            {
+                throw new ArgumentException("Page và PageSize phải lớn hơn 0");
+            }
+
+            var filter = Builders<User>.Filter.And(
+                Builders<User>.Filter.Or(
                     Builders<User>.Filter.Regex("Name", new BsonRegularExpression(query, "i")),
-                    Builders<User>.Filter.Regex("Username", new BsonRegularExpression(query,"i")),
-                    Builders<User>.Filter.Regex("Email", new BsonRegularExpression(query, "i"))
-            ); 
+                    Builders<User>.Filter.Regex("Email", new BsonRegularExpression(query, "i")),
+                    Builders<User>.Filter.Regex("Username", new BsonRegularExpression(query, "i"))
+                    ),
+                Builders<User>.Filter.Ne("Username", username)
+            );
+            var total = await users.CountDocumentsAsync(filter);
 
-            return await users.Find(filter).ToListAsync();
+            var usersFound = await users.Find(filter).Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync();
+            
+            int totalPages = (int)Math.Ceiling((double)total / pageSize);
+            return (usersFound, totalPages);
         }
-
+         
         public async Task<List<User>> GetUserByGroupId(string id)
         {
             return await users.Find(u => u.ChatGroup.Contains(id)).ToListAsync();
@@ -81,12 +95,12 @@ namespace API_Server.Services
 
             if (user.Friends.Contains(targetUser.Username))
             {
-                throw new Exception("Been Friend!");
+                throw new Exception("Hai người đã là bạn!");
             }
 
             if (targetUser.FriendRequests.Contains(user.Username))
             {
-                throw new Exception("Request been sent!");
+                throw new Exception("Bạn đã gửi lời mời rồi!");
             }
 
             targetUser.FriendRequests.Add(username);
@@ -109,7 +123,7 @@ namespace API_Server.Services
 
             if (!user.FriendRequests.Contains(requestUser.Username))
             {
-                throw new Exception("No request from this user!");
+                throw new Exception("Không có lời mời từ người dùng này!");
             }
             user.FriendRequests.Remove(requestUsername);
             user.Friends.Add(requestUser.Username);

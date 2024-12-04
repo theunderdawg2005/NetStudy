@@ -81,13 +81,13 @@ namespace NetStudy
                 };
                 btnAcptFriend.Click += async (sender, e) =>
                 {
-                    await userService.AcceptRequest(username, user.Username, btnAcptFriend ,accessToken);
-                    
+                    await userService.AcceptRequest(username, user.Username, btnAcptFriend, accessToken);
+
                 };
                 IconButton btnDelReq = new IconButton
                 {
                     Location = new Point(400, 60),
-                    Size = new Size(150,30),
+                    Size = new Size(150, 30),
                     Font = new Font("Arial", 9, FontStyle.Regular),
                     BackColor = Color.FromArgb(0, 117, 214),
                     Text = "Xóa",
@@ -125,6 +125,9 @@ namespace NetStudy
             }
         }
 
-        
+        private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }

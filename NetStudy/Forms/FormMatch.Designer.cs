@@ -164,7 +164,6 @@
             panelTop.Name = "panelTop";
             panelTop.Size = new Size(1205, 66);
             panelTop.TabIndex = 2;
-            panelTop.Paint += panelTop_Paint;
             // 
             // btnSearch
             // 
@@ -220,13 +219,15 @@
             // 
             // flowLayoutPanel1
             // 
+            flowLayoutPanel1.AutoScroll = true;
             flowLayoutPanel1.BackColor = Color.FromArgb(34, 33, 74);
             flowLayoutPanel1.Dock = DockStyle.Fill;
-            flowLayoutPanel1.ForeColor = SystemColors.ControlText;
+            flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
             flowLayoutPanel1.Location = new Point(0, 66);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
             flowLayoutPanel1.Size = new Size(1205, 576);
             flowLayoutPanel1.TabIndex = 3;
+            flowLayoutPanel1.WrapContents = false;
             // 
             // FormMatch
             // 
@@ -259,11 +260,11 @@
         private ComboBox comboBox1;
         private Label label2;
         private Panel panelTop;
-        private FlowLayoutPanel flowLayoutPanel1;
         private Panel panel1;
         private TextBox txtSearch;
         private FontAwesome.Sharp.IconButton btnSearch;
         private Label labeltitle;
         private Button btnRequest;
+        private FlowLayoutPanel flowLayoutPanel1;
     }
 }

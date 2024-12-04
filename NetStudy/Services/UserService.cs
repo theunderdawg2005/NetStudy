@@ -47,12 +47,21 @@ namespace NetStudy.Services
                 return null;
             }
         }
-        public async Task<HttpResponseMessage> VerifyOtp(dynamic otpModel)
+        public async Task<string> VerifyOtp(dynamic otpModel)
         {
-     
+            try
+            {
                 var json = JsonConvert.SerializeObject(otpModel);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                return await httpClient.PostAsync("api/user/Verify-Otp", content);
+                var res = await httpClient.PostAsync("api/user/Verify-Otp", content);
+                return await res.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+            
         }
 
         public async Task<bool> SendFriendRequest(string username,string targetUsername,Button btnFriend, string token)

@@ -85,13 +85,19 @@ namespace API_Server.Controllers
         {
             //Kiểm tra xem email đã được dùng để đăng kí chưa
             if (string.IsNullOrEmpty(currentEmail))
-                return BadRequest("Email này chưa được dùng để đăng kí.");
+                return BadRequest(new
+                {
+                    message = "Email này chưa được dùng để đăng kí."
+                });
             //Lưu email đã có từ api registration
             var tempUser = _users[currentEmail];
             //So sánh OTP
             if (curentOtp != otpModel.OTP)
             {
-                return BadRequest("OTP không hợp lệ");
+                return BadRequest(new
+                {
+                    message = "OTP không hợp lệ"
+                });
             }
             //Kiểm tra xem email đã đăng kí cho user nào chưa
             //Có thể xem xét bỏ đoạn này
@@ -135,7 +141,6 @@ namespace API_Server.Controllers
             }
 
             var filter = Builders<User>.Filter.Eq(u => u.Username, loginModel.Username);
-
             var user = await users.Find(filter).FirstOrDefaultAsync();
 
             if (user == null || string.IsNullOrEmpty(user.PasswordHash))
@@ -324,8 +329,8 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
-        [HttpGet("search")]
-        public async Task<ActionResult<List<User>>> SearchUsers(string query)
+        [HttpGet("{username}/search")]
+        public async Task<ActionResult<List<User>>> SearchUsers(string username,[FromQuery] string query, [FromQuery] int page=1, [FromQuery] int pageSize = 2)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
             if (!_jwtService.IsValidate(authorizationHeader))
@@ -335,30 +340,48 @@ namespace API_Server.Controllers
                     message = "Yêu cầu không hợp lệ!"
                 });
             }
-            var users = await _userService.SearchUserAsync(query);
-            if (users == null || users.Count == 0)
+            try 
             {
-                return NotFound(new
+                var (users, totalPages) = await _userService.SearchUserAsync(query, page, pageSize,username);
+                if (users == null || users.Count == 0)
                 {
-                    total = 0,
-                    message = "Không tìm thấy người dùng"
+                    return NotFound(new
+                    {
+                        total = 0,
+                        message = "Không tìm thấy người dùng"
+                    });
+                }
+
+                var res = users.Select(user => new
+                {
+                    id = user.Id.ToString(),
+                    name = user.Name,
+                    username = user.Username,
+                    email = user.Email,
+                    dateOfBirth = user.DateOfBirth
+
+                });
+                return Ok(new
+                {
+                    total = users.Count,
+                    totalPages,
+                    currentPage = page,
+                    data = res
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new {message = ex.Message});
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Internal Server Error",
+                    details = ex.Message
                 });
             }
 
-            var res = users.Select(user => new
-            {
-                id = user.Id.ToString(),
-                name = user.Name,
-                username = user.Username,
-                email = user.Email,
-                dateOfBirth = user.DateOfBirth
-
-            });
-            return Ok(new
-            {
-                total = users.Count,
-                data = res
-            });
         }
 
         [Authorize]

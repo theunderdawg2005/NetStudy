@@ -84,19 +84,19 @@ namespace NetStudy.Forms
                 return (new List<User>(), 0);
             }
         }
-        public async Task<(List<User>, int)> GetFriendSearching(string searchString, int pageSize)
+        public async Task<(List<User>, int)> GetFriendSearching(string searchString, int page = 1 ,int pageSize=2)
         {
-
+            var username = UserInfo["username"].ToString();
             try
             {
 
-                var response = await httpClient.GetAsync($"api/user/search?query={searchString}");
+                var response = await httpClient.GetAsync($"api/user/{username}/search?query={searchString}&page={page}&pageSize={pageSize}");
                 if (response.IsSuccessStatusCode)
                 {
                     var res = await response.Content.ReadAsStringAsync();
                     JObject info = JObject.Parse(res);
                     total = int.Parse(info["total"].ToString());
-                    totalPages = (int)Math.Ceiling((double)total / pageSize);
+                    totalPages = int.Parse(info["totalPages"].ToString());
                     List<User> users = info["data"].ToObject<List<User>>();
 
                     return (users, totalPages);
@@ -119,13 +119,14 @@ namespace NetStudy.Forms
             }
         }
 
-        private async void CreatePanel(List<User> users, string username)
+        private void CreatePanel(List<User> users, string username)
         {
             flowLayoutPanel1.Controls.Clear();
 
             foreach (var user in users)
             {
-                var (list, total) = await userService.GetReqList(user.Username, accessToken);
+
+                //var (list, total) = await userService.GetReqList(user.Username, accessToken);
                 
                 Panel userPanel = new Panel
                 {
@@ -201,16 +202,18 @@ namespace NetStudy.Forms
 
                 flowLayoutPanel1.Controls.Add(userPanel);
             }
+            
         }
-        private void UpdatePage(int totalPages)
+        private void UpdatePage(int newTotalPages)
         {
-            comboPage.Items.Clear();
-            for (int i = 1; i <= totalPages; i++)
-            {
-                comboPage.Items.Add(i);
-            }
-
-            comboPage.Enabled = totalPages > 1;
+            
+                comboBox1.Items.Clear();
+                for (int i = 1; i <= newTotalPages; i++)
+                {
+                    comboBox1.Items.Add(i);
+                }
+                comboBox1.Enabled = newTotalPages > 1;
+         
         }
         public async Task<List<string>> LoadFriendList()
         {
@@ -254,15 +257,16 @@ namespace NetStudy.Forms
 
                 string searchString = txtSearch.Text;
 
-                var (users, totalPages) = await GetFriendSearching(searchString, pageSize);
+                var (users, totalPages) = await GetFriendSearching(searchString, currPage ,pageSize);
 
                 this.totalPages = totalPages;
 
                 CreatePanel(users, username);
+                //MessageBox.Show($"totalPages: {totalPages}");
 
                 UpdatePage(totalPages);
 
-                comboPage.SelectedIndex = currPage - 1;
+                
             }
             catch (Exception ex)
             {
@@ -277,37 +281,15 @@ namespace NetStudy.Forms
             this.totalPages = totalPages;
             CreatePanel(friends, username);
             UpdatePage(totalPages);
-            comboPage.SelectedIndex = currPage - 1;
+            comboBox1.SelectedIndex = currPage;
         }
-        private void panelDesk_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void panelTop_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
         private async void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-
-            if (txtSearch.Text.Length == 0)
+            if(comboBox1.SelectedIndex >= 0)
             {
-                if (comboPage.SelectedIndex >= 0)
-                {
-                    currPage = comboPage.SelectedIndex + 1;
-                    await LoadFriendsRequest();
-                }
-            }
-            else
-            {
-                if (comboPage.SelectedIndex >= 0)
-                {
-                    currPage = comboPage.SelectedIndex + 1;
-                    await LoadUsersSearching();
-                }
-            }
+                currPage = comboBox1.SelectedIndex+1;
+                await LoadUsersSearching();
+            }    
         }
 
         private async void btnSearch_Click(object sender, EventArgs e)
@@ -323,7 +305,7 @@ namespace NetStudy.Forms
                 return false;
             }
 
-            // Ensure case-insensitive comparison
+            
             return friendsList.Any(f => string.Equals(f.Trim(), username.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 

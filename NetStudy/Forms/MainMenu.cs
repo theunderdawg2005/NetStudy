@@ -47,7 +47,7 @@ namespace NetStudy.Forms
             _tokenService = tokenService;
            
             _tokenService.SetTokens(accessToken);
-            //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             UserInfo = info;
         }
         //Structs

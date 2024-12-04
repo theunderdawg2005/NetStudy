@@ -28,7 +28,7 @@ namespace NetStudy
 
         private async void btnVerify_Click(object sender, EventArgs e)
         {
-            btnVerify.Enabled = false;
+            btnVerify.Enabled = true;
             if(string.IsNullOrEmpty(txtOTP.Text))
             {
                 MessageBox.Show("Vui lòng nhập OTP!", "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -39,7 +39,7 @@ namespace NetStudy
                 otp = txtOTP.Text.Trim(),
             };
             var response = await userService.VerifyOtp(OTP);
-            if (response.IsSuccessStatusCode)
+            if (response.Contains("thành công", StringComparison.OrdinalIgnoreCase))
             {
                 this.Hide();
                 MessageBox.Show($"Đăng kí thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -49,7 +49,7 @@ namespace NetStudy
             }
             else 
             {
-                MessageBox.Show(response.StatusCode.ToString());
+                MessageBox.Show(response);
             }
         }
     }
