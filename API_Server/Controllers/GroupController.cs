@@ -41,11 +41,13 @@ namespace API_Server.Controllers
 
             try
             {
+                groupModel.Members.Add(username);
                 var group = new Group
                 {
                     Name = groupModel.Name,
-                    Description = groupModel.Description,   
+                    Description = groupModel.Description,
                     Creator = username,
+                    Members = groupModel.Members,   
                 };
 
                 var createdGroup = await _chatGroupService.CreateGroup(group);
@@ -63,8 +65,8 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
-        [HttpPost("{groupId}/add-user/{userId}")]
-        public async Task<IActionResult> AddUserToGroup(string groupId, string userId)
+        [HttpPost("{groupId}/add-user/{username}")]
+        public async Task<IActionResult> AddUserToGroup(string groupId, string username)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
             if (!_jwtService.IsValidate(authorizationHeader))
@@ -76,7 +78,7 @@ namespace API_Server.Controllers
             }
             try
             {
-                var user = await _userService.GetUserById(userId);
+                var user = await _userService.GetUserByUserName(username);
                 if (user == null)
                 {
                     return NotFound("User not found");
@@ -88,8 +90,8 @@ namespace API_Server.Controllers
                     return NotFound("Group not found");
                 }
 
-                await _chatGroupService.AddUserToGroup(groupId, userId);
-                await _userService.AddGroupToUser(userId, groupId);
+                await _chatGroupService.AddUserToGroup(groupId, username);
+                await _userService.AddGroupToUser(username, groupId);
 
                 return Ok("Add usser successfully!");
             }

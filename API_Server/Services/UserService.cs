@@ -188,7 +188,7 @@ namespace API_Server.Services
                 {
                     throw new Exception("User not found");
                 }
-                var groupsFound = await groups.Find(g => g.Creator == username).ToListAsync();
+                var groupsFound = await groups.Find(g => g.Members.Contains(username)).ToListAsync();
                 return groupsFound;
             }
             catch (Exception ex)

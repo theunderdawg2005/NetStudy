@@ -79,7 +79,7 @@ namespace NetStudy
                     Font = new Font("Cambria", 10),
                     ForeColor = Color.Gainsboro
                 };
-                panel.Click += Group_Button_Click;
+                panel.Click += Group_Panel_Click;
                 panel.Controls.Add(lblName);
 
                 panel.Controls.Add(lblId);
@@ -88,7 +88,7 @@ namespace NetStudy
            
         }
 
-        private void Group_Button_Click(object sender, EventArgs e)
+        private void Group_Panel_Click(object sender, EventArgs e)
         {
             var panel = sender as Panel;
             var groupId = panel.Tag ;
