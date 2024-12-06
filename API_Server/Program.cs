@@ -24,13 +24,18 @@ builder.Services.AddSingleton<JwtService>();
 
 builder.Services.AddSingleton<UserService>();
 
-builder.Services.AddSingleton<ChatGroupService>();
+builder.Services.AddSingleton<GroupService>();
 
 builder.Services.AddSingleton<SingleChatService>();
 
 // Add services to the container.
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR()
+    .AddHubOptions<GroupChatHub>(options =>
+    {
+        options.EnableDetailedErrors = true;
+    }
+    );
 
 builder.Services.AddAuthentication(options =>
 {
@@ -56,6 +61,20 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Headers["accessToken"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+
     };
 });
 
@@ -85,5 +104,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<ChatHub>("/chatHub");
+app.MapHub<GroupChatHub>("groupChatHub");
 
 app.Run();

@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainMenu));
             panelMenu = new Panel();
+            btnGroupChat = new FontAwesome.Sharp.IconButton();
             btnMatch = new FontAwesome.Sharp.IconButton();
             btnExam = new FontAwesome.Sharp.IconButton();
             btnClass = new FontAwesome.Sharp.IconButton();
@@ -52,6 +53,7 @@
             // panelMenu
             // 
             panelMenu.BackColor = Color.FromArgb(31, 30, 68);
+            panelMenu.Controls.Add(btnGroupChat);
             panelMenu.Controls.Add(btnMatch);
             panelMenu.Controls.Add(btnExam);
             panelMenu.Controls.Add(btnClass);
@@ -65,6 +67,30 @@
             panelMenu.Name = "panelMenu";
             panelMenu.Size = new Size(275, 789);
             panelMenu.TabIndex = 0;
+            // 
+            // btnGroupChat
+            // 
+            btnGroupChat.Cursor = Cursors.Hand;
+            btnGroupChat.Dock = DockStyle.Top;
+            btnGroupChat.FlatAppearance.BorderSize = 0;
+            btnGroupChat.FlatStyle = FlatStyle.Flat;
+            btnGroupChat.ForeColor = Color.Gainsboro;
+            btnGroupChat.IconChar = FontAwesome.Sharp.IconChar.PeopleGroup;
+            btnGroupChat.IconColor = Color.Gainsboro;
+            btnGroupChat.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnGroupChat.IconSize = 32;
+            btnGroupChat.ImageAlign = ContentAlignment.MiddleLeft;
+            btnGroupChat.Location = new Point(0, 625);
+            btnGroupChat.Margin = new Padding(4);
+            btnGroupChat.Name = "btnGroupChat";
+            btnGroupChat.Padding = new Padding(12, 0, 25, 0);
+            btnGroupChat.Size = new Size(275, 75);
+            btnGroupChat.TabIndex = 7;
+            btnGroupChat.Text = "Hội nhóm";
+            btnGroupChat.TextAlign = ContentAlignment.MiddleLeft;
+            btnGroupChat.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnGroupChat.UseVisualStyleBackColor = true;
+            btnGroupChat.Click += btnGroupChat_Click;
             // 
             // btnMatch
             // 
@@ -318,5 +344,6 @@
         private Label lblTitleChildForm;
         private FontAwesome.Sharp.IconPictureBox iconCurrentChildForm;
         private Panel panelDesktop;
+        private FontAwesome.Sharp.IconButton btnGroupChat;
     }
 }

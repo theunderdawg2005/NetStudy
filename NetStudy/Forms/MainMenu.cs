@@ -45,7 +45,7 @@ namespace NetStudy.Forms
             this.accessToken = accessToken;
             var tokenService = new TokenService(httpClient);
             _tokenService = tokenService;
-           
+
             _tokenService.SetTokens(accessToken);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             UserInfo = info;
@@ -180,6 +180,12 @@ namespace NetStudy.Forms
         private void panelDesktop_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void btnGroupChat_Click(object sender, EventArgs e)
+        {
+            ActivateButton(sender, RGBColors.color5);
+            OpenChildForm(new FormGroups(accessToken, UserInfo));
         }
     }
 }

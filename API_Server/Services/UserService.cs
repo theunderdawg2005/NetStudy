@@ -7,12 +7,12 @@ namespace API_Server.Services
     public class UserService
     {
         private readonly IMongoCollection<User> users;
-        private readonly IMongoCollection<ChatGroup> chatGroups; 
+        private readonly IMongoCollection<Group> groups; 
         private readonly MongoDbService dbService;
         public UserService(MongoDbService db) {
             dbService = db;
             users = dbService.Users;
-            chatGroups = dbService.ChatGroup;
+            groups = dbService.ChatGroup;
         }
          
         public async Task<List<User>> GetAllUserAsync() => await users.Find(_ =>  true).ToListAsync();
@@ -56,14 +56,12 @@ namespace API_Server.Services
         {
             await users.ReplaceOneAsync(u => u.Username == user.Username, user);
         }
+        
         public async Task AddGroupToUser(string username, string groupId)
         {
             var update = Builders<User>.Update.AddToSet(u => u.ChatGroup, groupId);
             await users.UpdateOneAsync(u => u.Username == username, update);
         }
-
-        
-
         public async Task<List<User>> GetRequestList(string username)
         {
             var user = await GetUserByUserName(username);
@@ -142,7 +140,7 @@ namespace API_Server.Services
             if (userFound == null) { return null; }
 
             var userGroups = userFound.ChatGroup;
-            var members = await chatGroups
+            var members = await groups
                 .Find(g => userGroups.Contains(g.Id.ToString()))
                 .Project(g => g.Members)
                 .ToListAsync();
@@ -179,6 +177,23 @@ namespace API_Server.Services
             catch (Exception ex)
             {
                 throw new Exception($"Lỗi khi xóa yêu cầu: {ex.Message}");
+            }
+        }
+        public async Task<List<Group>> GetGroupsByUsername(string username)
+        {
+            try
+            {
+                var user = await GetUserByUserName(username);
+                if (user == null)
+                {
+                    throw new Exception("User not found");
+                }
+                var groupsFound = await groups.Find(g => g.Creator == username).ToListAsync();
+                return groupsFound;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi tải nhóm: {ex.Message}");
             }
         }
     }

@@ -270,37 +270,9 @@ namespace API_Server.Controllers
 
             return Ok(user);
         }
-        //Xóa người dùng
-        [HttpDelete("{username}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteUser(string username)
-        {
-            // Lấy access token từ cookies
-            if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
-            {
-                return BadRequest("Yêu cầu không hợp lệ.");
-            }
+        
 
-
-            // Xác minh token và lấy username
-            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
-            if (claimsPrincipal == null)
-            {
-                return Unauthorized("Access token không hợp lệ 1.");
-            }
-
-            //Tìm thông tin người dùng
-            var user = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
-
-            if (user == null)
-            {
-                return NotFound("Không tìm thấy người dùng.");
-            }
-            //Xóa người dùng
-            await _context.Users.DeleteOneAsync(u => u.Username == username);
-
-            return Ok("Xóa người dùng thành công.");
-        }
+        //PATCH METHOD
         //Chỉnh sửa thông tin người dùng (chưa hoàn thiện)
         [HttpPatch("{username}")]
         [Authorize]
@@ -328,6 +300,61 @@ namespace API_Server.Controllers
             return Ok(user);
         }
 
+        //POST METHOD
+        [Authorize]
+        [HttpPost("{username}/add-friend/{targetUsername}")]
+        public async Task<IActionResult> SendFriendRequest(string targetUsername, string username)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+            try
+            {
+                await _userService.SendRequest(username, targetUsername);
+                return Ok(new
+                {
+                    message = "Gửi yêu cầu thành công!"
+
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("{username}/accept-request/{requestUsername}")]
+        public async Task<IActionResult> AcceptFriendRequest(string username, string requestUsername)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+            try
+            {
+                await _userService.AcceptFriendRequest(username, requestUsername);
+                return Ok(new
+                {
+                    message = "Đã chấp nhận kết bạn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        //GET METHOD
         [Authorize]
         [HttpGet("{username}/search")]
         public async Task<ActionResult<List<User>>> SearchUsers(string username,[FromQuery] string query, [FromQuery] int page=1, [FromQuery] int pageSize = 2)
@@ -422,58 +449,6 @@ namespace API_Server.Controllers
                 data = result
             });
         }
-        [Authorize]
-        [HttpPost("{username}/add-friend/{targetUsername}")]
-        public async Task<IActionResult> SendFriendRequest(string targetUsername, string username)
-        {
-            var authorizationHeader = Request.Headers["Authorization"].ToString();
-            if (!_jwtService.IsValidate(authorizationHeader))
-            {
-                return Unauthorized(new
-                {
-                    message = "Yêu cầu không hợp lệ!"
-                });
-            }
-            try
-            {
-                await _userService.SendRequest(username, targetUsername);
-                return Ok(new
-                {
-                    message = "Gửi yêu cầu thành công!"
-
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [Authorize]
-        [HttpPost("{username}/accept-request/{requestUsername}")]
-        public async Task<IActionResult> AcceptFriendRequest(string username, string requestUsername)
-        {
-            var authorizationHeader = Request.Headers["Authorization"].ToString();
-            if (!_jwtService.IsValidate(authorizationHeader))
-            {
-                return Unauthorized(new
-                {
-                    message = "Yêu cầu không hợp lệ!"
-                });
-            }
-            try
-            {
-                await _userService.AcceptFriendRequest(username, requestUsername);
-                return Ok(new
-                {
-                    message = "Đã chấp nhận kết bạn!"
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
 
         [Authorize]
         [HttpGet("get-friend-list/{username}")]
@@ -544,6 +519,44 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
+        [HttpGet("{username}/get-groups")]
+        public async Task<IActionResult> GetGroupsByUsername(string username)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+
+            try
+            {
+                var groups = await _userService.GetGroupsByUsername(username);
+                if(groups == null || groups.Count == 0)
+                {
+                    return NotFound(new
+                    {
+                        message = "Không tìm được nhóm của người dùng này!"
+                    });
+                }
+                return Ok(new
+                {
+                    data = groups
+                }); 
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
+        // DELETE METHOD
+        [Authorize]
         [HttpDelete("{username}/remove-request/{reqUsername}")]
         public async Task<IActionResult> RemoveRequest(string reqUsername,string username)
         {
@@ -557,7 +570,6 @@ namespace API_Server.Controllers
                 });
             }    
 
-           
             try
             {
                 var res = await _userService.DeleteRequest(username, reqUsername);
@@ -583,6 +595,38 @@ namespace API_Server.Controllers
                 });
             }
 
+        }
+
+        //Xóa người dùng
+        [HttpDelete("{username}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteUser(string username)
+        {
+            // Lấy access token từ cookies
+            if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
+            {
+                return BadRequest("Yêu cầu không hợp lệ.");
+            }
+
+
+            // Xác minh token và lấy username
+            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            if (claimsPrincipal == null)
+            {
+                return Unauthorized("Access token không hợp lệ 1.");
+            }
+
+            //Tìm thông tin người dùng
+            var user = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return NotFound("Không tìm thấy người dùng.");
+            }
+            //Xóa người dùng
+            await _context.Users.DeleteOneAsync(u => u.Username == username);
+
+            return Ok("Xóa người dùng thành công.");
         }
     }
 }

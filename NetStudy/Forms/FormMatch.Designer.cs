@@ -85,7 +85,7 @@
             btnRequest.Name = "btnRequest";
             btnRequest.Size = new Size(196, 43);
             btnRequest.TabIndex = 4;
-            btnRequest.Text = "Lời mời kết bạn (0)";
+            btnRequest.Text = "Friend Request (0)";
             btnRequest.UseVisualStyleBackColor = false;
             btnRequest.Click += btnRequest_Click;
             // 

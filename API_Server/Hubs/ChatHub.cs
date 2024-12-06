@@ -32,5 +32,8 @@ namespace API_Server.Hubs
         {
             await Clients.All.SendAsync("ReceiveStatusUpdate", username, status);
         }
+
+        
+         
     }
 }

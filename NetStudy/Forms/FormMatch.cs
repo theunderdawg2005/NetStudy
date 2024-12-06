@@ -183,23 +183,17 @@ namespace NetStudy.Forms
                 }
                 else
                 {
-
                     btnFriend.Text = "Kết bạn";
-
                     btnFriend.Click += async (sender, e) =>
                     {
                         await userService.SendFriendRequest(username, user.Username, btnFriend, accessToken);
-                        
                     };
                 }
-
-
                 userPanel.Controls.Add(lblName);
                 lblName.Location = new Point(10, 10);
                 userPanel.Controls.Add(lblEmail);
                 lblEmail.Location = new Point(10, 40);
                 userPanel.Controls.Add(btnFriend);
-
                 flowLayoutPanel1.Controls.Add(userPanel);
             }
             
@@ -222,17 +216,13 @@ namespace NetStudy.Forms
             {
                 MessageBox.Show("Không tìm thấy người dùng", $"Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
             try
             {
-
-
                 var response = await httpClient.GetAsync($"api/user/get-friend-list/{username}");
                 if (response.IsSuccessStatusCode)
                 {
                     var res = await response.Content.ReadAsStringAsync();
                     var friendData = JObject.Parse(res);
-
                     List<string> friendList = friendData["data"].ToObject<List<string>>();
 
                     return friendList;

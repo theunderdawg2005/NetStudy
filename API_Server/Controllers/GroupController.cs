@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
+using Newtonsoft.Json.Linq;
 using System.Security.Claims;
 
 namespace API_Server.Controllers
@@ -13,11 +14,11 @@ namespace API_Server.Controllers
     public class GroupController : ControllerBase
     {
         private readonly UserService _userService;
-        private readonly ChatGroupService _chatGroupService;
+        private readonly GroupService _chatGroupService;
         private readonly MongoDbService _context;
         
         private readonly JwtService _jwtService;
-        public GroupController(UserService userService, ChatGroupService cgs, MongoDbService context, JwtService jwtService)
+        public GroupController(UserService userService, GroupService cgs, MongoDbService context, JwtService jwtService)
         {
             _userService = userService;
             _chatGroupService = cgs;
@@ -26,63 +27,76 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
-        [HttpPost("create")]
-        public async Task<ActionResult<ChatGroup>> CreateGroup([FromBody] ChatGroup group)
+        [HttpPost("{username}/create")]
+        public async Task<ActionResult<Group>> CreateGroup(string username,[FromBody] CreateGroup groupModel)
         {
-            if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
             {
-                return BadRequest("Yêu cầu không hợp lệ.");
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
             }
 
-            // Xác minh token và lấy username
-            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
-            if (claimsPrincipal == null)
+            try
             {
-                return Unauthorized("Access token không hợp lệ!");
-            }
+                var group = new Group
+                {
+                    Name = groupModel.Name,
+                    Description = groupModel.Description,   
+                    Creator = username,
+                };
 
-            var userNameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
-            if (userNameClaim == null || string.IsNullOrEmpty(userNameClaim.Value))
-            {
-                return Unauthorized("Access token không hợp lệ !");
-            }
-            var user = await _context.Users.Find(u => u.Username == userNameClaim.Value).FirstOrDefaultAsync();
-            // var creatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userId = user.Id.ToString();
-            if (userId == null)
-            {
-                return NotFound("Không tìm thấy người dùng.");
-            }
-            group.Creator = userId;
-            if (!group.Members.Contains(group.Creator))
-            {
-                group.Members.Add(group.Creator);
-            }    
+                var createdGroup = await _chatGroupService.CreateGroup(group);
 
-            var createdGroup = await _chatGroupService.CreateGroup(group);
-            return Ok(createdGroup);
+                return Ok(new
+                {
+                    message = "Create group sucessfully!",
+                    info = createdGroup
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [Authorize]
         [HttpPost("{groupId}/add-user/{userId}")]
         public async Task<IActionResult> AddUserToGroup(string groupId, string userId)
         {
-            var user = await _userService.GetUserById(userId);
-            if (user == null)
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
             {
-                return NotFound("User not found");
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
             }
-
-            var group = await _chatGroupService.GetGroupById(groupId);
-            if (group == null)
+            try
             {
-                return NotFound("Group not found");
+                var user = await _userService.GetUserById(userId);
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
+
+                var group = await _chatGroupService.GetGroupById(groupId);
+                if (group == null)
+                {
+                    return NotFound("Group not found");
+                }
+
+                await _chatGroupService.AddUserToGroup(groupId, userId);
+                await _userService.AddGroupToUser(userId, groupId);
+
+                return Ok("Add usser successfully!");
             }
-
-            await _chatGroupService.AddUserToGroup(groupId, userId);
-            await _userService.AddGroupToUser(userId, groupId);
-
-            return Ok("Add usser successfully!");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

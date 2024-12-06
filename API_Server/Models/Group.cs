@@ -4,17 +4,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API_Server.Models
 {
-    public class ChatGroup
+    public class Group
     {
         [BsonId]
-        
-        public ObjectId Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
 
 
         public string Name { get; set; }
         public string Description { get; set; }
-
-        
         public string Creator { get; set; }
 
         // Mảng lưu các thành viên (username) trong group
