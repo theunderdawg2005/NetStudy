@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -27,6 +27,8 @@ builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<GroupService>();
 
 builder.Services.AddSingleton<SingleChatService>();
+
+builder.Services.AddSingleton<GroupChatService>();
 
 // Add services to the container.
 
@@ -68,7 +70,7 @@ builder.Services.AddAuthentication(options =>
         {
             var accessToken = context.Request.Headers["accessToken"];
             var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/groupChatHub"))
             {
                 context.Token = accessToken;
             }
@@ -104,6 +106,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<ChatHub>("/chatHub");
-app.MapHub<GroupChatHub>("groupChatHub");
+app.MapHub<GroupChatHub>("/groupChatHub");
 
 app.Run();

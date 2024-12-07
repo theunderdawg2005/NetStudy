@@ -17,13 +17,19 @@ namespace NetStudy
         private HubConnection connection;
         private string accessToken;
         private readonly JObject UserInfo;
+        private readonly JObject GroupInfo;
         private string groupId;
-        public FormGroupDetails(string token, JObject info, string id)
+        public static readonly HttpClient httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(@"https://localhost:7070/"),
+            Timeout = TimeSpan.FromMinutes(5)
+        };
+        public FormGroupDetails(string token, JObject info, JObject groupInfo)
         {
             InitializeComponent();
             accessToken = token;
             UserInfo = info;
-            groupId = id;
+            groupId = groupInfo["id"].ToString();
             connection = new HubConnectionBuilder()
                 .WithUrl("https://localhost:7070/groupChatHub", opts =>
                 {
@@ -37,21 +43,28 @@ namespace NetStudy
                     listMsg.Items.Add($"{user}: {message}");
                 });
             });
+            GroupInfo = groupInfo;
+            lblTitle.Text = groupInfo["name"].ToString();
         }
 
         private async void btnSend_Click(object sender, EventArgs e)
         {
-            //var id = txtID.Text;
+
             await connection.InvokeAsync("SendMessageGroup", groupId, UserInfo["name"].ToString(), txtMessage.Text);
             txtMessage.Clear();
         }
 
         private async void FormGroupDetails_Load(object sender, EventArgs e)
         {
-            //var groupId = txtID.Text;
+
             await connection.StartAsync();
             await connection.SendAsync("JoinGroup", groupId);
         }
 
+        private void linkAdd_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            FormAddUser formAdd = new FormAddUser(accessToken, GroupInfo["name"].ToString(), GroupInfo["id"].ToString());
+            formAdd.ShowDialog();
+        }
     }
 }

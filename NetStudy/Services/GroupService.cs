@@ -14,7 +14,7 @@ namespace NetStudy.Services
     {
         private HttpClient _httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7070/")
+            BaseAddress = new Uri(@"https://localhost:7070/")
         };
         private string accessToken;
         public GroupService(string token)
@@ -76,6 +76,37 @@ namespace NetStudy.Services
             {
                 MessageBox.Show(ex.Message);
                 return null;
+            }
+        }
+        
+
+
+        public async Task AddUserToGroup(string groupId, string username)
+        {
+            try
+            {
+                var reqBody = new
+                {
+                    Username = username
+                };
+                var json = JsonConvert.SerializeObject(reqBody);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync($"api/groups/{groupId}/add-user", content);
+                var res = await response.Content.ReadAsStringAsync();
+                if(response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Thêm người dùng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }  
+                else
+                {
+                    var errorMessage = JObject.Parse(res)["message"]?.ToString();
+                    MessageBox.Show(errorMessage ?? "Failed to add user to group.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

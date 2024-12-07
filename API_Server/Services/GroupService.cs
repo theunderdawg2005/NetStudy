@@ -6,9 +6,11 @@ namespace API_Server.Services
     public class GroupService
     {
         private readonly IMongoCollection<Group> _chatGroups;
-        public GroupService(MongoDbService db)
+        private readonly UserService _userService;
+        public GroupService(MongoDbService db, UserService userService)
         {
             _chatGroups = db.ChatGroup;
+            _userService = userService;
         }
 
         public async Task<Group> CreateGroup(Group chatGroup)
@@ -27,11 +29,31 @@ namespace API_Server.Services
             return await _chatGroups.Find(g => g.Name == groupName).FirstOrDefaultAsync();
         }
 
-        // thêm user vào group
-        public async Task AddUserToGroup(string groupId, string userName)
+        public async Task<bool> IsInGroup(string username, string groupId)
         {
+            var group = await GetGroupById(groupId);
+            if (group == null)
+            {
+                return false;
+            }
+            if (!group.Members.Contains(username))
+            {
+                return false;
+            }
+            return true;
+        }
+        // thêm user vào group
+        public async Task<bool> AddUserToGroup(string groupId, string userName)
+        {
+            
+            var isJoined = await IsInGroup(userName, groupId);
+            if (isJoined)
+            {
+                return false;
+            }
             var update = Builders<Group>.Update.AddToSet(g => g.Members, userName);
             await _chatGroups.UpdateOneAsync(g => g.Id.ToString() == groupId, update);
+            return true;
         }
 
     }

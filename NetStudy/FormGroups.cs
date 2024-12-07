@@ -18,9 +18,10 @@ namespace NetStudy
     {
         private string accessToken;
         private readonly JObject UserInfo;
-        private HttpClient httpClient = new HttpClient
+        public static readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7070/")
+            BaseAddress = new Uri(@"https://localhost:7070/"),
+            Timeout = TimeSpan.FromMinutes(5)
         };
         private GroupService groupService;
         public FormGroups(string token, JObject info)
@@ -88,12 +89,20 @@ namespace NetStudy
            
         }
 
-        private void Group_Panel_Click(object sender, EventArgs e)
+        private async void Group_Panel_Click(object sender, EventArgs e)
         {
             var panel = sender as Panel;
             var groupId = panel.Tag ;
+            var response = await httpClient.GetAsync($"api/groups/get-group/{groupId}");
+            var res = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
 
-            var groupDetails = new FormGroupDetails(accessToken, UserInfo, groupId.ToString());
+                MessageBox.Show($"Lỗi {res}", response.StatusCode.ToString(), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            var info = JObject.Parse(res);
+            var groupDetails = new FormGroupDetails(accessToken, UserInfo, info);
             groupDetails.ShowDialog();
         }
 

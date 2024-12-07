@@ -17,9 +17,10 @@ namespace NetStudy
         private string accessToken;
         private GroupService groupService;
         private JObject UserInfo;
-        private HttpClient httpClient = new HttpClient
+        public static readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7070/")
+            BaseAddress = new Uri(@"https://localhost:7070/"),
+            Timeout = TimeSpan.FromMinutes(5)
         };
         public FormCreateGroup(JObject info, string token)
         {

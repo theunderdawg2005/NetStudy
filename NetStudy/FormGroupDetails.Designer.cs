@@ -32,7 +32,8 @@
             btnSend = new FontAwesome.Sharp.IconButton();
             txtMessage = new TextBox();
             panel2 = new Panel();
-            label1 = new Label();
+            linkAdd = new LinkLabel();
+            lblTitle = new Label();
             listMsg = new ListBox();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
@@ -77,31 +78,48 @@
             // panel2
             // 
             panel2.BackColor = Color.FromArgb(26, 25, 62);
-            panel2.Controls.Add(label1);
+            panel2.Controls.Add(linkAdd);
+            panel2.Controls.Add(lblTitle);
             panel2.Dock = DockStyle.Top;
             panel2.Location = new Point(0, 0);
             panel2.Name = "panel2";
             panel2.Size = new Size(1033, 73);
             panel2.TabIndex = 1;
             // 
-            // label1
+            // linkAdd
             // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Cambria", 11F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label1.ForeColor = Color.Gainsboro;
-            label1.Location = new Point(25, 22);
-            label1.Name = "label1";
-            label1.Size = new Size(138, 26);
-            label1.TabIndex = 0;
-            label1.Text = "Welcome to,  ";
+            linkAdd.AutoSize = true;
+            linkAdd.Font = new Font("Cambria", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            linkAdd.ForeColor = Color.CornflowerBlue;
+            linkAdd.LinkColor = Color.FromArgb(128, 128, 255);
+            linkAdd.Location = new Point(935, 24);
+            linkAdd.Name = "linkAdd";
+            linkAdd.Size = new Size(86, 23);
+            linkAdd.TabIndex = 1;
+            linkAdd.TabStop = true;
+            linkAdd.Text = "Add user";
+            linkAdd.VisitedLinkColor = Color.Blue;
+            linkAdd.LinkClicked += linkAdd_LinkClicked;
+            // 
+            // lblTitle
+            // 
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new Font("Bahnschrift SemiBold", 14F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblTitle.ForeColor = Color.Gainsboro;
+            lblTitle.Location = new Point(21, 15);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(182, 34);
+            lblTitle.TabIndex = 0;
+            lblTitle.Text = "Welcome to,  ";
             // 
             // listMsg
             // 
+            listMsg.BorderStyle = BorderStyle.None;
             listMsg.FormattingEnabled = true;
             listMsg.ItemHeight = 25;
             listMsg.Location = new Point(12, 88);
             listMsg.Name = "listMsg";
-            listMsg.Size = new Size(1009, 504);
+            listMsg.Size = new Size(1009, 500);
             listMsg.TabIndex = 2;
             // 
             // FormGroupDetails
@@ -129,7 +147,8 @@
         private TextBox txtMessage;
         private FontAwesome.Sharp.IconButton btnSend;
         private Panel panel2;
-        private Label label1;
+        private Label lblTitle;
         private ListBox listMsg;
+        private LinkLabel linkAdd;
     }
 }

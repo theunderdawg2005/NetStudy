@@ -8,11 +8,12 @@ namespace API_Server.Services
     {
         private readonly IMongoCollection<User> users;
         private readonly IMongoCollection<Group> groups; 
-        private readonly MongoDbService dbService;
+       
+      
         public UserService(MongoDbService db) {
-            dbService = db;
-            users = dbService.Users;
-            groups = dbService.ChatGroup;
+            users = db.Users;
+            groups = db.ChatGroup;
+            
         }
          
         public async Task<List<User>> GetAllUserAsync() => await users.Find(_ =>  true).ToListAsync();
@@ -56,11 +57,30 @@ namespace API_Server.Services
         {
             await users.ReplaceOneAsync(u => u.Username == user.Username, user);
         }
-        
-        public async Task AddGroupToUser(string username, string groupId)
+        public async Task<bool> IsJoined(string username, string groupId)
         {
+            var user = await GetUserByUserName(username);
+            if (user == null)
+            {
+                return false;
+            }
+            
+            if (!user.ChatGroup.Contains(groupId))
+            {
+                return false;
+            }
+            return true;
+        }
+        public async Task<bool> AddGroupToUser(string username, string groupId)
+        {
+            var isJoined = await IsJoined(username, groupId);
+            if (isJoined)
+            {
+                return false;
+            }
             var update = Builders<User>.Update.AddToSet(u => u.ChatGroup, groupId);
             await users.UpdateOneAsync(u => u.Username == username, update);
+            return true;
         }
         public async Task<List<User>> GetRequestList(string username)
         {
@@ -161,6 +181,15 @@ namespace API_Server.Services
             var res = await users.UpdateOneAsync(filter, update);
 
             return res.ModifiedCount > 0;
+        }
+        public async Task<bool> IsFriend(string username, string friendName)
+        {
+            var user = await GetUserByUserName(username);
+            if (user == null) { return false; }
+            var friend = await GetUserByUserName(friendName);
+            if (friend == null) { return false; }
+            if(!user.Friends.Contains(friendName)) { return false; }
+            return true;
         }
         public async Task<bool> DeleteRequest(string username, string reqUsername)
         {

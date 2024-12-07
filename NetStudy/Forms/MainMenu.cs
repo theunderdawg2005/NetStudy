@@ -25,9 +25,10 @@ namespace NetStudy.Forms
         private Form currentChildForm;
         private JObject UserInfo;
         private string accessToken;
-        private readonly HttpClient httpClient = new HttpClient
+        public static readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri(@"https://localhost:7070/")
+            BaseAddress = new Uri(@"https://localhost:7070/"),
+            Timeout = TimeSpan.FromMinutes(5)
         };
         private TokenService _tokenService;
         //Constructor

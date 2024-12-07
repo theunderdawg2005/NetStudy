@@ -15,6 +15,11 @@ namespace NetStudy
     public partial class FormRegister : Form
     {
         private readonly UserService userService;
+        public static readonly HttpClient httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(@"https://localhost:7070/"),
+            Timeout = TimeSpan.FromMinutes(5)
+        };
         public FormRegister()
         {
             InitializeComponent();
