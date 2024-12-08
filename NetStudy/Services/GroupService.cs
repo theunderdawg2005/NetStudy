@@ -109,5 +109,39 @@ namespace NetStudy.Services
                 MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        //public async Task<GroupMessage> SendMessage(string groupId, StringContent content)
+        //{
+        //    try
+        //    {
+        //        var response = await _httpClient.PostAsync($"api/group-chat-message/send", content);
+        //        var res = await response.Content.ReadAsStringAsync();
+        //        JObject message = JObject.Parse(res);
+                
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return null;
+        //    }
+        //}
+
+        public async Task<List<GroupMessage>> LoadMessageByGroupId(string groupId)
+        {
+
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/group-chat-message/get-messages?groupId={groupId}");
+                var res = await response.Content.ReadAsStringAsync();
+                JObject messageInfo = JObject.Parse(res);
+                var message = messageInfo["data"].ToObject<List<GroupMessage>>();
+                return message;
+            }
+            catch (Exception ex)
+            {
+
+                return new List<GroupMessage>();
+            }
+        }
     }
 }

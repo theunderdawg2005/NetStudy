@@ -1,5 +1,6 @@
 ﻿using API_Server.Models;
 using API_Server.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -17,6 +18,7 @@ namespace API_Server.Controllers
         }
 
         // API to send a message
+        [Authorize]
         [HttpPost("send")]
         public async Task<IActionResult> SendMessage([FromBody] ChatMessage chatMessage)
         {

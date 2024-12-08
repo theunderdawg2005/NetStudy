@@ -108,9 +108,9 @@
             lblTitle.ForeColor = Color.Gainsboro;
             lblTitle.Location = new Point(21, 15);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(182, 34);
+            lblTitle.Size = new Size(201, 34);
             lblTitle.TabIndex = 0;
-            lblTitle.Text = "Welcome to,  ";
+            lblTitle.Text = "{GroupName}  ";
             // 
             // listMsg
             // 

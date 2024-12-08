@@ -37,7 +37,7 @@
             // 
             // txtUsername
             // 
-            txtUsername.Location = new Point(191, 132);
+            txtUsername.Location = new Point(191, 129);
             txtUsername.Name = "txtUsername";
             txtUsername.Size = new Size(272, 31);
             txtUsername.TabIndex = 0;
@@ -47,7 +47,7 @@
             label1.AutoSize = true;
             label1.Font = new Font("Bahnschrift SemiBold", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = Color.Gainsboro;
-            label1.Location = new Point(61, 133);
+            label1.Location = new Point(61, 130);
             label1.Name = "label1";
             label1.Size = new Size(124, 27);
             label1.TabIndex = 1;
@@ -62,7 +62,7 @@
             btnAdd.IconChar = FontAwesome.Sharp.IconChar.PlusSquare;
             btnAdd.IconColor = Color.Gainsboro;
             btnAdd.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnAdd.Location = new Point(480, 122);
+            btnAdd.Location = new Point(469, 120);
             btnAdd.Name = "btnAdd";
             btnAdd.Size = new Size(47, 54);
             btnAdd.TabIndex = 2;

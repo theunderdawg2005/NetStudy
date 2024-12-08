@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using NetStudy.Services;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace NetStudy
         private readonly JObject UserInfo;
         private readonly JObject GroupInfo;
         private string groupId;
+        private readonly GroupService groupService;
         public static readonly HttpClient httpClient = new HttpClient
         {
             BaseAddress = new Uri(@"https://localhost:7070/"),
@@ -45,6 +47,7 @@ namespace NetStudy
             });
             GroupInfo = groupInfo;
             lblTitle.Text = groupInfo["name"].ToString();
+            groupService = new GroupService(accessToken);
         }
 
         private async void btnSend_Click(object sender, EventArgs e)
@@ -59,6 +62,14 @@ namespace NetStudy
 
             await connection.StartAsync();
             await connection.SendAsync("JoinGroup", groupId);
+            var data = await groupService.LoadMessageByGroupId(groupId);
+            listMsg.Items.Clear();
+            foreach (var message in data)
+            {
+                listMsg.Items.Add(" ");
+                listMsg.Items.Add($"{message.TimeStamp}");
+                listMsg.Items.Add($"{message.Sender}: {message.Content}");
+            }
         }
 
         private void linkAdd_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

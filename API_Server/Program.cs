@@ -28,7 +28,7 @@ builder.Services.AddSingleton<GroupService>();
 
 builder.Services.AddSingleton<SingleChatService>();
 
-builder.Services.AddSingleton<GroupChatService>();
+builder.Services.AddSingleton<GroupChatMessageService>();
 
 // Add services to the container.
 
