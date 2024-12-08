@@ -74,6 +74,7 @@
             txtMessage.Name = "txtMessage";
             txtMessage.Size = new Size(565, 33);
             txtMessage.TabIndex = 0;
+            txtMessage.TextChanged += txtMessage_TextChanged;
             // 
             // panel2
             // 

@@ -110,21 +110,39 @@ namespace NetStudy.Services
             }
         }
 
-        //public async Task<GroupMessage> SendMessage(string groupId, StringContent content)
-        //{
-        //    try
-        //    {
-        //        var response = await _httpClient.PostAsync($"api/group-chat-message/send", content);
-        //        var res = await response.Content.ReadAsStringAsync();
-        //        JObject message = JObject.Parse(res);
+        public async Task SendMessage(string groupId, string user, string message, DateTime timestamp)
+        {
+            try
+            {
                 
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return null;
-        //    }
-        //}
+                var newMsg = new GroupMessage
+                {
+                    Sender = user,
+                    GroupId = groupId,
+                    Content = message,
+                    TimeStamp = DateTime.UtcNow
+                };
+                var json = JsonConvert.SerializeObject(newMsg);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync($"api/group-chat-message/send", content);
+                var res = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    return;
+                }
+                else
+                {
+                    var error = JObject.Parse(res)["message"]?.ToString();   
+                    MessageBox.Show(error, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+        }
 
         public async Task<List<GroupMessage>> LoadMessageByGroupId(string groupId)
         {

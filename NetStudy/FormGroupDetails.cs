@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.VisualBasic.ApplicationServices;
+using NetStudy.Models;
 using NetStudy.Services;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -29,8 +32,10 @@ namespace NetStudy
         public FormGroupDetails(string token, JObject info, JObject groupInfo)
         {
             InitializeComponent();
+            btnSend.Enabled = false;
             accessToken = token;
             UserInfo = info;
+            GroupInfo = groupInfo;
             groupId = groupInfo["id"].ToString();
             connection = new HubConnectionBuilder()
                 .WithUrl("https://localhost:7070/groupChatHub", opts =>
@@ -40,20 +45,25 @@ namespace NetStudy
                 .Build();
             connection.On<string, string>("ReceiveMessage", (user, message) =>
             {
-                Invoke(() =>
+                Invoke(async () =>
                 {
+                    DateTime timeStamp = DateTime.Now;
+
+                    listMsg.Items.Add(" ");
+                    listMsg.Items.Add(timeStamp.ToString("dd/MM/yyyy hh:mm tt"));
                     listMsg.Items.Add($"{user}: {message}");
                 });
             });
-            GroupInfo = groupInfo;
+
             lblTitle.Text = groupInfo["name"].ToString();
             groupService = new GroupService(accessToken);
         }
 
         private async void btnSend_Click(object sender, EventArgs e)
         {
-
+            DateTime timeStamp = DateTime.UtcNow;
             await connection.InvokeAsync("SendMessageGroup", groupId, UserInfo["name"].ToString(), txtMessage.Text);
+            await groupService.SendMessage(groupId, UserInfo["name"].ToString(), txtMessage.Text, timeStamp);
             txtMessage.Clear();
         }
 
@@ -66,8 +76,11 @@ namespace NetStudy
             listMsg.Items.Clear();
             foreach (var message in data)
             {
+                var time = message.TimeStamp;
+                TimeZoneInfo gmtPlus7 = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                DateTime gmt7Time = TimeZoneInfo.ConvertTimeFromUtc(time, gmtPlus7);
                 listMsg.Items.Add(" ");
-                listMsg.Items.Add($"{message.TimeStamp}");
+                listMsg.Items.Add($"{gmt7Time.ToString("dd/MM/yyyy hh:mm tt")}");
                 listMsg.Items.Add($"{message.Sender}: {message.Content}");
             }
         }
@@ -76,6 +89,11 @@ namespace NetStudy
         {
             FormAddUser formAdd = new FormAddUser(accessToken, GroupInfo["name"].ToString(), GroupInfo["id"].ToString());
             formAdd.ShowDialog();
+        }
+
+        private void txtMessage_TextChanged(object sender, EventArgs e)
+        {
+            btnSend.Enabled = !string.IsNullOrWhiteSpace(txtMessage.Text);
         }
     }
 }

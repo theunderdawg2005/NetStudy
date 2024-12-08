@@ -31,6 +31,7 @@ namespace API_Server.Controllers
             }
             try
             {
+                
                 var message = new GroupChatMessage
                 {
                     Sender = msgModel.Sender,
@@ -72,6 +73,7 @@ namespace API_Server.Controllers
             try
             {
                 var msgs = await groupChatMsgService.GetMessageByGroupId(groupId);
+                
                 var res = msgs.Select(m => new
                 {
                     id = m.Id.ToString(),

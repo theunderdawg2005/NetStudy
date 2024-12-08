@@ -80,11 +80,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonDateConverter());
-    });
+
 
 builder.Services.AddAuthorization();
 
