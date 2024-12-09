@@ -7,7 +7,6 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using NetStudyMessage = NetStudy.Models.Message;
 using NetStudy.Models;
 
 namespace NetStudy.Forms
@@ -52,37 +51,25 @@ namespace NetStudy.Forms
                 }));
             });
 
-            _hubConnection.On<string, string>("ReceiveStatusUpdate", (username, status) =>
-            {
-                Invoke((Action)(() =>
-                {
-                    UpdateFriendStatus(username, status);
-                }));
-            });
-
             await _hubConnection.StartAsync();
-        }
-
-        private void UpdateFriendStatus(string username, string status)
-        {
-            foreach (Control control in groupBox_doanchat.Controls)
-            {
-                if (control is Label label && label.Text == username)
-                {
-                    label.ForeColor = status == "Đang hoạt động" ? Color.FromArgb(0, 255, 0) : Color.FromArgb(190, 190, 190);
-                }
-            }
         }
 
         private async void button_send_Click(object sender, EventArgs e)
         {
             var message = textBox_msg.Text;
-            await _hubConnection.InvokeAsync("SendMessage", _currentUser, message);
+            var timestamp = DateTime.Now.ToString("HH:mm:ss - dd/MM/yyyy");
+            textBox_showmsg.AppendText($"{timestamp}: {_currentUser}: {message}{Environment.NewLine}");
+            await _hubConnection.InvokeAsync("SendMessage", _currentUser, _currentChatUser, message);
             textBox_msg.Clear();
         }
 
         private async Task LoadChatHistory()
         {
+            if (string.IsNullOrEmpty(_currentChatUser))
+            {
+                return;
+            }
+
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
@@ -94,7 +81,15 @@ namespace NetStudy.Forms
                     return;
                 }
                 var responseBody = await response.Content.ReadAsStringAsync();
-                var messages = JsonSerializer.Deserialize<List<NetStudyMessage>>(responseBody);
+                Console.WriteLine(responseBody); // Ghi lại phản hồi để kiểm tra
+
+                var messages = JsonSerializer.Deserialize<List<SingleChat>>(responseBody);
+
+                if (messages == null || messages.Count == 0)
+                {
+                    MessageBox.Show("No messages found or response is invalid.");
+                    return;
+                }
 
                 foreach (var message in messages)
                 {
@@ -104,39 +99,53 @@ namespace NetStudy.Forms
             }
         }
 
-        private void LoadFriends()
+        private async void LoadFriends()
         {
-            // Danh sách bạn bè để test (Cần lấy từ Database ra)
-            var friends = new List<(string Username, string Status)>
+            using (HttpClient client = new HttpClient())
             {
-                ("Friend1", "Đang hoạt động"),
-                ("Friend2", "Ẩn hoạt động")
-            };
-
-            int yOffset = 20;
-            int labelHeight = 25;
-
-            foreach (var friend in friends)
-            {
-                var label = new Label
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
+                var url = $"https://localhost:7070/api/user/get-friend-list-for-chat/{_currentUser}";
+                var response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
                 {
-                    Text = friend.Username,
-                    ForeColor = friend.Status == "Đang hoạt động" ? Color.FromArgb(0, 255, 0) : Color.FromArgb(190, 190, 190),
-                    AutoSize = true,
-                    Location = new Point(10, yOffset)
-                };
-                label.Click += (s, e) => LoadChatWithUser(friend.Username, friend.Status);
-                groupBox_doanchat.Controls.Add(label);
+                    MessageBox.Show($"Error: {response.StatusCode} - {response.ReasonPhrase}");
+                    return;
+                }
+                var responseBody = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(responseBody); // Ghi lại phản hồi để kiểm tra
 
-                yOffset += labelHeight;
+                var friends = JsonSerializer.Deserialize<List<string>>(responseBody);
+
+                if (friends == null || friends.Count == 0)
+                {
+                    MessageBox.Show("No friends found or response is invalid.");
+                    return;
+                }
+
+                int yOffset = 20;
+                int labelHeight = 25;
+
+                foreach (var friend in friends)
+                {
+                    var label = new Label
+                    {
+                        Text = friend,
+                        ForeColor = Color.FromArgb(0, 255, 0),
+                        AutoSize = true,
+                        Location = new Point(10, yOffset)
+                    };
+                    label.Click += (s, e) => LoadChatWithUser(_currentUser, friend);
+                    groupBox_doanchat.Controls.Add(label);
+
+                    yOffset += labelHeight;
+                }
             }
         }
 
-        private async void LoadChatWithUser(string username, string status)
+        private async void LoadChatWithUser(string username, string friend)
         {
-            _currentChatUser = username;
-            textBox_otherusrname.Text = username; // Tên của người đang chat
-            textBox_otherstatus.Text = status;    // Trạng thái hoạt động của người đang chat
+            _currentChatUser = friend;
+            textBox_otherusrname.Text = friend;
             textBox_showmsg.Clear();
             await LoadChatHistory();
         }

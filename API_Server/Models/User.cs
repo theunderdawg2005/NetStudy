@@ -21,6 +21,5 @@ namespace API_Server.Models
         public bool IsEmailVerified { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-     
     }
 }

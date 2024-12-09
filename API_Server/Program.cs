@@ -30,6 +30,8 @@ builder.Services.AddSingleton<SingleChatService>();
 
 builder.Services.AddSingleton<GroupChatMessageService>();
 
+builder.Services.AddSingleton<QuestionService>();
+
 // Add services to the container.
 
 builder.Services.AddSignalR()

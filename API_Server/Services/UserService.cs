@@ -1,4 +1,5 @@
 ﻿using API_Server.Models;
+using API_Server.DTOs;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -7,13 +8,19 @@ namespace API_Server.Services
     public class UserService
     {
         private readonly IMongoCollection<User> users;
-        private readonly IMongoCollection<Group> groups; 
-       
-      
-        public UserService(MongoDbService db) {
+        private readonly IMongoCollection<Group> groups;
+
+        private EmailService emailService;
+        private readonly Dictionary<string, User> _users;
+        private string? _currentOtp;
+        private string? _currentEmail;
+
+
+        public UserService(MongoDbService db, EmailService email) {
             users = db.Users;
             groups = db.ChatGroup;
-            
+            emailService = email;
+            _users = new Dictionary<string, User>();
         }
          
         public async Task<List<User>> GetAllUserAsync() => await users.Find(_ =>  true).ToListAsync();
@@ -147,7 +154,7 @@ namespace API_Server.Services
         public async Task<List<string>> GetListFriendIdByUsername(string username)
         {
             var user = await users.Find(u => u.Username == username).FirstOrDefaultAsync();
-            return user.Friends;
+            return user?.Friends ?? new List<string>();
         }
         public async Task<List<User>> SuggestFriendAsync(string username)
         {
@@ -236,6 +243,126 @@ namespace API_Server.Services
             {
                 throw new Exception($"Lỗi khi tải nhóm: {ex.Message}");
             }
+        }
+
+        public async Task<(bool Success, string Message)> RegisterAsync(Register registerModel)
+        {
+            if (registerModel.Password != registerModel.ConfirmPassword)
+            {
+                return (false, "Mật khẩu xác nhận không hợp lệ.");
+            }
+
+            var filter = Builders<User>.Filter.Or(
+                Builders<User>.Filter.Eq(u => u.Username, registerModel.Username),
+                Builders<User>.Filter.Eq(u => u.Email, registerModel.Email)
+            );
+
+            var existingUser = await users.Find(filter).FirstOrDefaultAsync();
+            if (existingUser != null)
+            {
+                return (false, "Tên người dùng hoặc email đã tồn tại.");
+            }
+
+            var otp = new Random().Next(100000, 999999).ToString();
+            _currentOtp = otp;
+
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerModel.Password);
+
+            var user = new User
+            {
+                Name = registerModel.Name,
+                Username = registerModel.Username,
+                Password = registerModel.Password,
+                PasswordHash = hashedPassword,
+                DateOfBirth = registerModel.DateOfBirth.Date,
+                Email = registerModel.Email,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _users[registerModel.Email] = user;
+
+            _currentEmail = user.Email;
+            emailService.SendOtpEmail(user.Email, otp);
+
+            return (true, "Đăng kí thành công. Kiếm tra mã OTP trong email của bạn.");
+        }
+        public async Task<(bool Success, string Message, UserDTO? UserDto)> VerifyOtpAsync(Otp otpModel)
+        {
+            if (string.IsNullOrEmpty(_currentEmail))
+            {
+                return (false, "Email này chưa được dùng để đăng kí.", null);
+            }
+
+            if (!_users.ContainsKey(_currentEmail))
+            {
+                return (false, "Không tìm thấy thông tin người dùng.", null);
+            }
+            var tempUser = _users[_currentEmail];
+
+            if (_currentOtp != otpModel.OTP)
+            {
+                return (false, "OTP không hợp lệ", null);
+            }
+
+            var filter = Builders<User>.Filter.Eq(u => u.Email, tempUser.Email);
+            var existingUser = await users.Find(filter).FirstOrDefaultAsync();
+
+            if (existingUser != null)
+            {
+                return (false, "Người dùng đã được đăng kí.", null);
+            }
+
+            var newUser = new User
+            {
+                Name = tempUser.Name,
+                Username = tempUser.Username,
+                PasswordHash = tempUser.PasswordHash,
+                DateOfBirth = tempUser.DateOfBirth,
+                Email = tempUser.Email,
+                CreatedAt = DateTime.UtcNow,
+                IsEmailVerified = true
+            };
+
+            await users.InsertOneAsync(newUser);
+
+            var userDto = new UserDTO
+            {
+                Name = newUser.Name,
+                Username = newUser.Username,
+                Email = newUser.Email,
+                DateOfBirth = newUser.DateOfBirth,
+                Status = newUser.Status,
+                IsEmailVerified = newUser.IsEmailVerified,
+                CreatedAt = newUser.CreatedAt
+            };
+
+            _users.Remove(_currentEmail);
+            _currentOtp = string.Empty;
+            _currentEmail = string.Empty;
+
+            return (true, "Đăng kí thành công!", userDto);
+        }
+        public async Task<(bool Success, string Message, User? User)> LoginAsync(Login loginModel, HttpResponse response)
+        {
+            if (loginModel == null || string.IsNullOrEmpty(loginModel.Username) || string.IsNullOrEmpty(loginModel.Password))
+            {
+                return (false, "Yêu cầu đăng nhập thất bại.", null);
+            }
+
+            var filter = Builders<User>.Filter.Eq(u => u.Username, loginModel.Username);
+            var user = await users.Find(filter).FirstOrDefaultAsync();
+
+            if (user == null || string.IsNullOrEmpty(user.PasswordHash))
+            {
+                return (false, "Tên người dùng không hợp lệ.", null);
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(loginModel.Password, user.PasswordHash))
+            {
+                return (false, "Mật khẩu không hợp lệ.", null);
+            }
+
+            return (true, "Đăng nhập thành công", user);
         }
     }
 }
