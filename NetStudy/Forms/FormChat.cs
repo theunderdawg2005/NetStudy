@@ -7,7 +7,6 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using NetStudyMessage = NetStudy.Models.Message;
 using NetStudy.Models;
 
 namespace NetStudy.Forms
@@ -82,9 +81,9 @@ namespace NetStudy.Forms
                     return;
                 }
                 var responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(responseBody);
+                Console.WriteLine(responseBody); // Ghi lại phản hồi để kiểm tra
 
-                var messages = JsonSerializer.Deserialize<List<NetStudyMessage>>(responseBody);
+                var messages = JsonSerializer.Deserialize<List<SingleChat>>(responseBody);
 
                 if (messages == null || messages.Count == 0)
                 {

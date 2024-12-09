@@ -20,22 +20,15 @@ namespace API_Server.Controllers
         // API to send a message
         [Authorize]
         [HttpPost("send")]
-        public async Task<IActionResult> SendMessage([FromBody] ChatMessage chatMessage)
+        public async Task<IActionResult> SendMessage([FromBody] SingleChat chatMessage)
         {
             if (chatMessage == null || string.IsNullOrEmpty(chatMessage.Sender) || string.IsNullOrEmpty(chatMessage.Receiver) || string.IsNullOrEmpty(chatMessage.Content))
             {
                 return BadRequest("Invalid message information.");
             }
 
-            var message = new SingleChat
-            {
-                Sender = chatMessage.Sender,
-                Receiver = chatMessage.Receiver,
-                Content = chatMessage.Content,
-                Timestamp = DateTime.UtcNow
-            };
-
-            await _chatService.SendMessageAsync(message);
+            chatMessage.Timestamp = DateTime.UtcNow;
+            await _chatService.SendMessageAsync(chatMessage);
 
             return Ok("Message sent successfully.");
         }

@@ -21,7 +21,7 @@ namespace API_Server.Hubs
                 Sender = sender,
                 Receiver = receiver,
                 Content = message,
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.Now
             };
 
             await _chatService.SendMessageAsync(chatMessage);
