@@ -1,4 +1,5 @@
 ﻿using API_Server.Models;
+using API_Server.DTOs;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -273,7 +274,7 @@ namespace API_Server.Services
 
             return (true, "Đăng kí thành công. Kiếm tra mã OTP trong email của bạn.");
         }
-        public async Task<(bool Success, string Message, User? User)> VerifyOtpAsync(Otp otpModel)
+        public async Task<(bool Success, string Message, UserDTO? UserDto)> VerifyOtpAsync(Otp otpModel)
         {
             if (string.IsNullOrEmpty(_currentEmail))
             {
@@ -312,11 +313,22 @@ namespace API_Server.Services
 
             await users.InsertOneAsync(newUser);
 
+            var userDto = new UserDTO
+            {
+                Name = newUser.Name,
+                Username = newUser.Username,
+                Email = newUser.Email,
+                DateOfBirth = newUser.DateOfBirth,
+                Status = newUser.Status,
+                IsEmailVerified = newUser.IsEmailVerified,
+                CreatedAt = newUser.CreatedAt
+            };
+
             _users.Remove(_currentEmail);
             _currentOtp = string.Empty;
             _currentEmail = string.Empty;
 
-            return (true, "Đăng kí thành công!", newUser);
+            return (true, "Đăng kí thành công!", userDto);
         }
         public async Task<(bool Success, string Message, User? User)> LoginAsync(Login loginModel, HttpResponse response)
         {
