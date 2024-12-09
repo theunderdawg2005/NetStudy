@@ -159,7 +159,7 @@ namespace API_Server.Services
         public async Task<List<string>> GetListFriendIdByUsername(string username)
         {
             var user = await users.Find(u => u.Username == username).FirstOrDefaultAsync();
-            return user.Friends;
+            return user?.Friends ?? new List<string>();
         }
         public async Task<List<User>> SuggestFriendAsync(string username)
         {

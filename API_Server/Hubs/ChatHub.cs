@@ -14,26 +14,23 @@ namespace API_Server.Hubs
             _chatService = chatService;
         }
 
-        public async Task SendMessage(string user, string message)
+        public async Task SendMessage(string sender, string receiver, string message)
         {
             var chatMessage = new SingleChat
             {
-                Sender = user,
-                Receiver = "ReceiverUser",
+                Sender = sender,
+                Receiver = receiver,
                 Content = message,
                 Timestamp = DateTime.UtcNow
             };
 
             await _chatService.SendMessageAsync(chatMessage);
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            await Clients.User(receiver).SendAsync("ReceiveMessage", sender, message);
         }
 
         public async Task UpdateStatus(string username, string status)
         {
             await Clients.All.SendAsync("ReceiveStatusUpdate", username, status);
         }
-
-        
-         
     }
 }
