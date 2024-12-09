@@ -109,7 +109,7 @@ namespace NetStudy
             {
                 name = fullName,
                 username = username,
-                dateOfBirth = dateOfBirth.ToString("dd/MM/yyyy"),
+                dateOfBirth = dateOfBirth.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
                 email = email,
                 password = password,
                 confirmPassword = confirmedPass
