@@ -29,7 +29,8 @@ namespace NetStudy
             InitializeComponent();
             UserInfo = info;
             accessToken = token;
-            userService = new UserService();
+            userService = new UserService(accessToken);
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
         }
         private async void AcceptFriends_Load(object sender, EventArgs e)
         {
@@ -115,7 +116,12 @@ namespace NetStudy
 
             try
             {
-                var (users, total) = await userService.GetReqList(username, accessToken);
+                var (list, total) = await userService.GetReqList(username, accessToken);
+                List<User> users = new List<User>();
+                foreach (var u in list) {
+                    var user = await userService.GetUserByUsername(u);
+                    users.Add(user);
+                }
                 CreatePanel(users, username);
             }
             catch (Exception ex)

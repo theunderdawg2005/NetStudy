@@ -104,6 +104,7 @@
             Controls.Add(txtUsername);
             Name = "FormAddUser";
             Text = "FormAddUser";
+            Load += FormAddUser_Load;
             ResumeLayout(false);
             PerformLayout();
         }

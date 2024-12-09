@@ -30,7 +30,7 @@ namespace NetStudy.Forms
         private int total;
         private int totalPages = 1;
         private int currPage = 1;
-        private const int pageSize = 2;
+        private const int pageSize = 5;
         private UserService userService;
 
         public FormMatch(JObject info, string token)
@@ -39,12 +39,9 @@ namespace NetStudy.Forms
             UserInfo = info;
             accessToken = token;
             label1.Text = info["name"].ToString();
-            userService = new UserService();
-            if (!string.IsNullOrEmpty(accessToken))
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-            }
-
+            userService = new UserService(accessToken);
+            
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
         }
         private async void FormMatch_Load(object sender, EventArgs e)
         {
@@ -84,7 +81,7 @@ namespace NetStudy.Forms
                 return (new List<User>(), 0);
             }
         }
-        public async Task<(List<User>, int)> GetFriendSearching(string searchString, int page = 1 ,int pageSize=2)
+        public async Task<(List<User>, int)> GetFriendSearching(string searchString, int page = 1 ,int pageSize=5)
         {
             var username = UserInfo["username"].ToString();
             try
@@ -119,14 +116,15 @@ namespace NetStudy.Forms
             }
         }
 
-        private void CreatePanel(List<User> users, string username)
+        private async void CreatePanel(List<User> users, string username)
         {
             flowLayoutPanel1.Controls.Clear();
+            
 
             foreach (var user in users)
             {
 
-                //var (list, total) = await userService.GetReqList(user.Username, accessToken);
+                var (list, total) = await userService.GetReqList(user.Username, accessToken);
                 
                 Panel userPanel = new Panel
                 {
@@ -181,12 +179,19 @@ namespace NetStudy.Forms
                     btnFriend.BackColor = Color.FromArgb(26, 25, 62);
                     btnFriend.ForeColor = Color.Gainsboro;
                 }
+                else if (list.Contains(username))
+                {
+                    btnFriend.Text = "Đã gửi";
+                    btnFriend.Enabled = false;
+                    btnFriend.BackColor = Color.LightYellow;
+                }
                 else
                 {
                     btnFriend.Text = "Kết bạn";
                     btnFriend.Click += async (sender, e) =>
                     {
                         await userService.SendFriendRequest(username, user.Username, btnFriend, accessToken);
+
                     };
                 }
                 userPanel.Controls.Add(lblName);
@@ -251,7 +256,7 @@ namespace NetStudy.Forms
 
                 this.totalPages = totalPages;
 
-                CreatePanel(users, username);
+                 CreatePanel(users, username);
                 //MessageBox.Show($"totalPages: {totalPages}");
 
                 UpdatePage(totalPages);

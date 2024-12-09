@@ -1,4 +1,5 @@
-﻿using NetStudy.Services;
+﻿using Microsoft.AspNetCore.SignalR.Client;
+using NetStudy.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,12 +14,15 @@ namespace NetStudy
 {
     public partial class FormAddUser : Form
     {
-        
+
         private readonly GroupService groupService;
         private string accessToken;
         private string groupName;
         private string groupId;
-        public FormAddUser(string token, string name, string id)
+        private HubConnection connection;
+        private string name;
+        private DateTime timeStamp = DateTime.Now;
+        public FormAddUser(string token, string name, string id, string username)
         {
             InitializeComponent();
             accessToken = token;
@@ -26,6 +30,15 @@ namespace NetStudy
             groupId = id;
             lblName.Text = groupName;
             groupService = new GroupService(accessToken);
+            this.name = username;
+
+            connection = new HubConnectionBuilder()
+                .WithUrl("https://localhost:7070/groupChatHub", opts =>
+                {
+                    opts.AccessTokenProvider = async () => await Task.FromResult(accessToken);
+                })
+                .Build();
+
         }
 
         private async void btnAdd_Click(object sender, EventArgs e)
@@ -38,7 +51,14 @@ namespace NetStudy
                 return;
             }
 
+            await connection.InvokeAsync("SendMessageGroup", groupId, name, $"đã thêm {username}");
             await groupService.AddUserToGroup(groupId, username);
+            await groupService.SendMessage(groupId, name, $"đã thêm {username}", timeStamp);
+        }
+
+        private async void FormAddUser_Load(object sender, EventArgs e)
+        {
+            await connection.StartAsync();
         }
     }
 }

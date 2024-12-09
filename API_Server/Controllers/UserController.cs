@@ -33,6 +33,7 @@ namespace API_Server.Controllers
         private static string? currentEmail;
         private static string? curentOtp;
 
+        //POST METHOD
         //API cho Registration
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] Register registerModel)
@@ -241,36 +242,6 @@ namespace API_Server.Controllers
                 message = "Đăng xuất thành công."
             });
         }
-        //Lấy data của người dùng
-        [HttpGet("{username}")]
-        [Authorize]
-        public async Task<IActionResult> GetUser(string username)
-        {
-            // Lấy access token từ cookies
-            if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
-            {
-                return BadRequest("Yêu cầu không hợp lệ.");
-            }
-
-            // Xác minh token và lấy username
-            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
-
-            if (claimsPrincipal == null)
-            {
-                return Unauthorized("Access token không hợp lệ.");
-            }
-
-            //Tìm thông tin người dùng
-            var user = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
-
-            if (user == null)
-            {
-                return NotFound("Không tìm thấy người dùng.");
-            }
-
-            return Ok(user);
-        }
-        
 
         //PATCH METHOD
         //Chỉnh sửa thông tin người dùng (chưa hoàn thiện)
@@ -355,9 +326,44 @@ namespace API_Server.Controllers
         }
 
         //GET METHOD
+        //Lấy data của người dùng
+        [HttpGet("{username}")]
+        [Authorize]
+        public async Task<IActionResult> GetUser(string username)
+        {
+            var authHeader = Request.Headers["Authorization"].ToString();
+            if(!_jwtService.IsValidate(authHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }    
+            //Tìm thông tin người dùng
+            var user = await _userService.GetUserByUserName(username);
+
+            if (user == null)
+            {
+                return NotFound(new
+                {
+                    message = "Không tìm thấy người dùng."
+                });
+            }
+            var userResponse = new
+            {
+                name = user.Name,
+                username = user.Username,
+                email = user.Email
+            };
+            return Ok(new
+            {
+                message = "Lấy người dùng thành công!",
+                userFound = userResponse
+            });
+        }
         [Authorize]
         [HttpGet("{username}/search")]
-        public async Task<ActionResult<List<User>>> SearchUsers(string username,[FromQuery] string query, [FromQuery] int page=1, [FromQuery] int pageSize = 2)
+        public async Task<ActionResult<List<User>>> SearchUsers(string username,[FromQuery] string query, [FromQuery] int page=1, [FromQuery] int pageSize = 5)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
             if (!_jwtService.IsValidate(authorizationHeader))
@@ -430,7 +436,7 @@ namespace API_Server.Controllers
                 return NotFound(new
                 {
                     total = 0,
-                    message = "No friends was found!"
+                    message = "Không tìm thấy bạn bè!"
                 });
             }
 
@@ -474,9 +480,10 @@ namespace API_Server.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new
+                return StatusCode(500, new
                 {
-                    message = ex.Message
+                    message = "Internal Server Error",
+                    details = ex.Message
                 });
             }
         }
@@ -496,24 +503,30 @@ namespace API_Server.Controllers
             try
             {
                 var reqList = await _userService.GetRequestList(username);
-                var res = reqList.Select(u => new
+                
+                if (reqList.Count == 0)
                 {
-                    id = u.Id.ToString(),
-                    name = u.Name,
-                    username = u.Username,
-                    email = u.Email
-                });
-                return Ok(new
+                    return NotFound(new
+                    {
+                        message = "Không có lời mời kết bạn!"
+                    });
+                }
+                else
                 {
-                    total = reqList.Count,
-                    data = res
-                });
+                    return Ok(new
+                    {
+                        message = "Lấy danh sách lời mời thành công!",
+                        total = reqList.Count,
+                        data = reqList
+                    });
+                }
             }
             catch (Exception ex)
             {
-                return BadRequest(new
+                return StatusCode(500, new
                 {
-                    message = ex.Message
+                    message = "Internal Server Error",
+                    details = ex.Message
                 });
             }
         }
@@ -548,9 +561,10 @@ namespace API_Server.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new
+                return StatusCode(500, new
                 {
-                    message = ex.Message
+                    message = "Internal Server Error",
+                    details = ex.Message
                 });
             }
         }
@@ -589,12 +603,62 @@ namespace API_Server.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new
+                return StatusCode(500, new
                 {
-                    message = ex.Message
+                    message = "Internal Server Error",
+                    details = ex.Message
                 });
             }
 
+        }
+
+        [Authorize]
+        [HttpDelete("delete-sending-request/{reqUsername}")]
+        public async Task<IActionResult> RemoveSendingRequest(string reqUsername)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            // Xác minh token và lấy username
+            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            if (claimsPrincipal == null)
+            {
+                return Unauthorized("Access token không hợp lệ");
+            }
+
+            var usernameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
+            if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
+            {
+                return Unauthorized("Access token không hợp lệ");
+            }
+            var username = usernameClaim.Value;
+
+            try
+            {
+                var check = await _userService.DeleteSendingRequest(username, reqUsername);
+                if (!check)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Lỗi không thể xóa lời mời!"
+                    });
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        message = "Đã xóa lời mời!"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Internal Server Error",
+                    details = ex.Message
+                });
+            }
         }
 
         //Xóa người dùng

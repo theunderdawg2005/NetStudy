@@ -1,4 +1,5 @@
 ﻿using NetStudy.Services;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,8 +24,23 @@ namespace NetStudy
         public FormRegister()
         {
             InitializeComponent();
-            userService = new UserService();
+            
             LoadForm();
+        }
+        public async Task<string> Register(dynamic registerModel)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(registerModel);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await httpClient.PostAsync("api/user/register", content);
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
         }
         public void LoadForm()
         {
@@ -114,7 +130,7 @@ namespace NetStudy
                 password = password,
                 confirmPassword = confirmedPass
             };
-            var response = await userService.Register(register);
+            var response = await Register(register);
             if (response.Contains("thành công", StringComparison.OrdinalIgnoreCase))
             {
                 this.Hide();

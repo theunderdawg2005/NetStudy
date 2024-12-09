@@ -84,10 +84,9 @@ namespace NetStudy
                 listMsg.Items.Add($"{message.Sender}: {message.Content}");
             }
         }
-
         private void linkAdd_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            FormAddUser formAdd = new FormAddUser(accessToken, GroupInfo["name"].ToString(), GroupInfo["id"].ToString());
+            FormAddUser formAdd = new FormAddUser(accessToken, GroupInfo["name"].ToString(), GroupInfo["id"].ToString(), UserInfo["name"].ToString());
             formAdd.ShowDialog();
         }
 

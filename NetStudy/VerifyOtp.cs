@@ -1,10 +1,12 @@
 ﻿using NetStudy.Services;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,11 +16,34 @@ namespace NetStudy
 {
     public partial class VerifyOtp : Form
     {
-        private readonly UserService userService;
+        
+        public static readonly HttpClient httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(@"https://localhost:7070/"),
+            Timeout = TimeSpan.FromMinutes(5)
+        };
         public VerifyOtp()
         {
             InitializeComponent();
-            userService = new UserService();
+            
+        }
+
+
+        public async Task<string> VeriOtp(dynamic otpModel)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(otpModel);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var res = await httpClient.PostAsync("api/user/Verify-Otp", content);
+                return await res.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -38,7 +63,7 @@ namespace NetStudy
             {
                 otp = txtOTP.Text.Trim(),
             };
-            var response = await userService.VerifyOtp(OTP);
+            var response = await VeriOtp(OTP);
             if (response.Contains("thành công", StringComparison.OrdinalIgnoreCase))
             {
                 this.Hide();

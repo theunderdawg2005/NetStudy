@@ -19,8 +19,9 @@ namespace NetStudy.Services
             Timeout = TimeSpan.FromMinutes(5)
         };
         private string accessToken;
-        public UserService() {
-           
+        public UserService(string token) {
+            accessToken = token;
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
         }    
 
         public async Task<string> Login(dynamic loginModel)
@@ -32,49 +33,10 @@ namespace NetStudy.Services
             return await response.Content.ReadAsStringAsync();
         }
 
-        public async Task<string> Register(dynamic registerModel)
-        {
-            try
-            {
-                var json = JsonConvert.SerializeObject(registerModel);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await httpClient.PostAsync("api/user/register", content);
-                return await response.Content.ReadAsStringAsync();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-        }
-        public async Task<string> VerifyOtp(dynamic otpModel)
-        {
-            try
-            {
-                var json = JsonConvert.SerializeObject(otpModel);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var res = await httpClient.PostAsync("api/user/Verify-Otp", content);
-                return await res.Content.ReadAsStringAsync();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-            
-        }
+        
 
         public async Task<bool> SendFriendRequest(string username,string targetUsername,Button btnFriend, string token)
         {
-            if(!string.IsNullOrEmpty(token))
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            }    
-            else
-            {
-                MessageBox.Show("Yêu cầu không hợp lệ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
             
             try
             {
@@ -101,52 +63,67 @@ namespace NetStudy.Services
             }
         }
 
-        public async Task<(List<User>,int)> GetReqList(string username, string token)
+        public async Task<User> GetUserByUsername(string username)
         {
-            if (!string.IsNullOrEmpty(token))
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            }
-            else
-            {
-                MessageBox.Show("Yêu cầu không hợp lệ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return (new List<User>(), 0);
-            }
             try
             {
-                var response = await httpClient.GetAsync($"api/user/get-request-list/{username}");
+                var response = await httpClient.GetAsync($"api/user/{username}");
+                var res = await response.Content.ReadAsStringAsync();
+                JObject userInfo = JObject.Parse(res);
+
                 if (response.IsSuccessStatusCode)
                 {
-                    var res = await response.Content.ReadAsStringAsync();
-                    var info = JObject.Parse(res);
-                    List<User> reqList = info["data"].ToObject<List<User>>();
-                    int total = int.Parse(info["total"].ToString());
-                    return (reqList,total);
+                    var user = userInfo["userFound"].ToObject<User>();
+                    return user;
                 }
                 else
                 {
-                    MessageBox.Show("Không thể tải danh sách bạn bè.", $"Thông báo: {response.StatusCode}", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return (new List<User>(), 0);
+                    var error = userInfo["message"].ToString();
+                    MessageBox.Show(error, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error...123", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return (new List<User>(), 0);
+                MessageBox.Show(ex.Message, "Error...GetUser", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+
+        public async Task<(List<string>,int)> GetReqList(string username, string token)
+        {
+            try
+            {
+                var response = await httpClient.GetAsync($"api/user/get-request-list/{username}");
+                var res = await response.Content.ReadAsStringAsync();
+                var info = JObject.Parse(res);
+                if (response.IsSuccessStatusCode)
+                {
+                    
+                    List<string> reqList = info["data"].ToObject<List<string>>();
+                    int total = int.Parse(info["total"].ToString());
+                    return (reqList,total);
+                }
+                else if(response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return (new List<string>(), 0);
+                }    
+                else
+                {
+                    var error = info["message"].ToString();
+                    MessageBox.Show(error, $"Thông báo: {response.StatusCode}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return (new List<string>(), 0);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...GetReqList", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return (new List<string>(), 0);
             }
         }
 
         public async Task AcceptRequest(string username, string requestUsername, Button btnAcptFriend, string accessToken)
         {
-            if (!string.IsNullOrEmpty(accessToken))
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-            }
-            else
-            {
-                MessageBox.Show("Yêu cầu không hợp lệ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return ;
-            }
             try
             {
                 var response = await httpClient.PostAsync($"api/user/{username}/accept-request/{requestUsername}", null);
@@ -172,18 +149,10 @@ namespace NetStudy.Services
             }
         }
 
+        
+
         public async Task RemoveRequest(string username, string reqUsername, Button btn, string accessToken)
         {
-            if (!string.IsNullOrEmpty(accessToken))
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-                MessageBox.Show(accessToken);
-            }
-            else
-            {
-                MessageBox.Show("Yêu cầu không hợp lệ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
             try
             {
                 var res = await httpClient.DeleteAsync($"api/user/{username}/remove-request/{reqUsername}");
@@ -211,7 +180,6 @@ namespace NetStudy.Services
                 MessageBox.Show($"Lỗi khi gửi yêu cầu: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-        }    
-            
+        }       
     }
 }

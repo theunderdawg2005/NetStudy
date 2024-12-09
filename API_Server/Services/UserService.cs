@@ -82,20 +82,15 @@ namespace API_Server.Services
             await users.UpdateOneAsync(u => u.Username == username, update);
             return true;
         }
-        public async Task<List<User>> GetRequestList(string username)
+        public async Task<List<string>> GetRequestList(string username)
         {
             var user = await GetUserByUserName(username);
             if (user == null)
             {
                 throw new Exception("User not found!");
             }
-            List<string> list = user.FriendRequests;
-            List<User> reqList = new List<User>();
-            foreach(var req in list)
-            {
-                User userReq = await GetUserByUserName(req);
-                reqList.Add(userReq);
-            }    
+            List<string> reqList = user.FriendRequests;
+            
             return reqList;
         }
         public async Task<bool> SendRequest(string username, string targetUsername)
@@ -200,6 +195,23 @@ namespace API_Server.Services
                 var reqUser = await GetUserByUserName(reqUsername);
                 if (reqUser == null) { throw new Exception("reqUser not found!"); }
                 user.FriendRequests.Remove(reqUser.Username);
+                await UpdateUser(user);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi xóa yêu cầu: {ex.Message}");
+            }
+        }
+        public async Task<bool> DeleteSendingRequest(string username, string reqUsername)
+        {
+            try
+            {
+                var user = await GetUserByUserName(username);
+                if (user == null) { throw new Exception("User not found!"); }
+                var reqUser = await GetUserByUserName(reqUsername);
+                if (reqUser == null) { throw new Exception("reqUser not found!"); }
+                reqUser.FriendRequests.Remove(username);
                 await UpdateUser(user);
                 return true;
             }
