@@ -108,6 +108,7 @@
             // 
             // FormChat
             // 
+            AcceptButton = button_send;
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;

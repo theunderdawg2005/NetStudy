@@ -21,8 +21,8 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
-        [HttpPost("create-question")]
-        public async Task<IActionResult> CreateQuestion([FromBody] QuestionDTO questionDTO)
+        [HttpPost("{username}/create-question")]
+        public async Task<IActionResult> CreateQuestion([FromRoute] string username, [FromBody] Question question)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
             if (!_jwtService.IsValidate(authorizationHeader))
@@ -33,7 +33,7 @@ namespace API_Server.Controllers
                 });
             }
 
-            if (await _questionService.IsTitleExistsAsync(questionDTO.Title))
+            if (await _questionService.IsTitleExistsAsync(question.Title, question.Owner))
             {
                 return BadRequest(new
                 {
@@ -43,9 +43,8 @@ namespace API_Server.Controllers
 
             try
             {
-
-                var createdQuestion = await _questionService.CreateQuestionAsync(questionDTO);
-
+                var createdQuestion = await _questionService.CreateQuestionAsync(question);
+                
                 return Ok(new
                 {
                     message = "Tạo câu hỏi thành công!",
@@ -59,7 +58,7 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
-        [HttpGet("get-question/{title}")]
+        [HttpGet("{username}/get-question/{title}")]
         public async Task<IActionResult> GetQuestion(string title)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
@@ -95,7 +94,7 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
-        [HttpGet("{title}/correct-answer")]
+        [HttpGet("{username}/get-correct-answer/{title}")]
         public async Task<IActionResult> GetCorrectAnswer(string title)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
@@ -129,5 +128,6 @@ namespace API_Server.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
     }
 }

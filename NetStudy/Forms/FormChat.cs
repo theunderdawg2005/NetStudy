@@ -57,7 +57,8 @@ namespace NetStudy.Forms
         private async void button_send_Click(object sender, EventArgs e)
         {
             var message = textBox_msg.Text;
-            var timestamp = DateTime.Now.ToString("HH:mm:ss - dd/MM/yyyy");
+            var localTime = DateTime.UtcNow.AddHours(7);
+            var timestamp = localTime.ToString("HH:mm:ss - dd/MM/yyyy");
             textBox_showmsg.AppendText($"{timestamp}: {_currentUser}: {message}{Environment.NewLine}");
             await _hubConnection.InvokeAsync("SendMessage", _currentUser, _currentChatUser, message);
             textBox_msg.Clear();
@@ -70,32 +71,19 @@ namespace NetStudy.Forms
                 return;
             }
 
-            using (HttpClient client = new HttpClient())
+            var messages = await _hubConnection.InvokeAsync<List<SingleChat>>("GetChatHistory", _currentUser, _currentChatUser);
+
+            if (messages == null || messages.Count == 0)
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-                var url = $"https://localhost:7070/api/chat/history?user1={_currentUser}&user2={_currentChatUser}";
-                var response = await client.GetAsync(url);
-                if (!response.IsSuccessStatusCode)
-                {
-                    MessageBox.Show($"Error: {response.StatusCode} - {response.ReasonPhrase}");
-                    return;
-                }
-                var responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(responseBody); // Ghi lại phản hồi để kiểm tra
+                MessageBox.Show("No messages found or response is invalid.");
+                return;
+            }
 
-                var messages = JsonSerializer.Deserialize<List<SingleChat>>(responseBody);
-
-                if (messages == null || messages.Count == 0)
-                {
-                    MessageBox.Show("No messages found or response is invalid.");
-                    return;
-                }
-
-                foreach (var message in messages)
-                {
-                    var timestamp = message.Timestamp.ToString("HH:mm:ss - dd/MM/yyyy");
-                    textBox_showmsg.AppendText($"{timestamp}: {message.Sender}: {message.Content}{Environment.NewLine}");
-                }
+            foreach (var message in messages)
+            {
+                var localTime = message.Timestamp.AddHours(7);
+                var timestamp = localTime.ToString("HH:mm:ss - dd/MM/yyyy");
+                textBox_showmsg.AppendText($"{timestamp}: {message.Sender}: {message.Content}{Environment.NewLine}");
             }
         }
 
@@ -112,7 +100,7 @@ namespace NetStudy.Forms
                     return;
                 }
                 var responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(responseBody); // Ghi lại phản hồi để kiểm tra
+                MessageBox.Show(responseBody);
 
                 var friends = JsonSerializer.Deserialize<List<string>>(responseBody);
 

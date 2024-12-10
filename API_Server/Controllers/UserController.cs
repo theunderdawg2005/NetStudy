@@ -253,9 +253,10 @@ namespace API_Server.Controllers
             var user = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
             var filter = Builders<User>.Filter.Eq(u => u.Username, username);
 
-            if (user == null)
-            {
-                return NotFound("Không tìm thấy người dùng.");
+                return NotFound(new
+                {
+                    message = "Không tìm thấy thông tin người dùng"
+                });
             }
 
             patchDoc.ApplyTo(user, ModelState);
@@ -271,6 +272,7 @@ namespace API_Server.Controllers
             return Ok(user);
         }
 
+        
         //POST METHOD
         [Authorize]
         [HttpPost("{username}/add-friend/{targetUsername}")]
