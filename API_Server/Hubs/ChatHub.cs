@@ -1,6 +1,7 @@
 ﻿using API_Server.Models;
 using API_Server.Services;
 using Microsoft.AspNetCore.SignalR;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace API_Server.Hubs
@@ -21,7 +22,7 @@ namespace API_Server.Hubs
                 Sender = sender,
                 Receiver = receiver,
                 Content = message,
-                Timestamp = DateTime.Now
+                Timestamp = DateTime.UtcNow
             };
 
             await _chatService.SendMessageAsync(chatMessage);
@@ -31,6 +32,12 @@ namespace API_Server.Hubs
         public async Task UpdateStatus(string username, string status)
         {
             await Clients.All.SendAsync("ReceiveStatusUpdate", username, status);
+        }
+
+        // New method to get chat history between two users
+        public async Task<List<SingleChat>> GetChatHistory(string user1, string user2)
+        {
+            return await _chatService.GetMessagesAsync(user1, user2);
         }
     }
 }
