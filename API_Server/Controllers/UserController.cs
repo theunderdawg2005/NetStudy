@@ -33,93 +33,205 @@ namespace API_Server.Controllers
         private static string? currentEmail;
         private static string? curentOtp;
 
+        //POST METHOD
+        //API cho Registration
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] Register registerModel)
         {
-            var (success, message) = await _userService.RegisterAsync(registerModel);
-            if (!success)
+            //Kiểm tra 2 mật khẩu được nhập vào
+            if (registerModel.Password != registerModel.ConfirmPassword)
             {
-                return BadRequest(message);
+                return BadRequest("Mật khẩu xác nhận không hợp lệ.");
+            }
+            //Kiểm tra xem tên người dùng hoặc mail đã tồn tại hay chưa
+            var filter = Builders<User>.Filter.Or(
+                Builders<User>.Filter.Eq(u => u.Username, registerModel.Username),
+                Builders<User>.Filter.Eq(u => u.Email, registerModel.Email)
+            );
+            //Luu kết quả tìm trong database 
+            var existingUser = await _context.Users.Find(filter).FirstOrDefaultAsync();
+
+            if (existingUser != null)
+            {
+                return BadRequest("Tên người dùng hoặc email đã tồn tại.");
             }
 
-            return Ok(message);
-        }
+            //Tạo mã otp và gắn cho biến tạm để dùng so sánh trong hàm xác minh otp
+            var otp = new Random().Next(000000, 999999).ToString();
+            curentOtp = otp;
+            //Hash password bằng framework
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerModel.Password);
+            //Tạo user nhận dữ liệu được vào
+            var user = new User
+            {
+                Name = registerModel.Name,
+                Username = registerModel.Username,
+                Password = registerModel.Password,
+                PasswordHash = hashedPassword,
+                DateOfBirth = registerModel.DateOfBirth,
+                Email = registerModel.Email,
+                CreatedAt = DateTime.UtcNow
+            };
 
+            _users[registerModel.Email] = user;
+            //Gửi otp với mail được nhập
+            currentEmail = user.Email;
+            _emailService.SendOtpEmail(user.Email, otp);
+
+            return Ok("Đăng kí thành công. Kiếm tra mã OTP trong email của bạn.");
+        }
+        //API cho Verify Otp
         [HttpPost("Verify-Otp")]
         public async Task<IActionResult> VerifyOtp([FromBody] Otp otpModel)
         {
-            var (success, message, user) = await _userService.VerifyOtpAsync(otpModel);
-
-            if (!success)
+            //Kiểm tra xem email đã được dùng để đăng kí chưa
+            if (string.IsNullOrEmpty(currentEmail))
+                return BadRequest(new
+                {
+                    message = "Email này chưa được dùng để đăng kí."
+                });
+            //Lưu email đã có từ api registration
+            var tempUser = _users[currentEmail];
+            //So sánh OTP
+            if (curentOtp != otpModel.OTP)
             {
-                return BadRequest(new { message });
+                return BadRequest(new
+                {
+                    message = "OTP không hợp lệ"
+                });
             }
+            //Kiểm tra xem email đã đăng kí cho user nào chưa
+            //Có thể xem xét bỏ đoạn này
+            var filter = Builders<User>.Filter.Eq(x => x.Email, tempUser.Email);
+            var existingUser = await _context.Users.Find(filter).FirstOrDefaultAsync();
 
+            if (existingUser != null)
+            {
+                return BadRequest("Người dùng đã được đăng kí.");
+            }
+            //Tạo user để thêm dữ liệu vào database
+            var newUser = new User
+            {
+
+                Name = tempUser.Name,
+                Username = tempUser.Username,
+                PasswordHash = tempUser.PasswordHash,
+                DateOfBirth = tempUser.DateOfBirth,
+                Email = tempUser.Email,
+                CreatedAt = DateTime.UtcNow,
+                IsEmailVerified = true
+            };
+            newUser.IsEmailVerified = true;
+            await _context.Users.InsertOneAsync(newUser);
             return Ok(new
             {
-                message,
-                info = user
+                message = "Đăng kí thành công!",
+                info = newUser
             });
         }
-
+        //API cho Login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] Login loginModel)
         {
-            var (success, message, data) = await _userService.LoginAsync(loginModel, Response);
-            if (!success)
+            if (loginModel == null || string.IsNullOrEmpty(loginModel.Username) || string.IsNullOrEmpty(loginModel.Password))
             {
-                return BadRequest(new { message });
+                return BadRequest(new
+                {
+                    message = "Yêu cầu đăng nhập thất bại."
+                });
             }
 
-            var accessToken = _jwtService.GenerateAccessToken(data);
+            var filter = Builders<User>.Filter.Eq(u => u.Username, loginModel.Username);
+            var user = await users.Find(filter).FirstOrDefaultAsync();
+
+            if (user == null || string.IsNullOrEmpty(user.PasswordHash))
+            {
+                return Unauthorized(new
+                {
+                    message = "Tên người dùng không hợp lệ."
+                });
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(loginModel.Password, user.PasswordHash))
+            {
+                return Unauthorized(new
+                {
+                    message = "Mật khẩu không hợp lệ."
+                });
+            }
+
+            var accessToken = _jwtService.GenerateAccessToken(user);
             var refreshToken = _jwtService.GenerateRefreshToken();
             var jti = _jwtService.GetJtiFromAccessToken(accessToken);
-
+            // Lưu refresh token vào database
             var tokenData = new TokenData
             {
                 RefreshToken = refreshToken,
                 RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7),
-                Username = data.Username,
+                Username = user.Username,
                 Jti = jti
             };
 
             await _context.Tokens.InsertOneAsync(tokenData);
+            //Lưu access token vào cookies
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(7),
+                Secure = true,
+                SameSite = SameSiteMode.Strict
+            };
+            Response.Cookies.Append("accessToken", accessToken, cookieOptions);
+            //Trả về refresh token và access token
 
-            return Ok (new
+            return Ok(new
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                Id = data.Id.ToString(),
-                Name = data.Name,
-                Username = data.Username,
-                Email = data.Email,
+                Id = user.Id.ToString(),
+                Name = user.Name,
+                Username = user.Username,
+                Email = user.Email
             });
         }
-
+        //API cho logout
         [HttpPost("logout")]
         [Authorize]
         public async Task<IActionResult> Logout()
         {
-            var authorizationHeader = Request.Headers["Authorization"].ToString();
-            if (!_jwtService.IsValidate(authorizationHeader))
+            // Lấy access token từ cookies
+            if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
             {
-                return Unauthorized(new
-                {
-                    message = "Yêu cầu không hợp lệ!"
-                });
+                return BadRequest("Yêu cầu không hợp lệ.");
             }
 
-            if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer "))
+            // Xác minh token và lấy username
+            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            if (claimsPrincipal == null)
             {
-                authorizationHeader = authorizationHeader.Substring("Bearer ".Length).Trim();
+                return Unauthorized("Access token không hợp lệ 1.");
             }
 
-            var claimsPrincipal = _jwtService.ValidateToken(authorizationHeader);
+            var usernameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
+            if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
+            {
+                return Unauthorized("Access token không hợp lệ 2");
+            }
+            var username = usernameClaim.Value;
 
-            var usernameClaim = claimsPrincipal?.FindFirst("userName");
+            // Tìm user trong database
+            var user = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                return NotFound("Không tìm thấy người dùng.");
+            }
 
-            var username = usernameClaim?.Value;
-            if (username == null)
+            // Xóa refresh token từ database
+            var filter = Builders<TokenData>.Filter.Eq(t => t.Username, username);
+            await _context.Tokens.DeleteManyAsync(filter);
+
+            // Xóa access token từ cookies
+            if (Request.Cookies.ContainsKey("accessToken"))
             {
                 Response.Cookies.Delete("accessToken");
             }
@@ -141,25 +253,22 @@ namespace API_Server.Controllers
             var user = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
             var filter = Builders<User>.Filter.Eq(u => u.Username, username);
 
-                return NotFound(new
-                {
-                    message = "Không tìm thấy thông tin người dùng"
-                });
-            }
-
-            var user = await users.Find(u => u.Username == username).FirstOrDefaultAsync();
             if (user == null)
             {
-                return NotFound(new
-                {
-                    message = "Không tìm thấy người dùng."
-                });
+                return NotFound("Không tìm thấy người dùng.");
             }
 
-            var filter = Builders<TokenData>.Filter.Eq(t => t.Username, username);
-            await _context.Tokens.DeleteManyAsync(filter);
+            patchDoc.ApplyTo(user, ModelState);
+            ModelState.Remove("password");
 
-            return Ok("Đăng xuất thành công");
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _context.Users.ReplaceOneAsync(filter, user);
+
+            return Ok(user);
         }
 
         //POST METHOD
@@ -371,32 +480,6 @@ namespace API_Server.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new
-                {
-                    message = ex.Message
-                });
-            }
-        }
-
-        [Authorize]
-        [HttpGet("get-friend-list-for-chat/{username}")]
-        public async Task<ActionResult<List<string>>> GetFriendListForChat(string username)
-        {
-            var authorizationHeader = Request.Headers["Authorization"].ToString();
-            if (!_jwtService.IsValidate(authorizationHeader))
-            {
-                return Unauthorized(new
-                {
-                    message = "Yêu cầu không hợp lệ!"
-                });
-            }
-            try
-            {
-                var friends = await _userService.GetListFriendIdByUsername(username);
-                return Ok(friends);
-            }
-            catch (Exception ex)
-            {
                 return StatusCode(500, new
                 {
                     message = "Internal Server Error",
@@ -530,6 +613,50 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
+        [HttpDelete("delete-friend/{friendName}")]
+        public async Task<IActionResult> DeleteFriend(string friendName)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            // Xác minh token và lấy username
+            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            if (claimsPrincipal == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Access token không hợp lệ"
+                });
+            }
+
+            var usernameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
+            if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
+            {
+                return Unauthorized(new
+                {
+                    message = "Access token không hợp lệ"
+                });
+            }
+            var username = usernameClaim.Value;
+
+            try
+            {
+                await _userService.DeleteFriend(username, friendName);
+                return Ok(new
+                {
+                    message = "Xóa bạn thành công!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
+        [Authorize]
         [HttpDelete("delete-sending-request/{reqUsername}")]
         public async Task<IActionResult> RemoveSendingRequest(string reqUsername)
         {
@@ -578,26 +705,33 @@ namespace API_Server.Controllers
             }
         }
 
-        [Authorize]
+        //Xóa người dùng
         [HttpDelete("{username}")]
+        [Authorize]
         public async Task<IActionResult> DeleteUser(string username)
         {
-            var authorizationHeader = Request.Headers["Authorization"].ToString();
-            if (!_jwtService.IsValidate(authorizationHeader))
+            // Lấy access token từ cookies
+            if (!Request.Cookies.TryGetValue("accessToken", out var accessToken))
             {
-                return Unauthorized(new
-                {
-                    message = "Yêu cầu không hợp lệ!"
-                });
+                return BadRequest("Yêu cầu không hợp lệ.");
             }
 
+
+            // Xác minh token và lấy username
+            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            if (claimsPrincipal == null)
+            {
+                return Unauthorized("Access token không hợp lệ 1.");
+            }
+
+            //Tìm thông tin người dùng
             var user = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
 
             if (user == null)
             {
                 return NotFound("Không tìm thấy người dùng.");
             }
-
+            //Xóa người dùng
             await _context.Users.DeleteOneAsync(u => u.Username == username);
 
             return Ok("Xóa người dùng thành công.");

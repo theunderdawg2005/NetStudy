@@ -180,6 +180,32 @@ namespace NetStudy.Services
                 MessageBox.Show($"Lỗi khi gửi yêu cầu: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-        }       
+        } 
+        
+        public async Task DeleteFriend( string friendName)
+        {
+            try
+            {
+                var res = await httpClient.DeleteAsync($"api/user/delete-friend/{friendName}");
+                var resp = await res.Content.ReadAsStringAsync();
+                JObject obj = JObject.Parse(resp);
+                var msg = obj["message"].ToString();
+                if (res.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Đã xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                else
+                {
+                    
+                    MessageBox.Show(msg, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi gửi yêu cầu: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+        }
     }
 }

@@ -165,6 +165,29 @@ namespace NetStudy.Forms
                     ForeColor = Color.Gainsboro,
                 };
 
+                IconButton delBtn = new IconButton
+                {
+                    Location = new Point(1024, 60),
+                    Size = new Size(150, 35),
+                    Font = new Font("Arial", 9, FontStyle.Regular),
+                    BackColor = Color.FromArgb(0, 117, 214),
+                    Text = "Xóa",
+
+                    FlatStyle = FlatStyle.Flat,
+                    Cursor = Cursors.Hand,
+                    ForeColor = Color.Gainsboro,
+                };
+
+                LinkLabel linkDelFriend = new LinkLabel
+                {
+                    Location = new Point(1024, 75),
+                    Size = new Size(150, 35),
+                    Font = new Font("Arial", 9, FontStyle.Regular),
+                    LinkColor = Color.IndianRed,
+                    Text = "Xóa bạn bè",
+                    Cursor = Cursors.Hand
+                };
+
                 if (IsFriend(user.Username))
                 {
                     btnFriend.Text = "Đã kết bạn";
@@ -178,16 +201,31 @@ namespace NetStudy.Forms
                     btnFriend.Enabled = true;
                     btnFriend.BackColor = Color.FromArgb(26, 25, 62);
                     btnFriend.ForeColor = Color.Gainsboro;
+                    linkDelFriend.Click += async (sender, e) =>
+                    {
+                        await userService.DeleteFriend(user.Username);
+                    };
+                    userPanel.Controls.Add(linkDelFriend);
                 }
                 else if (list.Contains(username))
                 {
                     btnFriend.Text = "Đã gửi";
+                    btnFriend.Location = new Point(1024, 5);
+                    btnFriend.Size = new Size(150, 35);
+                    btnFriend.Font = new Font("Arial", 9, FontStyle.Regular);
                     btnFriend.Enabled = false;
                     btnFriend.BackColor = Color.LightYellow;
+                    delBtn.Enabled = true;
+                    delBtn.Click += async (sender, e) =>
+                    {
+                        await userService.RemoveRequest(user.Username, username, delBtn, accessToken);
+                    };
+                    userPanel.Controls.Add(delBtn);
                 }
                 else
                 {
                     btnFriend.Text = "Kết bạn";
+                    btnFriend.Cursor = Cursors.Hand;
                     btnFriend.Click += async (sender, e) =>
                     {
                         await userService.SendFriendRequest(username, user.Username, btnFriend, accessToken);

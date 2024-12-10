@@ -227,6 +227,24 @@ namespace API_Server.Services
                 throw new Exception($"Lỗi khi xóa yêu cầu: {ex.Message}");
             }
         }
+        public async Task DeleteFriend(string username, string friendName)
+        {
+            try
+            {
+                var user = await GetUserByUserName(username);
+                if (user == null) { throw new Exception("User not found!"); }
+                var friend = await GetUserByUserName(friendName);
+                if (friend == null) { throw new Exception("Friend not found!"); }
+                friend.Friends.Remove(username);
+                user.Friends.Remove(friendName);
+                await UpdateUser(user);
+                await UpdateUser(friend);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{ex.Message}");
+            }
+        }
         public async Task<List<Group>> GetGroupsByUsername(string username)
         {
             try
