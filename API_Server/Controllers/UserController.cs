@@ -121,26 +121,6 @@ namespace API_Server.Controllers
             var username = usernameClaim?.Value;
             if (username == null)
             {
-                Response.Cookies.Delete("accessToken");
-            }
-
-            return Ok(new
-            {
-                status = 200,
-                message = "Đăng xuất thành công."
-            });
-        }
-
-        //PATCH METHOD
-        //Chỉnh sửa thông tin người dùng (chưa hoàn thiện)
-        [HttpPatch("{username}")]
-        [Authorize]
-        public async Task<IActionResult> UpdateUser(string username, [FromBody] JsonPatchDocument<User> patchDoc)
-        {
-
-            var user = await _context.Users.Find(u => u.Username == username).FirstOrDefaultAsync();
-            var filter = Builders<User>.Filter.Eq(u => u.Username, username);
-
                 return NotFound(new
                 {
                     message = "Không tìm thấy thông tin người dùng"
@@ -162,6 +142,7 @@ namespace API_Server.Controllers
             return Ok("Đăng xuất thành công");
         }
 
+        
         //POST METHOD
         [Authorize]
         [HttpPost("{username}/add-friend/{targetUsername}")]
