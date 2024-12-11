@@ -28,16 +28,14 @@ namespace API_Server.Hubs
             await _chatService.SendMessageAsync(chatMessage);
             await Clients.User(receiver).SendAsync("ReceiveMessage", sender, message);
         }
+        public async Task<List<SingleChat>> GetChatHistory(string user1, string user2)
+        {
+            return await _chatService.GetMessagesAsync(user1, user2);
+        }
 
         public async Task UpdateStatus(string username, string status)
         {
             await Clients.All.SendAsync("ReceiveStatusdate", username, status);
-        }
-
-        // New method to get chat history between two users
-        public async Task<List<SingleChat>> GetChatHistory(string user1, string user2)
-        {
-            return await _chatService.GetMessagesAsync(user1, user2);
         }
     }
 }

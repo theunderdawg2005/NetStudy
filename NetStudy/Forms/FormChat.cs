@@ -75,7 +75,7 @@ namespace NetStudy.Forms
 
             if (messages == null || messages.Count == 0)
             {
-                MessageBox.Show("No messages found or response is invalid.");
+                MessageBox.Show("Đây là đoạn chat mới chưa có tin nhắn nào.");
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace NetStudy.Forms
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-                var url = $"https://localhost:7070/api/user/get-friend-list/{_currentUser}";
+                var url = $"https://localhost:7070/api/user/get-friend-list-for-chat/{_currentUser}";
                 var response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -106,12 +106,12 @@ namespace NetStudy.Forms
 
                 if (friends == null || friends.Count == 0)
                 {
-                    MessageBox.Show("No friends found or response is invalid.");
+                    MessageBox.Show("Không tìm thấy người nào trong danh sách bạn bè của bạn.");
                     return;
                 }
 
-                int yOffset = 20;
-                int labelHeight = 25;
+                int yOffset = 30;
+                int labelHeight = 45;
 
                 foreach (var friend in friends)
                 {
@@ -120,7 +120,8 @@ namespace NetStudy.Forms
                         Text = friend,
                         ForeColor = Color.FromArgb(0, 255, 0),
                         AutoSize = true,
-                        Location = new Point(10, yOffset)
+                        Location = new Point(10, yOffset),
+                        Font = new Font("Arial", 12)
                     };
                     label.Click += (s, e) => LoadChatWithUser(_currentUser, friend);
                     groupBox_doanchat.Controls.Add(label);

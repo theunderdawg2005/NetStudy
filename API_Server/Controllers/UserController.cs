@@ -360,6 +360,33 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
+        [HttpGet("get-friend-list-for-chat/{username}")]
+        public async Task<ActionResult<List<string>>> GetFriendListForChat(string username)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+            try
+            {
+                var friends = await _userService.GetListFriendIdByUsername(username);
+                return Ok(friends);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Internal Server Error",
+                    details = ex.Message
+                });
+            }
+        }
+
+        [Authorize]
         [HttpGet("get-request-list/{username}")]
         public async Task<IActionResult> GetReqList(string username)
         {
