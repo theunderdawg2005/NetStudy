@@ -31,7 +31,7 @@ namespace API_Server.Hubs
 
         public async Task UpdateStatus(string username, string status)
         {
-            await Clients.All.SendAsync("ReceiveStatusUpdate", username, status);
+            await Clients.All.SendAsync("ReceiveStatusdate", username, status);
         }
 
         // New method to get chat history between two users

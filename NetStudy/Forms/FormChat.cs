@@ -92,7 +92,7 @@ namespace NetStudy.Forms
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-                var url = $"https://localhost:7070/api/user/get-friend-list-for-chat/{_currentUser}";
+                var url = $"https://localhost:7070/api/user/get-friend-list/{_currentUser}";
                 var response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
