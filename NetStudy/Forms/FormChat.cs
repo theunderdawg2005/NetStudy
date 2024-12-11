@@ -92,7 +92,7 @@ namespace NetStudy.Forms
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-                var url = $"https://localhost:7070/api/user/get-friend-list-for-chat/{_currentUser}";
+                var url = $"https://localhost:7070/api/user/get-friend-list/{_currentUser}";
                 var response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -102,7 +102,9 @@ namespace NetStudy.Forms
                 var responseBody = await response.Content.ReadAsStringAsync();
                 MessageBox.Show(responseBody);
 
-                var friends = JsonSerializer.Deserialize<List<string>>(responseBody);
+                var jsonResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
+                var friends = jsonResponse.GetProperty("data").EnumerateArray().Select(f => f.GetString()).ToList();
+                var totalFriends = jsonResponse.GetProperty("total").GetInt32();
 
                 if (friends == null || friends.Count == 0)
                 {
@@ -113,12 +115,24 @@ namespace NetStudy.Forms
                 int yOffset = 30;
                 int labelHeight = 45;
 
+                var totalLabel = new Label
+                {
+                    Text = $"Số lượng bạn bè: {totalFriends}",
+                    ForeColor = Color.FromArgb(0, 0, 0),
+                    AutoSize = true,
+                    Location = new Point(10, yOffset),
+                    Font = new Font("Arial", 12)
+                };
+                groupBox_doanchat.Controls.Add(totalLabel);
+
+                yOffset += labelHeight;
+
                 foreach (var friend in friends)
                 {
                     var label = new Label
                     {
                         Text = friend,
-                        ForeColor = Color.FromArgb(0, 255, 0),
+                        ForeColor = Color.FromArgb(0, 0, 128),
                         AutoSize = true,
                         Location = new Point(10, yOffset),
                         Font = new Font("Arial", 12)
