@@ -15,7 +15,13 @@ namespace API_Server.Models
         public string Description { get; set; }
         public string Creator { get; set; }
 
-        // Mảng lưu các thành viên (username) trong group
-        public List<string> Members { get; set; } = new List<string>();
+        // Mảng lưu các thành viên (username và role) trong group
+        public List<MemberRole> Members { get; set; } = new List<MemberRole>();
+    }
+
+    public class MemberRole
+    {
+        public string Username { get; set; }
+        public string Role { get; set; } //Admin hoặc User
     }
 }
