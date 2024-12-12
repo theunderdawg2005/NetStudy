@@ -158,7 +158,7 @@ namespace NetStudy.Forms
         private void btnExam_Click(object sender, EventArgs e)
         {
             ActivateButton(sender, RGBColors.color5);
-            OpenChildForm(new FormExam());
+            OpenChildForm(new FormExam(UserInfo, accessToken));
         }
         private void btnMatch_Click(object sender, EventArgs e)
         {
