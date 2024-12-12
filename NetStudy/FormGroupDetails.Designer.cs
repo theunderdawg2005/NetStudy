@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
+            iconButton1 = new FontAwesome.Sharp.IconButton();
             btnSend = new FontAwesome.Sharp.IconButton();
             txtMessage = new TextBox();
             panel2 = new Panel();
-            linkAdd = new LinkLabel();
             lblTitle = new Label();
             listMsg = new ListBox();
             panel1.SuspendLayout();
@@ -42,13 +42,29 @@
             // panel1
             // 
             panel1.BackColor = Color.FromArgb(26, 25, 62);
+            panel1.Controls.Add(iconButton1);
             panel1.Controls.Add(btnSend);
             panel1.Controls.Add(txtMessage);
             panel1.Dock = DockStyle.Bottom;
             panel1.Location = new Point(0, 610);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1033, 85);
+            panel1.Size = new Size(1032, 85);
             panel1.TabIndex = 0;
+            // 
+            // iconButton1
+            // 
+            iconButton1.BackColor = Color.FromArgb(192, 0, 192);
+            iconButton1.FlatAppearance.BorderSize = 0;
+            iconButton1.FlatStyle = FlatStyle.Flat;
+            iconButton1.IconChar = FontAwesome.Sharp.IconChar.PersonCirclePlus;
+            iconButton1.IconColor = Color.Gainsboro;
+            iconButton1.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            iconButton1.Location = new Point(287, 18);
+            iconButton1.Name = "iconButton1";
+            iconButton1.Size = new Size(53, 55);
+            iconButton1.TabIndex = 2;
+            iconButton1.UseVisualStyleBackColor = false;
+            iconButton1.Click += iconButton1_Click;
             // 
             // btnSend
             // 
@@ -79,28 +95,12 @@
             // panel2
             // 
             panel2.BackColor = Color.FromArgb(26, 25, 62);
-            panel2.Controls.Add(linkAdd);
             panel2.Controls.Add(lblTitle);
             panel2.Dock = DockStyle.Top;
             panel2.Location = new Point(0, 0);
             panel2.Name = "panel2";
-            panel2.Size = new Size(1033, 73);
+            panel2.Size = new Size(1032, 73);
             panel2.TabIndex = 1;
-            // 
-            // linkAdd
-            // 
-            linkAdd.AutoSize = true;
-            linkAdd.Font = new Font("Cambria", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            linkAdd.ForeColor = Color.CornflowerBlue;
-            linkAdd.LinkColor = Color.FromArgb(128, 128, 255);
-            linkAdd.Location = new Point(935, 24);
-            linkAdd.Name = "linkAdd";
-            linkAdd.Size = new Size(86, 23);
-            linkAdd.TabIndex = 1;
-            linkAdd.TabStop = true;
-            linkAdd.Text = "Add user";
-            linkAdd.VisitedLinkColor = Color.Blue;
-            linkAdd.LinkClicked += linkAdd_LinkClicked;
             // 
             // lblTitle
             // 
@@ -128,7 +128,7 @@
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(34, 33, 74);
-            ClientSize = new Size(1033, 695);
+            ClientSize = new Size(1032, 695);
             Controls.Add(listMsg);
             Controls.Add(panel2);
             Controls.Add(panel1);
@@ -150,6 +150,6 @@
         private Panel panel2;
         private Label lblTitle;
         private ListBox listMsg;
-        private LinkLabel linkAdd;
+        private FontAwesome.Sharp.IconButton iconButton1;
     }
 }

@@ -94,5 +94,11 @@ namespace NetStudy
         {
             btnSend.Enabled = !string.IsNullOrWhiteSpace(txtMessage.Text);
         }
+
+        private void iconButton1_Click(object sender, EventArgs e)
+        {
+            FormAddUser formAdd = new FormAddUser(accessToken, GroupInfo["name"].ToString(), GroupInfo["id"].ToString(), UserInfo["name"].ToString());
+            formAdd.ShowDialog();
+        }
     }
 }
