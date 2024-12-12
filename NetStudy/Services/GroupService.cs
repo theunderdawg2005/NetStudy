@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,6 +44,10 @@ namespace NetStudy.Services
                         return null;
                     }
                 }
+                else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return null;
+                }    
                 else
                 {
                     var errorMessage = JObject.Parse(res)["message"]?.ToString();
@@ -159,6 +164,31 @@ namespace NetStudy.Services
             {
 
                 return new List<GroupMessage>();
+            }
+        }
+        public async Task LeaveGroup(string groupId, string username)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"api/groups/leave-group/{groupId}");
+                var res = await response.Content.ReadAsStringAsync();
+                JObject obj = JObject.Parse(res);
+                var msg = obj["message"].ToString();
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show(msg, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                else
+                {
+                    MessageBox.Show(msg, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi gửi yêu cầu: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
         }
     }

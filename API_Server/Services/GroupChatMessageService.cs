@@ -21,5 +21,6 @@ namespace API_Server.Services
             var filter = Builders<GroupChatMessage>.Filter.Eq(gr => gr.GroupId, groupId);
             return await groupChatMessage.Find(filter).SortBy(msg => msg.TimeStamp).ToListAsync();
         }
+        
     }
 }

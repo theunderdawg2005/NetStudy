@@ -199,6 +199,7 @@ namespace NetStudy.Services
                 {
                     
                     MessageBox.Show(msg, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
             }
             catch (Exception ex)
@@ -207,5 +208,6 @@ namespace NetStudy.Services
                 return;
             }
         }
+        
     }
 }

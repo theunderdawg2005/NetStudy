@@ -56,5 +56,22 @@ namespace API_Server.Services
             return true;
         }
 
+        public async Task LeaveGroup(string groupId, string username)
+        {
+            var group = await GetGroupById(groupId);
+            if (group == null)
+            {
+                throw new Exception("Nhóm không tồn tại!");
+            }
+
+            if (!group.Members.Remove(username))
+            {
+                throw new Exception("Người dùng không phải thành viên của nhóm này!");
+            }
+
+            var filter = Builders<Group>.Filter.Eq(g => g.Id, groupId);
+            var update = Builders<Group>.Update.Set(g => g.Members, group.Members);
+            await _chatGroups.UpdateOneAsync(filter, update);
+        }
     }
 }

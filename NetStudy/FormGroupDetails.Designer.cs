@@ -35,6 +35,7 @@
             panel2 = new Panel();
             lblTitle = new Label();
             listMsg = new ListBox();
+            btnLeave = new FontAwesome.Sharp.IconButton();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             SuspendLayout();
@@ -95,6 +96,7 @@
             // panel2
             // 
             panel2.BackColor = Color.FromArgb(26, 25, 62);
+            panel2.Controls.Add(btnLeave);
             panel2.Controls.Add(lblTitle);
             panel2.Dock = DockStyle.Top;
             panel2.Location = new Point(0, 0);
@@ -122,6 +124,22 @@
             listMsg.Name = "listMsg";
             listMsg.Size = new Size(1009, 500);
             listMsg.TabIndex = 2;
+            // 
+            // btnLeave
+            // 
+            btnLeave.BackColor = Color.FromArgb(192, 0, 192);
+            btnLeave.FlatAppearance.BorderSize = 0;
+            btnLeave.FlatStyle = FlatStyle.Flat;
+            btnLeave.IconChar = FontAwesome.Sharp.IconChar.PersonWalkingArrowRight;
+            btnLeave.IconColor = Color.Gainsboro;
+            btnLeave.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnLeave.IconSize = 30;
+            btnLeave.Location = new Point(978, 13);
+            btnLeave.Name = "btnLeave";
+            btnLeave.Size = new Size(42, 44);
+            btnLeave.TabIndex = 3;
+            btnLeave.UseVisualStyleBackColor = false;
+            btnLeave.Click += btnLeave_Click;
             // 
             // FormGroupDetails
             // 
@@ -151,5 +169,6 @@
         private Label lblTitle;
         private ListBox listMsg;
         private FontAwesome.Sharp.IconButton iconButton1;
+        private FontAwesome.Sharp.IconButton btnLeave;
     }
 }

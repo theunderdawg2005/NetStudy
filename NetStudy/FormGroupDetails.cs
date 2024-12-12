@@ -100,5 +100,15 @@ namespace NetStudy
             FormAddUser formAdd = new FormAddUser(accessToken, GroupInfo["name"].ToString(), GroupInfo["id"].ToString(), UserInfo["name"].ToString());
             formAdd.ShowDialog();
         }
+
+        private async void btnLeave_Click(object sender, EventArgs e)
+        {
+            string username = UserInfo["username"].ToString();
+            string name = UserInfo["name"].ToString();
+            await connection.InvokeAsync("LeaveGroup", groupId);
+            await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{name} đã rời khỏi nhóm");
+            await groupService.LeaveGroup(groupId, username);
+            await groupService.SendMessage(groupId, "Thông báo", $"{name} đã rời khỏi nhóm", DateTime.UtcNow);
+        }
     }
 }

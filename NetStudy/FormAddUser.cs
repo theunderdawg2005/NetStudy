@@ -43,7 +43,7 @@ namespace NetStudy
 
         private async void btnAdd_Click(object sender, EventArgs e)
         {
-            var username = txtUsername.Text;         // Username from a TextBox
+            var username = txtUsername.Text;
 
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -53,7 +53,7 @@ namespace NetStudy
 
             await connection.InvokeAsync("SendMessageGroup", groupId, name, $"đã thêm {username}");
             await groupService.AddUserToGroup(groupId, username);
-            await groupService.SendMessage(groupId, name, $"đã thêm {username}", timeStamp);
+            await groupService.SendMessage(groupId, "Thông báo", $"đã thêm {username}", timeStamp);
         }
 
         private async void FormAddUser_Load(object sender, EventArgs e)

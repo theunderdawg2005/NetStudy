@@ -161,5 +161,49 @@ namespace API_Server.Controllers
                 description = group.Description
             });
         }
+
+        //DELETE METHOD
+        [Authorize]
+        [HttpDelete("leave-group/{groupId}")]
+        public async Task<IActionResult> LeaveGroup(string groupId)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            if (claimsPrincipal == null)
+            {
+                return Unauthorized("Yêu cầu không hợp lệ!");
+            }
+
+            var usernameClaim = claimsPrincipal.FindFirst("userName");
+            if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
+            {
+                return Unauthorized("Yêu cầu không hợp lệ!");
+            }
+
+            var username = usernameClaim.Value;
+
+            try
+            {
+                var group = await GetGroupByGroupId(groupId);
+                if (group == null)
+                {
+                    return NotFound(new { message = "Nhóm không tồn tại!" });
+                }
+                await _chatGroupService.LeaveGroup(groupId, username);
+                return Ok(new
+                {
+                    message = "Đã rời khỏi nhóm!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new {
+                    message = "Internal Server Error",
+                    detail = ex.Message
+                });
+            }
+        }
+
     }
 }
