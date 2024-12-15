@@ -101,9 +101,7 @@ namespace API_Server.Services
 
                 var questionDto = new QuestionDTO
                 {
-
-
-
+                    Topic = randomQuestion.Topic,
                     Content = randomQuestion.Content,
                     CorrectAnswer = randomQuestion.CorrectAnswer
                 };
