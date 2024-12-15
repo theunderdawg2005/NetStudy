@@ -33,7 +33,7 @@ namespace API_Server.Controllers
                 });
             }
 
-            if (await _questionService.IsTitleExistsAsync(question.Title, username))
+            if (await _questionService.IsContentExistsAsync(question.Content, username))
             {
                 return BadRequest(new
                 {
@@ -44,7 +44,7 @@ namespace API_Server.Controllers
             try
             {
                 var createdQuestion = await _questionService.CreateQuestionAsync(question, username);
-                
+
                 return Ok(new
                 {
                     message = "Tạo câu hỏi thành công!",
@@ -58,8 +58,8 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
-        [HttpGet("{username}/get-question/{title}")]
-        public async Task<IActionResult> GetQuestion(string title, [FromRoute] string username)
+        [HttpGet("{username}/get-question/{content}")]
+        public async Task<IActionResult> GetQuestion([FromRoute] string content, [FromRoute] string username)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
             if (!_jwtService.IsValidate(authorizationHeader))
@@ -72,7 +72,7 @@ namespace API_Server.Controllers
 
             try
             {
-                var question = await _questionService.GetQuestionAsync(title, username);
+                var question = await _questionService.GetQuestionAsync(content, username);
                 if (question == null)
                 {
                     return NotFound(new
@@ -166,8 +166,8 @@ namespace API_Server.Controllers
         }
 
         [Authorize]
-        [HttpGet("{username}/get-correct-answer/{title}")]
-        public async Task<IActionResult> GetCorrectAnswer(string title, [FromRoute] string username)
+        [HttpGet("{username}/get-correct-answer/{content}")]
+        public async Task<IActionResult> GetCorrectAnswer([FromRoute] string username, [FromRoute] string content)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
             if (!_jwtService.IsValidate(authorizationHeader))
@@ -180,7 +180,7 @@ namespace API_Server.Controllers
 
             try
             {
-                var correctAnswer = await _questionService.GetCorrectAnswer(title, username);
+                var correctAnswer = await _questionService.GetCorrectAnswer(content, username);
                 if (correctAnswer == null)
                 {
                     return NotFound(new
@@ -201,6 +201,113 @@ namespace API_Server.Controllers
             }
         }
 
+        [Authorize]
+        [HttpGet("{username}/get-random-question/{topic}")]
+        public async Task<IActionResult> GetRandomQuestionByTopic([FromRoute] string username, [FromRoute] string topic)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+
+            try
+            {
+                var question = await _questionService.GetRandomQuestionByTopic(username, topic);
+                if (question == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Không tìm thấy câu hỏi!"
+                    });
+                }
+
+                return Ok(new
+                {
+                    message = "Lấy câu hỏi ngẫu nhiên theo chủ đề thành công!",
+                    info = question
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("{username}/get-all-questions/{topic}")]
+        public async Task<IActionResult> GetAllQuestionsByTopic([FromRoute] string username, [FromRoute] string topic)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+
+            try
+            {
+                var questions = await _questionService.GetAllQuestionByTopic(username, topic);
+                if (questions == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Không tìm thấy câu hỏi!"
+                    });
+                }
+
+                return Ok(new
+                {
+                    message = "Lấy danh sách câu hỏi theo chủ đề thành công!",
+                    info = questions
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("{username}/delete-question/{question}")]
+        public async Task<IActionResult> DeleteQuestion(QuestionDTO question)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+
+            try
+            {
+                var deletedQuestion = await _questionService.DeleteQuestion(question);
+                if (deletedQuestion == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Không tìm thấy câu hỏi!"
+                    });
+                }
+
+                return Ok(new
+                {
+                    message = "Xóa câu hỏi thành công!",
+                    info = deletedQuestion
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
     }
 }

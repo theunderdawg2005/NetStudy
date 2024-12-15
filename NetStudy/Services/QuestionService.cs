@@ -58,11 +58,11 @@ namespace NetStudy.Services
             }
         }
 
-        public async Task<string> GetQuestions(string username, string title)
+        public async Task<string> GetQuestions(string username, string content)
         {
             try
             {
-                var response = await httpClient.GetAsync($"api/question/{username}/get-question/{title}");
+                var response = await httpClient.GetAsync($"api/question/{username}/get-question/{content}");
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadAsStringAsync();
@@ -155,11 +155,87 @@ namespace NetStudy.Services
             }
         }
 
-        public async Task<string> GetCorrectAnswer(string username, string title)
+        public async Task<ApiResponse<QuestionDto>> GetRandomQuestionByTopic(string username, string topic)
         {
             try
             {
-                var response = await httpClient.GetAsync($"api/question/{username}/get-correct-answer/{title}");
+                var response = await httpClient.GetAsync($"api/questions/{username}/get-random-question/{topic}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+
+                    var apiResponse = JsonConvert.DeserializeObject<ApiResponseWrapper<QuestionDto>>(content);
+
+                    return new ApiResponse<QuestionDto>
+                    {
+                        Message = apiResponse.Message,
+                        Data = apiResponse.Info
+                    };
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Error: {errorContent}", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
+
+        public async Task<ApiResponse<List<QuestionDto>>> GetAllQuestionByTopicAsync(string username, string topic)
+        {
+            try
+            {
+                var response = await httpClient.GetAsync($"api/questions/{username}/get-all-questions/{topic}");
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var apiResponse = JsonConvert.DeserializeObject<ApiResponseWrapper<List<QuestionDto>>>(content);
+
+                    if (apiResponse != null && apiResponse.Info != null)
+                    {
+                        return new ApiResponse<List<QuestionDto>>
+                        {
+                            Message = apiResponse.Message,
+                            Data = apiResponse.Info
+                        };
+                    }
+
+                    return new ApiResponse<List<QuestionDto>>
+                    {
+                        Message = "No questions found.",
+                        Data = new List<QuestionDto>()
+                    };
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return new ApiResponse<List<QuestionDto>>
+                    {
+                        Message = $"Error: {errorContent}"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<List<QuestionDto>>
+                {
+                    Message = $"Error: {ex.Message}"
+                };
+            }
+        }
+
+        public async Task<string> GetCorrectAnswer(string username, string content)
+        {
+            try
+            {
+                var response = await httpClient.GetAsync($"api/question/{username}/get-correct-answer/{content}");
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadAsStringAsync();

@@ -68,9 +68,9 @@
             lbl_title.Font = new Font("Segoe UI", 15F);
             lbl_title.Location = new Point(60, 27);
             lbl_title.Name = "lbl_title";
-            lbl_title.Size = new Size(61, 35);
+            lbl_title.Size = new Size(74, 35);
             lbl_title.TabIndex = 3;
-            lbl_title.Text = "Title";
+            lbl_title.Text = "Topic";
             // 
             // lbl_content
             // 

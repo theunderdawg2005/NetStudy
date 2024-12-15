@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Net.Http;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 
 namespace API_Server.Services
@@ -23,7 +24,7 @@ namespace API_Server.Services
         {
             var question = new Question
             {
-                Title = _question.Title,
+                Topic = _question.Topic,
                 Content = _question.Content,
                 CorrectAnswer = _question.CorrectAnswer,
                 Owner = owner,
@@ -43,14 +44,14 @@ namespace API_Server.Services
                 var update = Builders<ListQuestion>.Update.PushEach(q => q.Questions, listQuestion.Questions);
                 await _questions.UpdateOneAsync(filter, update);
             }
-            else 
+            else
             {
                 await _questions.InsertOneAsync(listQuestion);
             }
 
             var questionDto = new QuestionDTO
             {
-                Title = question.Title,
+                Topic = question.Topic,
                 Content = question.Content,
                 CorrectAnswer = question.CorrectAnswer
             };
@@ -58,42 +59,36 @@ namespace API_Server.Services
             return questionDto;
         }
 
-        public async Task<bool> IsTitleExistsAsync(string title, string owner)
+        public async Task<bool> IsContentExistsAsync(string content, string owner)
         {
             var filter = Builders<ListQuestion>.Filter.And(
-                        Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner), 
-                        Builders<ListQuestion>.Filter.ElemMatch(q => q.Questions, q => q.Title == title) 
+                        Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner),
+                        Builders<ListQuestion>.Filter.ElemMatch(q => q.Questions, q => q.Content == content)
             );
 
             var result = await _questions.Find(filter).FirstOrDefaultAsync();
-            if(result != null)
+            if (result != null)
             {
                 return true;
             }
             return false;
         }
 
-        public async Task<QuestionDTO> GetQuestionAsync(string title, string owner)
+        public async Task<Question> GetQuestionAsync(string content, string owner)
         {
-            //var filter = Builders<ListQuestion>.Filter.ElemMatch(q => q.Questions, q => q.Title == title);
             var filter = Builders<ListQuestion>.Filter.And(
-                        Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner),
-                        Builders<ListQuestion>.Filter.ElemMatch(q => q.Questions, q => q.Title == title)
+                Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner),
+                Builders<ListQuestion>.Filter.ElemMatch(q => q.Questions, q => q.Content == content)
             );
-            var listQuestion = await _questions.Find(filter).FirstOrDefaultAsync();
-            if (listQuestion != null)
-            {
-                var questionDto = new QuestionDTO
-                {
-                    Title = listQuestion.Questions[0].Title,
-                    Content = listQuestion.Questions[0].Content,
-                    CorrectAnswer = listQuestion.Questions[0].CorrectAnswer
-                };
-                return questionDto;
-            }
-            return null;
-        }
 
+            var projection = Builders<ListQuestion>.Projection.Expression(list => list.Questions
+                .Where(q => q.Content == content)
+                .FirstOrDefault());
+
+            var question = await _questions.Find(filter).Project(projection).FirstOrDefaultAsync();
+
+            return question;
+        }
         public async Task<QuestionDTO> GetRandomQuestionAsync(string owner)
         {
             var filter = Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner);
@@ -106,7 +101,9 @@ namespace API_Server.Services
 
                 var questionDto = new QuestionDTO
                 {
-                    Title = randomQuestion.Title,
+
+
+
                     Content = randomQuestion.Content,
                     CorrectAnswer = randomQuestion.CorrectAnswer
                 };
@@ -126,22 +123,99 @@ namespace API_Server.Services
 
             if (listQuestion?.Questions == null)
             {
-                return new List<QuestionDTO>(); 
+                return new List<QuestionDTO>();
             }
 
             return listQuestion.Questions.Select(question => new QuestionDTO
             {
-                Title = question.Title,
+                Topic = question.Topic,
                 Content = question.Content,
                 CorrectAnswer = question.CorrectAnswer
             }).ToList();
         }
 
-        public async Task<string> GetCorrectAnswer(string title, string owner)
+
+        public async Task<QuestionDTO> GetRandomQuestionByTopic(string owner, string topic)
         {
-            var question = await GetQuestionAsync(title, owner);
-            return question.CorrectAnswer;
+            var filter = Builders<ListQuestion>.Filter.And(
+                Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner),
+                Builders<ListQuestion>.Filter.ElemMatch(q => q.Questions, q => q.Topic == topic)
+            );
+
+            var projection = Builders<ListQuestion>.Projection.Expression(list => list.Questions
+                .Where(q => q.Topic == topic)
+                .ToList());
+
+            var filteredQuestions = await _questions.Find(filter).Project(projection).FirstOrDefaultAsync();
+
+            if (filteredQuestions != null && filteredQuestions.Any())
+            {
+                var random = new Random();
+                var randomQuestion = filteredQuestions[random.Next(filteredQuestions.Count)];
+
+                return new QuestionDTO
+                {
+                    Topic = randomQuestion.Topic,
+                    Content = randomQuestion.Content,
+                    CorrectAnswer = randomQuestion.CorrectAnswer
+                };
+            }
+
+            return null;
         }
 
+
+        public async Task<List<QuestionDTO>> GetAllQuestionByTopic(string owner, string topic)
+        {
+            var filter = Builders<ListQuestion>.Filter.And(
+                Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner),
+                Builders<ListQuestion>.Filter.ElemMatch(q => q.Questions, q => q.Topic == topic)
+            );
+
+            var projection = Builders<ListQuestion>.Projection.Expression(list => list.Questions
+                .Where(q => q.Topic == topic)
+                .ToList());
+
+            var filteredQuestions = await _questions.Find(filter).Project(projection).FirstOrDefaultAsync();
+
+            if (filteredQuestions == null || !filteredQuestions.Any())
+            {
+                return new List<QuestionDTO>();
+            }
+
+            return filteredQuestions.Select(question => new QuestionDTO
+            {
+                Topic = question.Topic,
+                Content = question.Content,
+                CorrectAnswer = question.CorrectAnswer
+            }).ToList();
+        }
+
+        public async Task<bool> DeleteQuestion(QuestionDTO question)
+        {
+            var filter = Builders<ListQuestion>.Filter.ElemMatch(
+                q => q.Questions,
+                q => q.Topic == question.Topic &&
+                     q.Content == question.Content &&
+                     q.CorrectAnswer == question.CorrectAnswer
+            );
+
+            var update = Builders<ListQuestion>.Update.PullFilter(
+                q => q.Questions,
+                q => q.Topic == question.Topic &&
+                     q.Content == question.Content &&
+                     q.CorrectAnswer == question.CorrectAnswer
+            );
+
+            var result = await _questions.UpdateOneAsync(filter, update);
+
+            return result.ModifiedCount > 0;
+        }
+
+        public async Task<string> GetCorrectAnswer(string content, string owner)
+        {
+            var question = await GetQuestionAsync(content, owner);
+            return question.CorrectAnswer;
+        }
     }
 }

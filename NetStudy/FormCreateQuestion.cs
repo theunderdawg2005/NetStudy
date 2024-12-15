@@ -27,11 +27,11 @@ namespace NetStudy
 
         private async void btn_create_Click(object sender, EventArgs e)
         {
-            string title = tB_title.Text.Trim();
+            string topic = tB_title.Text.Trim();
             string content = tB_content.Text.Trim();
             string correctAnswer = tB_correctanswer.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(content) || string.IsNullOrWhiteSpace(correctAnswer))
+            if (string.IsNullOrWhiteSpace(topic) || string.IsNullOrWhiteSpace(content) || string.IsNullOrWhiteSpace(correctAnswer))
             {
                 MessageBox.Show("Vui lòng nhập đầy đủ thông tin!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -39,7 +39,7 @@ namespace NetStudy
 
             var question = new Question
             {
-                Title = title,
+                Topic = topic,
                 Content = content,
                 CorrectAnswer = correctAnswer,
                 Owner = UserInfo["username"].ToString()

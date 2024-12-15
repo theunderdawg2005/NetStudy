@@ -32,6 +32,8 @@ builder.Services.AddSingleton<GroupChatMessageService>();
 
 builder.Services.AddSingleton<QuestionService>();
 
+builder.Services.AddSingleton<ChatBotService>();
+
 builder.Services.AddHttpClient();
 
 // Add services to the container.

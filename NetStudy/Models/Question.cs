@@ -10,7 +10,7 @@ namespace NetStudy.Models
     public class Question
     {
         [Required]
-        public string Title { get; set; }
+        public string Topic { get; set; }
         [Required]
         public string Content { get; set; }
         [Required]

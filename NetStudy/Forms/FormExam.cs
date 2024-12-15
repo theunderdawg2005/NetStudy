@@ -4,6 +4,7 @@ using NetStudy.Models;
 using Newtonsoft.Json;
 using System.Text;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.VisualBasic.ApplicationServices;
 
 namespace NetStudy.Forms
 {
@@ -32,30 +33,14 @@ namespace NetStudy.Forms
 
         private async void btn_listquestion_Click(object sender, EventArgs e)
         {
-            try
+            string topic = tB_topic.Text;
+            if(topic == "")
             {
-                var questions = await questionService.GetAllQuestionAsync(UserInfo["username"].ToString());
-
-                if (questions.Data.Any() && questions.Data != null)
-                {
-                    StringBuilder sb = new StringBuilder();
-                    foreach (var question in questions.Data)
-                    {
-                        sb.AppendLine($"Title: {question.Title}");
-                        sb.AppendLine($"Content: {question.Content}");
-                        sb.AppendLine($"Correct Answer: {question.CorrectAnswer}");
-                        sb.AppendLine(new string('-', 50));
-                    }
-                    tB_data.Text = sb.ToString();
-                }
-                else
-                {
-                    tB_data.Text = "No questions found.";
-                }
+                await LoadListQuestion();
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                await LoadListQuestionByTopic(topic);
             }
         }
 
@@ -68,47 +53,42 @@ namespace NetStudy.Forms
 
         private void btn_clear_Click(object sender, EventArgs e)
         {
-            tB_data.Text = "";
+            flowLayoutPanel1.Controls.Clear();
         }
 
-        private async Task LoadRandomQuestionAsync()
+        private void btn_review_Click(object sender, EventArgs e)
+        {
+            ReviewQuestion reviewQuestion = new ReviewQuestion(UserInfo, accessToken);
+            reviewQuestion.Show();
+            this.Hide();
+        }
+
+        private void btn_AI_Click(object sender, EventArgs e)
+        {
+            ChatBot chatBot = new ChatBot(UserInfo, accessToken);
+            chatBot.Show();
+            this.Hide();
+        }
+
+        private async Task LoadListQuestion()
         {
             try
             {
-                var randomQuestion = await questionService.GetRandomQuestionsAsync(UserInfo["username"].ToString());
-                if (randomQuestion.Data != null)
+                var questions = await questionService.GetAllQuestionAsync(UserInfo["username"].ToString());
+
+                if (questions.Data != null && questions.Data.Any())
                 {
-                    tB_data.Text = $"Title: {randomQuestion.Data.Title}{Environment.NewLine}Content: {randomQuestion.Data.Content}";
-                    correctAnswer = randomQuestion.Data.CorrectAnswer;
-                    List<string> fakeAnswers = new List<string>
-                    {
-                        "Answer A",
-                        "Answer B",
-                        "Answer C",
-                        "Answer D"
-                    };
+                    flowLayoutPanel1.Controls.Clear();
 
-                    Random random = new Random();
-                    int correctAnswerIndex = random.Next(0, 4);
-                    Button[] buttons = { btn_option1, btn_option2, btn_option3, btn_option4 };
-                    buttons[correctAnswerIndex].Text = correctAnswer;
-
-                    int fakeAnswerIndex = 0;
-                    for (int i = 0; i < 4; i++)
+                    foreach (var question in questions.Data)
                     {
-                        if (i != correctAnswerIndex)
-                        {
-                            buttons[i].Text = fakeAnswers[fakeAnswerIndex];
-                            fakeAnswerIndex++;
-                        }
+                        AddQuestionToPanel(question);
                     }
-
                 }
                 else
                 {
-                    tB_data.Text = "No questions found.";
+                    MessageBox.Show("No questions found.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-
             }
             catch (Exception ex)
             {
@@ -116,46 +96,104 @@ namespace NetStudy.Forms
             }
         }
 
-        private async void btn_review_Click(object sender, EventArgs e)
+        private async Task LoadListQuestionByTopic(string topic)
         {
-            LoadRandomQuestionAsync();
-        }
-
-        private void btn_next_Click(object sender, EventArgs e)
-        {
-            LoadRandomQuestionAsync();
-        }
-
-        private void CheckAnswer(string selectedAnswer)
-        {
-            if (selectedAnswer == correctAnswer)
+            try
             {
-                MessageBox.Show("Câu trả lời chính xác", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                var questions = await questionService.GetAllQuestionByTopicAsync(UserInfo["username"].ToString(), topic);
+
+                if (questions.Data != null && questions.Data.Any())
+                {
+                    flowLayoutPanel1.Controls.Clear();
+
+                    foreach (var question in questions.Data)
+                    {
+                        AddQuestionToPanel(question);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("No questions found for this topic.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Bạn đã chọn sai!. Hãy thử lại!", "Result", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void btn_option1_Click(object sender, EventArgs e)
+        private void AddQuestionToPanel(QuestionDto question)
         {
-            CheckAnswer(btn_option1.Text);
+            Panel questionPanel = new Panel
+            {
+                Width = flowLayoutPanel1.Width - 20,
+                BorderStyle = BorderStyle.FixedSingle,
+                Padding = new Padding(10),
+                Margin = new Padding(5),
+                BackColor = Color.Indigo,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink
+            };
+
+            Label lblData = new Label
+            {
+                Text = $"Topic: {question.Topic}\nContent: {question.Content}\nCorrect Answer: {question.CorrectAnswer}",
+                AutoSize = true,
+                Font = new Font("Cambria", 12, FontStyle.Bold),
+                ForeColor = Color.Gainsboro,
+                MaximumSize = new Size(flowLayoutPanel1.Width - 40, 0),
+                Margin = new Padding(0, 0, 0, 5)
+            };
+
+            Button editButton = new Button
+            {
+                Text = "Sửa",
+                Size = new Size(60, 30),
+                BackColor = Color.Blue,
+                ForeColor = Color.White
+            };
+
+            Button deleteButton = new Button
+            {
+                Text = "Xóa",
+                Size = new Size(60, 30),
+                BackColor = Color.Red,
+                ForeColor = Color.White
+            };
+
+            editButton.Click += (s, e) => EditQuestion(question);
+            deleteButton.Click += (s, e) => DeleteQuestion(question);
+
+            Panel buttonPanel = new Panel
+            {
+                AutoSize = true,
+                Location = new Point(questionPanel.Width - 140, 10)
+            };
+
+            buttonPanel.Controls.Add(editButton);
+            buttonPanel.Controls.Add(deleteButton);
+
+            editButton.Location = new Point(0, 0);
+            deleteButton.Location = new Point(editButton.Width + 10, 0);
+
+            questionPanel.Controls.Add(lblData);
+
+            questionPanel.Controls.Add(buttonPanel);
+
+            flowLayoutPanel1.Controls.Add(questionPanel);
+
+            flowLayoutPanel1.AutoScroll = true;
         }
 
-        private void btn_option2_Click(object sender, EventArgs e)
+        private void EditQuestion(QuestionDto question)
         {
-            CheckAnswer(btn_option2.Text);
+            MessageBox.Show("Chức năng đang cập nhật");
         }
 
-        private void btn_option3_Click(object sender, EventArgs e)
+        private async void DeleteQuestion(QuestionDto question)
         {
-            CheckAnswer(btn_option3.Text);
+            MessageBox.Show("Chức năng đang cập nhật");
         }
 
-        private void btn_option4_Click(object sender, EventArgs e)
-        {
-            CheckAnswer(btn_option4.Text);
-        }
     }
 }
