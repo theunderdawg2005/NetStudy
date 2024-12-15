@@ -7,6 +7,7 @@
         public string? Email { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string? Status { get; set; }
+        public bool OpStatus { get; set; }
         public bool IsEmailVerified { get; set; }
         public DateTime CreatedAt { get; set; }
     }

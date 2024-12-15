@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             groupBox_doanchat = new GroupBox();
-            comboBox_mystatus = new ComboBox();
             textBox_myusrname = new TextBox();
             textBox_otherusrname = new TextBox();
             textBox_showmsg = new TextBox();
-            textBox_otherstatus = new TextBox();
             textBox_msg = new TextBox();
             button_send = new Button();
+            comboBox_mystatus = new ComboBox();
+            textBox_otherstatus = new TextBox();
             SuspendLayout();
             // 
             // groupBox_doanchat
@@ -46,16 +46,6 @@
             groupBox_doanchat.TabIndex = 0;
             groupBox_doanchat.TabStop = false;
             groupBox_doanchat.Text = "Đoạn chat";
-            // 
-            // comboBox_mystatus
-            // 
-            comboBox_mystatus.FormattingEnabled = true;
-            comboBox_mystatus.Items.AddRange(new object[] { "Đang hoạt động", "Ẩn hoạt động" });
-            comboBox_mystatus.Location = new Point(201, 12);
-            comboBox_mystatus.Name = "comboBox_mystatus";
-            comboBox_mystatus.Size = new Size(182, 33);
-            comboBox_mystatus.TabIndex = 1;
-            comboBox_mystatus.SelectedIndexChanged += comboBox_status_SelectedIndexChanged;
             // 
             // textBox_myusrname
             // 
@@ -81,14 +71,6 @@
             textBox_showmsg.Size = new Size(804, 597);
             textBox_showmsg.TabIndex = 2;
             // 
-            // textBox_otherstatus
-            // 
-            textBox_otherstatus.Location = new Point(1043, 9);
-            textBox_otherstatus.Name = "textBox_otherstatus";
-            textBox_otherstatus.ReadOnly = true;
-            textBox_otherstatus.Size = new Size(150, 31);
-            textBox_otherstatus.TabIndex = 3;
-            // 
             // textBox_msg
             // 
             textBox_msg.Location = new Point(389, 652);
@@ -106,6 +88,25 @@
             button_send.UseVisualStyleBackColor = true;
             button_send.Click += button_send_Click;
             // 
+            // comboBox_mystatus
+            // 
+            comboBox_mystatus.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBox_mystatus.FormattingEnabled = true;
+            comboBox_mystatus.Items.AddRange(new object[] { "Đang hoạt động", "Không hoạt động" });
+            comboBox_mystatus.Location = new Point(201, 12);
+            comboBox_mystatus.Name = "comboBox_mystatus";
+            comboBox_mystatus.Size = new Size(182, 33);
+            comboBox_mystatus.TabIndex = 6;
+            comboBox_mystatus.SelectedIndexChanged += comboBox_mystatus_SelectedIndexChanged;
+            // 
+            // textBox_otherstatus
+            // 
+            textBox_otherstatus.Location = new Point(1043, 12);
+            textBox_otherstatus.Name = "textBox_otherstatus";
+            textBox_otherstatus.ReadOnly = true;
+            textBox_otherstatus.Size = new Size(150, 31);
+            textBox_otherstatus.TabIndex = 7;
+            // 
             // FormChat
             // 
             AcceptButton = button_send;
@@ -113,11 +114,11 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
             ClientSize = new Size(1205, 695);
+            Controls.Add(textBox_otherstatus);
             Controls.Add(comboBox_mystatus);
             Controls.Add(button_send);
             Controls.Add(textBox_myusrname);
             Controls.Add(textBox_msg);
-            Controls.Add(textBox_otherstatus);
             Controls.Add(textBox_showmsg);
             Controls.Add(textBox_otherusrname);
             Controls.Add(groupBox_doanchat);
@@ -132,12 +133,12 @@
         #endregion
 
         private GroupBox groupBox_doanchat;
-        private ComboBox comboBox_mystatus;
         private TextBox textBox_myusrname;
         private TextBox textBox_otherusrname;
         private TextBox textBox_showmsg;
-        private TextBox textBox_otherstatus;
         private TextBox textBox_msg;
         private Button button_send;
+        private ComboBox comboBox_mystatus;
+        private TextBox textBox_otherstatus;
     }
 }

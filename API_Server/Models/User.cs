@@ -15,6 +15,7 @@ namespace API_Server.Models
         public string? Password { get; set; }
         public string? PasswordHash { get; set; }
         public string? Status {  get; set; }
+        public bool OpStatus { get; set; }
         public List<string> FriendRequests { get; set; } = new List<string>();
         public List<string> Friends { get; set; } = new List<string>();
         public List<string> ChatGroup { get; set; } = new List<string>();

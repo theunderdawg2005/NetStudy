@@ -338,7 +338,8 @@ namespace API_Server.Services
                 DateOfBirth = tempUser.DateOfBirth,
                 Email = tempUser.Email,
                 CreatedAt = DateTime.UtcNow,
-                IsEmailVerified = true
+                IsEmailVerified = true,
+                OpStatus = true
             };
 
             await users.InsertOneAsync(newUser);
@@ -350,6 +351,7 @@ namespace API_Server.Services
                 Email = newUser.Email,
                 DateOfBirth = newUser.DateOfBirth,
                 Status = newUser.Status,
+                OpStatus = newUser.OpStatus,
                 IsEmailVerified = newUser.IsEmailVerified,
                 CreatedAt = newUser.CreatedAt
             };
@@ -381,6 +383,15 @@ namespace API_Server.Services
             }
 
             return (true, "Đăng nhập thành công", user);
+        }
+
+        public async Task<bool> UpdateUserStatusAsync(string username, bool opStatus)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.Username, username);
+            var update = Builders<User>.Update.Set(u => u.OpStatus, opStatus);
+            var result = await users.UpdateOneAsync(filter, update);
+
+            return result.ModifiedCount > 0;
         }
     }
 }

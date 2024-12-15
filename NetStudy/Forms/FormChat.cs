@@ -129,10 +129,13 @@ namespace NetStudy.Forms
 
                 foreach (var friend in friends)
                 {
+                    var friendStatus = await GetFriendStatus(friend);
+                    var labelColor = friendStatus ? Color.FromArgb(0, 0, 255) : Color.FromArgb(0, 0, 0);
+
                     var label = new Label
                     {
                         Text = friend,
-                        ForeColor = Color.FromArgb(0, 0, 128),
+                        ForeColor = labelColor,
                         AutoSize = true,
                         Location = new Point(10, yOffset),
                         Font = new Font("Arial", 12)
@@ -145,27 +148,48 @@ namespace NetStudy.Forms
             }
         }
 
+        private async Task<bool> GetFriendStatus(string username)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
+                var url = $"https://localhost:7070/api/user/get-status/{username}";
+                var response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    var jsonResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
+                    return jsonResponse.GetProperty("opStatus").GetBoolean();
+                }
+                return false;
+            }
+        }
+
         private async void LoadChatWithUser(string username, string friend)
         {
             _currentChatUser = friend;
             textBox_otherusrname.Text = friend;
             textBox_showmsg.Clear();
             await LoadChatHistory();
+
+            var friendStatus = await GetFriendStatus(friend);
+            textBox_otherstatus.Text = friendStatus ? "Đang hoạt động" : "Không hoạt động";
         }
 
-        private async void comboBox_status_SelectedIndexChanged(object sender, EventArgs e)
+        private async void comboBox_mystatus_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var status = comboBox_mystatus.SelectedItem.ToString();
+            var statusString = comboBox_mystatus.SelectedItem.ToString();
+            bool status = statusString == "Đang hoạt động";
             await UpdateUserStatus(status);
         }
 
-        private async Task UpdateUserStatus(string status)
+        private async Task UpdateUserStatus(bool status)
         {
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
                 var url = $"https://localhost:7070/api/user/updateStatus";
-                var content = new StringContent(JsonSerializer.Serialize(new { Username = _currentUser, Status = status }), System.Text.Encoding.UTF8, "application/json");
+                var content = new StringContent(JsonSerializer.Serialize(new { Username = _currentUser, OpStatus = status }), System.Text.Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(url, content);
                 if (!response.IsSuccessStatusCode)
                 {
