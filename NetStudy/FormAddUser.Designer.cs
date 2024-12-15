@@ -33,6 +33,8 @@
             btnAdd = new FontAwesome.Sharp.IconButton();
             label2 = new Label();
             lblName = new Label();
+            label3 = new Label();
+            comboRole = new ComboBox();
             SuspendLayout();
             // 
             // txtUsername
@@ -91,12 +93,33 @@
             lblName.TabIndex = 4;
             lblName.Text = "{GroupName}";
             // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Bahnschrift SemiBold", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label3.ForeColor = Color.Gainsboro;
+            label3.Location = new Point(118, 171);
+            label3.Name = "label3";
+            label3.Size = new Size(67, 27);
+            label3.TabIndex = 5;
+            label3.Text = "Role: ";
+            // 
+            // comboRole
+            // 
+            comboRole.FormattingEnabled = true;
+            comboRole.Location = new Point(191, 170);
+            comboRole.Name = "comboRole";
+            comboRole.Size = new Size(182, 33);
+            comboRole.TabIndex = 6;
+            // 
             // FormAddUser
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(34, 33, 74);
-            ClientSize = new Size(603, 197);
+            ClientSize = new Size(603, 229);
+            Controls.Add(comboRole);
+            Controls.Add(label3);
             Controls.Add(lblName);
             Controls.Add(label2);
             Controls.Add(btnAdd);
@@ -116,5 +139,7 @@
         private FontAwesome.Sharp.IconButton btnAdd;
         private Label label2;
         private Label lblName;
+        private Label label3;
+        private ComboBox comboRole;
     }
 }

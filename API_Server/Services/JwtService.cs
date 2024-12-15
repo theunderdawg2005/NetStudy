@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using API_Server.Models;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -109,6 +110,22 @@ namespace API_Server.Services
             {
                 return false;
             }
+        }
+        public async Task<string> GetUsernameFromToken(string authHeader)
+        {
+            var accessToken = authHeader.Substring("Bearer ".Length).Trim();
+            var claimsPrincipal = ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            if (claimsPrincipal == null)
+            {
+                return null;
+            }
+
+            var usernameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
+            if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
+            {
+                return null;
+            }
+            return usernameClaim.Value;
         }
         public async Task<TokenData> GetRefreshToken(string token)
         {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using FontAwesome.Sharp;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.VisualBasic.ApplicationServices;
 using NetStudy.Models;
 using NetStudy.Services;
@@ -24,6 +25,9 @@ namespace NetStudy
         private readonly JObject GroupInfo;
         private string groupId;
         private readonly GroupService groupService;
+        private readonly List<MemberRole> members;
+        private List<string> memReq;
+        private string roleUser;
         public static readonly HttpClient httpClient = new HttpClient
         {
             BaseAddress = new Uri(@"https://localhost:7070/"),
@@ -37,6 +41,9 @@ namespace NetStudy
             UserInfo = info;
             GroupInfo = groupInfo;
             groupId = groupInfo["id"].ToString();
+            members = GroupInfo["members"].ToObject<List<MemberRole>>();
+            var user = members.FirstOrDefault(u => u.Username == UserInfo["username"].ToString());
+            roleUser = user.Role;
             connection = new HubConnectionBuilder()
                 .WithUrl("https://localhost:7070/groupChatHub", opts =>
                 {
@@ -55,7 +62,7 @@ namespace NetStudy
                 });
             });
 
-            lblTitle.Text = groupInfo["name"].ToString();
+            lblTitle.Text = GroupInfo["name"].ToString();
             groupService = new GroupService(accessToken);
         }
 
@@ -69,7 +76,32 @@ namespace NetStudy
 
         private async void FormGroupDetails_Load(object sender, EventArgs e)
         {
-
+            int total;
+            (memReq, total) = await groupService.GetJoinListByGroupId(groupId);
+            if(roleUser == "001")
+            {
+                IconButton btnUserRequest = new IconButton
+                {
+                     
+                    FlatStyle = FlatStyle.Flat,
+                    Text = $"User Requests ({total})",
+                    TextAlign = ContentAlignment.MiddleLeft,
+                    Font = new Font("Bahnschrift",9, FontStyle.Bold),
+                    BackColor = Color.FromArgb(192, 0, 192),
+                    IconChar = IconChar.PersonWalkingArrowRight,
+                    IconSize = 35,
+                    IconColor = Color.Gainsboro,
+                    ImageAlign = ContentAlignment.MiddleLeft,
+                    TextImageRelation = TextImageRelation.ImageBeforeText,
+                    Location = new Point(729,12),
+                    Size = new Size(203,44)
+                };
+                btnUserRequest.Click += async (sender, e) =>
+                {
+                    btnUserReq_Click(sender, e);
+                };
+                panelTop.Controls.Add(btnUserRequest);
+            }    
             await connection.StartAsync();
             await connection.SendAsync("JoinGroup", groupId);
             var data = await groupService.LoadMessageByGroupId(groupId);
@@ -84,12 +116,6 @@ namespace NetStudy
                 listMsg.Items.Add($"{message.Sender}: {message.Content}");
             }
         }
-        private void linkAdd_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            FormAddUser formAdd = new FormAddUser(accessToken, GroupInfo["name"].ToString(), GroupInfo["id"].ToString(), UserInfo["name"].ToString());
-            formAdd.ShowDialog();
-        }
-
         private void txtMessage_TextChanged(object sender, EventArgs e)
         {
             btnSend.Enabled = !string.IsNullOrWhiteSpace(txtMessage.Text);
@@ -97,7 +123,14 @@ namespace NetStudy
 
         private void iconButton1_Click(object sender, EventArgs e)
         {
-            FormAddUser formAdd = new FormAddUser(accessToken, GroupInfo["name"].ToString(), GroupInfo["id"].ToString(), UserInfo["name"].ToString());
+            
+            FormAddUser formAdd = new FormAddUser(
+                accessToken, 
+                GroupInfo["name"].ToString(), 
+                GroupInfo["id"].ToString(), 
+                UserInfo["name"].ToString(), 
+                roleUser
+            );
             formAdd.ShowDialog();
         }
 
@@ -109,6 +142,12 @@ namespace NetStudy
             await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{name} đã rời khỏi nhóm");
             await groupService.LeaveGroup(groupId, username);
             await groupService.SendMessage(groupId, "Thông báo", $"{name} đã rời khỏi nhóm", DateTime.UtcNow);
+        }
+
+        private void btnUserReq_Click(object sender, EventArgs e)
+        {
+            FormUserRequests formReq = new FormUserRequests(accessToken, groupId, memReq, UserInfo["name"].ToString());
+            formReq.ShowDialog();
         }
     }
 }

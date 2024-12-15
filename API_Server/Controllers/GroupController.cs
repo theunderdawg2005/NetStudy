@@ -44,7 +44,12 @@ namespace API_Server.Controllers
 
             try
             {
-                groupModel.Members.Add(username);
+                var creator = new MemberRole
+                {
+                    Username = username,
+                    Role = "001"
+                };
+                groupModel.Members.Add(creator);
                 var group = new Group
                 {
                     Name = groupModel.Name,
@@ -72,24 +77,25 @@ namespace API_Server.Controllers
         public async Task<IActionResult> AddUserToGroup(string groupId, [FromBody] AddUserRequest userReq)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
-            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
-            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
-            if (claimsPrincipal == null)
+            var username = await _jwtService.GetUsernameFromToken(authorizationHeader);
+            if(username == null)
             {
-                return Unauthorized("Yêu cầu không hợp lệ!");
-            }
-
-            var usernameClaim = claimsPrincipal.FindFirst("userName");//Tìm username của token
-            if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
-            {
-                return Unauthorized("Yêu cầu không hợp lệ!");
-            }
-
-            var username = usernameClaim.Value;
-
-
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }    
             try
             {
+                var checkJoined = await _chatGroupService.IsInGroup(username, groupId);
+                if (!checkJoined)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Bạn chưa tham gia vào nhóm này!"
+                    });
+                }
+                    
                 var user = await _userService.GetUserByUserName(userReq.Username);
                 if (user == null)
                 {
@@ -114,8 +120,15 @@ namespace API_Server.Controllers
                         message = "Không tìm thấy nhóm"
                     });
                 }
-
-                await _chatGroupService.AddUserToGroup(groupId, userReq.Username);
+                var callerRole = group.Members.FirstOrDefault(m => m.Username == username)?.Role;
+                if(callerRole == "002")
+                {
+                    return StatusCode(403, new
+                    {
+                        message = "Chỉ Admin có thể thêm thành viên!"
+                    });
+                }    
+                await _chatGroupService.AddUserToGroup(groupId, userReq.Username, userReq.Role);
                 await _userService.AddGroupToUser(userReq.Username, groupId);
 
                 return Ok(new
@@ -125,7 +138,169 @@ namespace API_Server.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new
+                return StatusCode(500, new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("{groupId}/add-user-request")]
+        public async Task<IActionResult> AddUserToGroupRequest(string groupId, [FromBody] AddUserRequest userReq)
+        {
+            
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var username = await _jwtService.GetUsernameFromToken(authorizationHeader);
+            if (username == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+
+            try
+            {
+                var checkJoined = await _chatGroupService.IsInGroup(username, groupId);
+                if (!checkJoined)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Bạn chưa tham gia vào nhóm này!"
+                    });
+                }
+                var user = await _userService.GetUserByUserName(userReq.Username);
+                if (user == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Không tìm thấy người dùng!"
+                    });
+                }
+                var checkFriend = await _userService.IsFriend(username, userReq.Username);
+                if (!checkFriend)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Hai bạn chưa là bạn bè nên không thể thêm vào nhóm!"
+                    });
+                }
+                var check = await _chatGroupService.AddUserToGroupRequest(groupId, userReq.Username);
+                if(!check)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Người dùng đã là thành viên!"
+                    });
+                }    
+                return Ok(new
+                {
+                    message = "Đã gửi request tới admin!"
+                });
+
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("{groupId}/accept-join-req/{reqUsername}")]
+        public async Task<IActionResult> AcptJoinReq(string groupId,string reqUsername)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var username = await _jwtService.GetUsernameFromToken(authorizationHeader);
+            if (username == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+            try
+            {
+                var checkJoined = await _chatGroupService.IsInGroup(username, groupId);
+                if (!checkJoined)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Bạn chưa tham gia vào nhóm này!"
+                    });
+                }
+                
+                var acpt = await _chatGroupService.AcptJoinReq(groupId, reqUsername);
+                if (acpt)
+                {
+                    return Ok(new
+                    {
+                        message = "Đã thêm thành viên!"
+                    });
+                }    
+                else
+                {
+                    return BadRequest(new
+                    {
+                        message = "Không thể chấp nhận người dùng này!"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("{groupId}/remove-join-req/{reqUsername}")]
+        public async Task<IActionResult> DelJoinReq(string groupId, string reqUsername)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var username = await _jwtService.GetUsernameFromToken(authorizationHeader);
+            if (username == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+            try
+            {
+                var checkJoined = await _chatGroupService.IsInGroup(username, groupId);
+                if (!checkJoined)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Bạn chưa tham gia vào nhóm này!"
+                    });
+                }
+
+                var acpt = await _chatGroupService.DelJoinReq(groupId, reqUsername);
+                if (acpt)
+                {
+                    return Ok(new
+                    {
+                        message = "Đã xóa yêu cầu vào nhóm!"
+                    });
+                }
+                else
+                {
+                    return BadRequest(new
+                    {
+                        message = "Không thể chấp nhận người dùng này!"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
                 {
                     message = ex.Message
                 });
@@ -158,8 +333,56 @@ namespace API_Server.Controllers
             {
                 id = group.Id.ToString(),
                 name = group.Name,
-                description = group.Description
+                description = group.Description,
+                members = group.Members,
             });
+        }
+
+        [Authorize]
+        [HttpGet("get-join-list/{groupId}")]
+        public async Task<IActionResult> GetJoinList(string groupId)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var username = await _jwtService.GetUsernameFromToken(authorizationHeader);
+            if (username == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+            try
+            {
+                var checkJoined = await _chatGroupService.IsInGroup(username, groupId);
+                if (!checkJoined)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Bạn chưa tham gia vào nhóm này!"
+                    });
+                }
+                var joinReq = await _chatGroupService.GetJoinList(groupId);
+                if(joinReq == null)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Không tìm thấy nhóm"
+                    });
+                }
+                return Ok(new
+                {
+                    message = "Lấy danh sách yêu cầu thành công!",
+                    total = joinReq.Count,
+                    data = joinReq
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                });
+            }
         }
 
         //DELETE METHOD
@@ -168,23 +391,24 @@ namespace API_Server.Controllers
         public async Task<IActionResult> LeaveGroup(string groupId)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
-            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
-            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
-            if (claimsPrincipal == null)
+            var username = await _jwtService.GetUsernameFromToken(authorizationHeader);
+            if (username == null)
             {
-                return Unauthorized("Yêu cầu không hợp lệ!");
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
             }
-
-            var usernameClaim = claimsPrincipal.FindFirst("userName");
-            if (usernameClaim == null || string.IsNullOrEmpty(usernameClaim.Value))
-            {
-                return Unauthorized("Yêu cầu không hợp lệ!");
-            }
-
-            var username = usernameClaim.Value;
-
             try
             {
+                var checkJoined = await _chatGroupService.IsInGroup(username, groupId);
+                if (!checkJoined)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Bạn chưa tham gia vào nhóm này!"
+                    });
+                }
                 var group = await GetGroupByGroupId(groupId);
                 if (group == null)
                 {

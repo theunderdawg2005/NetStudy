@@ -164,14 +164,16 @@ namespace API_Server.Services
             var userGroups = userFound.ChatGroup;
             var members = await groups
                 .Find(g => userGroups.Contains(g.Id.ToString()))
-                .Project(g => g.Members)
+                .Project(g => g.Members.Select(mem => mem.Username))
                 .ToListAsync();
-            var allMembers = members.SelectMany(m => m).Distinct().ToList();
+            var allUsernames = members.SelectMany(m => m)
+                .Distinct()
+                .ToList();
 
-            allMembers.Remove(username);
-            allMembers.RemoveAll(m => userFound.Friends.Contains(m));
+            allUsernames.Remove(username);
+            allUsernames.RemoveAll(m => userFound.Friends.Contains(m));
 
-            var suggestFriends = await users.Find(u => allMembers.Contains(u.Username)).ToListAsync();
+            var suggestFriends = await users.Find(u => allUsernames.Contains(u.Username)).ToListAsync();
 
             return suggestFriends;
         }
@@ -254,7 +256,7 @@ namespace API_Server.Services
                 {
                     throw new Exception("User not found");
                 }
-                var groupsFound = await groups.Find(g => g.Members.Contains(username)).ToListAsync();
+                var groupsFound = await groups.Find(g => g.Members.Any(m => m.Username == username)).ToListAsync();
                 return groupsFound;
             }
             catch (Exception ex)
