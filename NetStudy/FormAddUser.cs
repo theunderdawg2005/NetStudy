@@ -22,7 +22,8 @@ namespace NetStudy
         private HubConnection connection;
         private string name;
         private DateTime timeStamp = DateTime.Now;
-        public FormAddUser(string token, string name, string id, string username)
+        private string roleUser;
+        public FormAddUser(string token, string name, string id, string username, string role)
         {
             InitializeComponent();
             accessToken = token;
@@ -31,7 +32,13 @@ namespace NetStudy
             lblName.Text = groupName;
             groupService = new GroupService(accessToken);
             this.name = username;
-
+            comboRole.Items.Add("User");
+            if (role == "001")
+            {
+                comboRole.Items.Add("Admin");
+            }
+            comboRole.SelectedIndex = 0;
+            roleUser = role;
             connection = new HubConnectionBuilder()
                 .WithUrl("https://localhost:7070/groupChatHub", opts =>
                 {
@@ -43,17 +50,34 @@ namespace NetStudy
 
         private async void btnAdd_Click(object sender, EventArgs e)
         {
-            var username = txtUsername.Text;         // Username from a TextBox
+            var username = txtUsername.Text;
+            var roleSelected = comboRole.SelectedItem.ToString();
 
-            if (string.IsNullOrWhiteSpace(username))
+            if (string.IsNullOrWhiteSpace(username) && string.IsNullOrEmpty(roleSelected))
             {
-                MessageBox.Show("Vui lòng điền tên người dùng!", "Error...", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng điền tên người dùng và vai trò trong nhóm!", "Error...", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            await connection.InvokeAsync("SendMessageGroup", groupId, name, $"đã thêm {username}");
-            await groupService.AddUserToGroup(groupId, username);
-            await groupService.SendMessage(groupId, name, $"đã thêm {username}", timeStamp);
+            if (roleSelected != "Admin" && roleSelected != "User")
+            {
+                MessageBox.Show("Vai trò không tồn tại!", "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if(roleUser == "002")
+            {
+                var checkUser = await groupService.AddUserToGroupRequest(groupId, username);
+                return;
+            }    
+           
+            var check = await groupService.AddUserToGroup(groupId, username, roleSelected);
+            if(check)
+            {
+                await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{name} đã thêm {username} là {roleSelected}");
+                await groupService.SendMessage(groupId, "Thông báo", $"đã thêm {username} là {roleSelected}", timeStamp);
+            }    
+            
         }
 
         private async void FormAddUser_Load(object sender, EventArgs e)

@@ -85,7 +85,7 @@
             Controls.Add(panel2);
             Controls.Add(panel1);
             Name = "FormGroups";
-            Text = "FormGroups";
+            Text = "Hội nhóm";
             Load += FormGroups_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();

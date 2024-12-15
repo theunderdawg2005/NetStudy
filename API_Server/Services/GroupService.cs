@@ -29,6 +29,11 @@ namespace API_Server.Services
             return await _chatGroups.Find(g => g.Name == groupName).FirstOrDefaultAsync();
         }
 
+        public async Task UpdateGroup(Group group)
+        {
+            await _chatGroups.ReplaceOneAsync(gr => gr.Id.ToString() == group.Id.ToString(), group);
+        }
+
         public async Task<bool> IsInGroup(string username, string groupId)
         {
             var group = await GetGroupById(groupId);
@@ -36,14 +41,10 @@ namespace API_Server.Services
             {
                 return false;
             }
-            if (!group.Members.Contains(username))
-            {
-                return false;
-            }
-            return true;
+            return group.Members.Any(m => m.Username == username);
         }
-        // thêm user vào group
-        public async Task<bool> AddUserToGroup(string groupId, string userName)
+        // thêm user vào group cho admin
+        public async Task<bool> AddUserToGroup(string groupId, string userName, string role)
         {
             
             var isJoined = await IsInGroup(userName, groupId);
@@ -51,10 +52,137 @@ namespace API_Server.Services
             {
                 return false;
             }
-            var update = Builders<Group>.Update.AddToSet(g => g.Members, userName);
+            if(role != "User" && role != "Admin")
+            {
+                return false;
+            }    
+            var member = new MemberRole
+            {
+                Username = userName,
+                Role = (role == "Admin") ? "001" : "002"
+            };
+
+            var update = Builders<Group>.Update.AddToSet(g => g.Members, member);
             await _chatGroups.UpdateOneAsync(g => g.Id.ToString() == groupId, update);
             return true;
         }
+        public async Task<bool> AddUserToGroupRequest(string groupId, string reqUsername)
+        {
+            var isJoined = await IsInGroup(reqUsername, groupId);
+            if (isJoined)
+            {
+                return false;
+            }
+            
+            var update = Builders<Group>.Update.AddToSet(g => g.MemberRequest, reqUsername);
+            await _chatGroups.UpdateOneAsync(g => g.Id.ToString() == groupId, update);
+            return true;
+        }
+        public async Task<List<string>> GetJoinList(string groupId)
+        {
+            
+            try
+            {
+                var group = await GetGroupById(groupId);
+                if (group == null)
+                {
+                    return null;
+                }
+                var joinReq = group.MemberRequest;
+                if(joinReq.Count == 0)
+                {
+                    return new List<string>();
+                }  
+                return joinReq;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public async Task<bool> AcptJoinReq(string groupId, string req)
+        {
+            try
+            {
+                var group = await GetGroupById(groupId);
+                if (group == null)
+                {
+                    return false;
+                }
+                var user = await _userService.GetUserByUserName(req);
+                if (user == null)
+                {
+                    return false;
+                }
 
+                var member = new MemberRole
+                {
+                    Username = req,
+                    Role = "002"
+                };
+
+                group.MemberRequest.Remove(req);
+                group.Members.Add(member);
+                var addGroup = await _userService.AddGroupToUser(req, groupId);
+                if(!addGroup)
+                {
+                    return false;
+                }
+                await UpdateGroup(group);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+        }
+
+        public async Task<bool> DelJoinReq(string groupId, string username)
+        {
+            try
+            {
+                var group = await GetGroupById(groupId);
+                if(group == null)
+                {
+                    return false ;
+                }    
+                var reqUser = await _userService.GetUserByUserName(username);
+                if(reqUser == null)
+                {
+                    return false;
+                }
+
+                group.MemberRequest.Remove(username);
+                await UpdateGroup(group);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }    
+        public async Task LeaveGroup(string groupId, string username)
+        {
+            var group = await GetGroupById(groupId);
+            if (group == null)
+            {
+                throw new Exception("Nhóm không tồn tại!");
+            }
+
+            var member = group.Members.FirstOrDefault(m => m.Username == username);
+            if(member == null)
+            {
+                throw new Exception("Người dùng không phải thành viên của nhóm này!");
+            }    
+            if (!group.Members.Remove(member))
+            {
+                throw new Exception("Người dùng không phải thành viên của nhóm này!");
+            }
+
+            var filter = Builders<Group>.Filter.Eq(g => g.Id, groupId);
+            var update = Builders<Group>.Update.Set(g => g.Members, group.Members);
+            await _chatGroups.UpdateOneAsync(filter, update);
+        }
     }
 }

@@ -19,14 +19,14 @@ namespace API_Server.Services
             _questions = context.ListQuestions;
         }
 
-        public async Task<QuestionDTO> CreateQuestionAsync(Question _question)
+        public async Task<QuestionDTO> CreateQuestionAsync(Question _question, string owner)
         {
             var question = new Question
             {
                 Title = _question.Title,
                 Content = _question.Content,
                 CorrectAnswer = _question.CorrectAnswer,
-                Owner = _question.Owner,
+                Owner = owner,
             };
 
             var listQuestion = new ListQuestion
@@ -35,7 +35,7 @@ namespace API_Server.Services
                 Questions = new List<Question> { question }
             };
 
-            var filter = Builders<ListQuestion>.Filter.Eq(q => q.Owner, _question.Owner);
+            var filter = Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner);
             var listQuestionExists = await _questions.Find(filter).FirstOrDefaultAsync();
 
             if (listQuestionExists != null)
@@ -73,9 +73,13 @@ namespace API_Server.Services
             return false;
         }
 
-        public async Task<QuestionDTO> GetQuestionAsync(string title)
+        public async Task<QuestionDTO> GetQuestionAsync(string title, string owner)
         {
-            var filter = Builders<ListQuestion>.Filter.ElemMatch(q => q.Questions, q => q.Title == title);
+            //var filter = Builders<ListQuestion>.Filter.ElemMatch(q => q.Questions, q => q.Title == title);
+            var filter = Builders<ListQuestion>.Filter.And(
+                        Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner),
+                        Builders<ListQuestion>.Filter.ElemMatch(q => q.Questions, q => q.Title == title)
+            );
             var listQuestion = await _questions.Find(filter).FirstOrDefaultAsync();
             if (listQuestion != null)
             {
@@ -90,9 +94,52 @@ namespace API_Server.Services
             return null;
         }
 
-        public async Task<string> GetCorrectAnswer(string title)
+        public async Task<QuestionDTO> GetRandomQuestionAsync(string owner)
         {
-            var question = await GetQuestionAsync(title);
+            var filter = Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner);
+            var listQuestion = await _questions.Find(filter).FirstOrDefaultAsync();
+
+            if (listQuestion != null && listQuestion.Questions.Any())
+            {
+                var random = new Random();
+                var randomQuestion = listQuestion.Questions[random.Next(listQuestion.Questions.Count)];
+
+                var questionDto = new QuestionDTO
+                {
+                    Title = randomQuestion.Title,
+                    Content = randomQuestion.Content,
+                    CorrectAnswer = randomQuestion.CorrectAnswer
+                };
+
+                return questionDto;
+            }
+
+            return null;
+
+        }
+
+        public async Task<List<QuestionDTO>> GetAllQuestionsAsync(string owner)
+        {
+            var filter = Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner);
+
+            var listQuestion = await _questions.Find(filter).FirstOrDefaultAsync();
+
+            if (listQuestion?.Questions == null)
+            {
+                return new List<QuestionDTO>(); 
+            }
+
+            return listQuestion.Questions.Select(question => new QuestionDTO
+            {
+                Title = question.Title,
+                Content = question.Content,
+                CorrectAnswer = question.CorrectAnswer
+            }).ToList();
+        }
+
+        public async Task<string> GetCorrectAnswer(string title, string owner)
+        {
+            var question = await GetQuestionAsync(title, owner);
             return question.CorrectAnswer;
         }
 
