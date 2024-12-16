@@ -18,6 +18,7 @@ namespace NetStudy.Forms
         private JObject UserInfo;
         private string accessToken;
         private QuestionService questionService;
+        private ChatBotService chatBotService;
         string correctAnswer;
 
         public FormExam(JObject info, string token)

@@ -1,5 +1,6 @@
 ﻿using NetStudy.Services;
 using Newtonsoft.Json.Linq;
+using NetStudy.Helper;
 
 namespace NetStudy
 {
@@ -15,6 +16,7 @@ namespace NetStudy
         private string accessToken;
         private QuestionService questionService;
         string correctAnswer;
+        private QuestionHelper questionHelper;
 
         public ReviewQuestion(JObject info, string token)
         {
@@ -23,6 +25,7 @@ namespace NetStudy
             accessToken = token;
             lbl_username.Text = UserInfo["username"].ToString();
             questionService = new QuestionService(accessToken);
+            questionHelper = new QuestionHelper(accessToken);
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
         }
 
@@ -87,6 +90,97 @@ namespace NetStudy
             }
         }
 
+        //private async Task LoadRandomQuestionAsync()
+        //{
+        //    try
+        //    {
+        //        var randomQuestion = await questionService.GetRandomQuestionsAsync(UserInfo["username"].ToString());
+        //        if (randomQuestion.Data != null)
+        //        {
+        //            tB_data.Text = $"Topic: {randomQuestion.Data.Topic}{Environment.NewLine}Content: {randomQuestion.Data.Content}";
+        //            correctAnswer = randomQuestion.Data.CorrectAnswer;
+        //            List<string> fakeAnswers = new List<string>
+        //            {
+        //                "Answer A",
+        //                "Answer B",
+        //                "Answer C",
+        //                "Answer D"
+        //            };
+
+        //            Random random = new Random();
+        //            int correctAnswerIndex = random.Next(0, 4);
+        //            Button[] buttons = { btn_option1, btn_option2, btn_option3, btn_option4 };
+        //            buttons[correctAnswerIndex].Text = correctAnswer;
+
+        //            int fakeAnswerIndex = 0;
+        //            for (int i = 0; i < 4; i++)
+        //            {
+        //                if (i != correctAnswerIndex)
+        //                {
+        //                    buttons[i].Text = fakeAnswers[fakeAnswerIndex];
+        //                    fakeAnswerIndex++;
+        //                }
+        //            }
+
+        //        }
+        //        else
+        //        {
+        //            tB_data.Text = "No questions found.";
+        //        }
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+        //}
+
+        //private async Task LoadRandomQuestionByTopic()
+        //{
+        //    string topic = tB_topic.Text;
+        //    try
+        //    {
+        //        var randomQuestion = await questionService.GetRandomQuestionByTopic(UserInfo["username"].ToString(), topic);
+        //        if (randomQuestion.Data != null)
+        //        {
+        //            tB_data.Text = $"Topic: {randomQuestion.Data.Topic}{Environment.NewLine}Content: {randomQuestion.Data.Content}";
+        //            correctAnswer = randomQuestion.Data.CorrectAnswer;
+        //            List<string> fakeAnswers = new List<string>
+        //            {
+        //                "Answer A",
+        //                "Answer B",
+        //                "Answer C",
+        //                "Answer D"
+        //            };
+
+        //            Random random = new Random();
+        //            int correctAnswerIndex = random.Next(0, 4);
+        //            Button[] buttons = { btn_option1, btn_option2, btn_option3, btn_option4 };
+        //            buttons[correctAnswerIndex].Text = correctAnswer;
+
+        //            int fakeAnswerIndex = 0;
+        //            for (int i = 0; i < 4; i++)
+        //            {
+        //                if (i != correctAnswerIndex)
+        //                {
+        //                    buttons[i].Text = fakeAnswers[fakeAnswerIndex];
+        //                    fakeAnswerIndex++;
+        //                }
+        //            }
+
+        //        }
+        //        else
+        //        {
+        //            tB_data.Text = "No questions found.";
+        //        }
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+        //}
+
         private async Task LoadRandomQuestionAsync()
         {
             try
@@ -96,13 +190,14 @@ namespace NetStudy
                 {
                     tB_data.Text = $"Topic: {randomQuestion.Data.Topic}{Environment.NewLine}Content: {randomQuestion.Data.Content}";
                     correctAnswer = randomQuestion.Data.CorrectAnswer;
-                    List<string> fakeAnswers = new List<string>
+
+                    var fakeAnswers = await questionHelper.GenerateFakeAnswers(randomQuestion.Data.Content);
+
+                    if (fakeAnswers == null || fakeAnswers.Count < 3)
                     {
-                        "Answer A",
-                        "Answer B",
-                        "Answer C",
-                        "Answer D"
-                    };
+                        MessageBox.Show("Failed to generate fake answers. Using default fake answers.");
+                        fakeAnswers = new List<string> { "Answer A", "Answer B", "Answer C", "Answer D" };
+                    }
 
                     Random random = new Random();
                     int correctAnswerIndex = random.Next(0, 4);
@@ -118,13 +213,11 @@ namespace NetStudy
                             fakeAnswerIndex++;
                         }
                     }
-
                 }
                 else
                 {
                     tB_data.Text = "No questions found.";
                 }
-
             }
             catch (Exception ex)
             {
@@ -142,13 +235,14 @@ namespace NetStudy
                 {
                     tB_data.Text = $"Topic: {randomQuestion.Data.Topic}{Environment.NewLine}Content: {randomQuestion.Data.Content}";
                     correctAnswer = randomQuestion.Data.CorrectAnswer;
-                    List<string> fakeAnswers = new List<string>
+
+                    var fakeAnswers = await questionHelper.GenerateFakeAnswers(randomQuestion.Data.Content);
+
+                    if (fakeAnswers == null || fakeAnswers.Count < 3)
                     {
-                        "Answer A",
-                        "Answer B",
-                        "Answer C",
-                        "Answer D"
-                    };
+                        MessageBox.Show("Failed to generate fake answers. Using default fake answers.");
+                        fakeAnswers = new List<string> { "Answer A", "Answer B", "Answer C", "Answer D" };
+                    }
 
                     Random random = new Random();
                     int correctAnswerIndex = random.Next(0, 4);
@@ -164,18 +258,17 @@ namespace NetStudy
                             fakeAnswerIndex++;
                         }
                     }
-
                 }
                 else
                 {
                     tB_data.Text = "No questions found.";
                 }
-
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
     }
 }
