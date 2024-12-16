@@ -215,6 +215,7 @@
             Name = "FormLogin";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Đăng nhập vào NetStudy";
+            Load += FormLogin_Load;
             ((System.ComponentModel.ISupportInitialize)PicUser).EndInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox2).EndInit();
             ((System.ComponentModel.ISupportInitialize)PicPassword).EndInit();

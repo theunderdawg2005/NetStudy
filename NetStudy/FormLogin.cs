@@ -26,7 +26,7 @@ namespace NetStudy
         public FormLogin()
         {
             InitializeComponent();
-            
+
         }
         public async void btnLogin_Click_1(object sender, EventArgs e)
         {
@@ -81,6 +81,11 @@ namespace NetStudy
             FormRegister register = new FormRegister();
             register.ShowDialog();
             this.Close();
+        }
+
+        private void FormLogin_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

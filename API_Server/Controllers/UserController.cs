@@ -196,6 +196,36 @@ namespace API_Server.Controllers
             }
         }
 
+
+        [Authorize]
+        [HttpPost("updateStatus")]
+        public async Task<IActionResult> UpdateStatus([FromBody] UserStatusUpdateRequest request)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+
+            if (request.OpStatus == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Trạng thái không hợp lệ!"
+                });
+            }
+
+            var result = await _userService.UpdateUserStatusAsync(request.Username, request.OpStatus.Value);
+            if (result)
+            {
+                return Ok();
+            }
+            return BadRequest("Không thể cập nhật trạng thái.");
+        }
+
         //GET METHOD
         //Lấy data của người dùng
         [HttpGet("{username}")]
@@ -440,6 +470,36 @@ namespace API_Server.Controllers
             }
         }
 
+
+        [Authorize]
+        [HttpGet("get-status/{username}")]
+        public async Task<IActionResult> GetStatus(string username)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+
+            var user = await _userService.GetUserByUserName(username);
+            if (user == null)
+            {
+                return NotFound(new
+                {
+                    message = "Không tìm thấy người dùng."
+                });
+            }
+
+            return Ok(new
+            {
+                username = user.Username,
+                opStatus = user.OpStatus
+            });
+        }
+
         // DELETE METHOD
         [Authorize]
         [HttpDelete("{username}/remove-request/{reqUsername}")]
@@ -599,64 +659,6 @@ namespace API_Server.Controllers
             await _context.Users.DeleteOneAsync(u => u.Username == username);
 
             return Ok("Xóa người dùng thành công.");
-        }
-
-        [Authorize]
-        [HttpPost("updateStatus")]
-        public async Task<IActionResult> UpdateStatus([FromBody] UserStatusUpdateRequest request)
-        {
-            var authorizationHeader = Request.Headers["Authorization"].ToString();
-            if (!_jwtService.IsValidate(authorizationHeader))
-            {
-                return Unauthorized(new
-                {
-                    message = "Yêu cầu không hợp lệ!"
-                });
-            }
-
-            if (request.OpStatus == null)
-            {
-                return BadRequest(new
-                {
-                    message = "Trạng thái không hợp lệ!"
-                });
-            }
-
-            var result = await _userService.UpdateUserStatusAsync(request.Username, request.OpStatus.Value);
-            if (result)
-            {
-                return Ok();
-            }
-            return BadRequest("Failed to update status");
-        }
-
-        [Authorize]
-        [HttpGet("get-status/{username}")]
-        public async Task<IActionResult> GetStatus(string username)
-        {
-            var authorizationHeader = Request.Headers["Authorization"].ToString();
-            if (!_jwtService.IsValidate(authorizationHeader))
-            {
-                return Unauthorized(new
-                {
-                    message = "Yêu cầu không hợp lệ!"
-                });
-            }
-
-            var user = await _userService.GetUserByUserName(username);
-            if (user == null)
-            {
-                return NotFound(new
-                {
-                    message = "Không tìm thấy người dùng."
-                });
-            }
-
-            return Ok(new
-            {
-                username = user.Username,
-                opStatus = user.OpStatus
-            });
         }
     }
 }
