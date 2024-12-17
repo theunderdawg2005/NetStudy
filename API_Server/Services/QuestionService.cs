@@ -189,17 +189,17 @@ namespace API_Server.Services
             }).ToList();
         }
 
-        public async Task<bool> DeleteQuestion(QuestionDTO question)
+        public async Task<bool> DeleteQuestion(QuestionDTO question, string owner)
         {
-            var filter = Builders<ListQuestion>.Filter.ElemMatch(
-                q => q.Questions,
-                q => q.Topic == question.Topic &&
-                     q.Content == question.Content &&
-                     q.CorrectAnswer == question.CorrectAnswer
+            var filter = Builders<ListQuestion>.Filter.And(
+                Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner),
+                Builders<ListQuestion>.Filter.ElemMatch(q => q.Questions,
+                         q => q.Topic == question.Topic &&
+                         q.Content == question.Content &&
+                         q.CorrectAnswer == question.CorrectAnswer)
             );
 
-            var update = Builders<ListQuestion>.Update.PullFilter(
-                q => q.Questions,
+            var update = Builders<ListQuestion>.Update.PullFilter(q => q.Questions,
                 q => q.Topic == question.Topic &&
                      q.Content == question.Content &&
                      q.CorrectAnswer == question.CorrectAnswer
@@ -215,5 +215,34 @@ namespace API_Server.Services
             var question = await GetQuestionAsync(content, owner);
             return question.CorrectAnswer;
         }
+
+        public async Task<QuestionDTO> UpdateQuestion(QuestionDTO oldQuestion, QuestionDTO newQuestion, string owner)
+        {
+            var filter = Builders<ListQuestion>.Filter.And(
+                Builders<ListQuestion>.Filter.Eq(q => q.Owner, owner),
+                Builders<ListQuestion>.Filter.ElemMatch(
+                    q => q.Questions,
+                    q => q.Topic == oldQuestion.Topic &&
+                         q.Content == oldQuestion.Content &&
+                         q.CorrectAnswer == oldQuestion.CorrectAnswer
+                )
+            );
+
+            var update = Builders<ListQuestion>.Update
+                .Set("Questions.$.Topic", newQuestion.Topic ?? oldQuestion.Topic)
+                .Set("Questions.$.Content", newQuestion.Content ?? oldQuestion.Content)
+                .Set("Questions.$.CorrectAnswer", newQuestion.CorrectAnswer ?? oldQuestion.CorrectAnswer);
+
+            var result = await _questions.UpdateOneAsync(filter, update);
+
+            if (result.ModifiedCount > 0)
+            {
+                return newQuestion;
+            }
+
+            return null;
+        }
+
+
     }
 }

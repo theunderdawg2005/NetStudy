@@ -53,7 +53,7 @@
             LoginTitle.ForeColor = Color.FromArgb(0, 117, 214);
             LoginTitle.Location = new Point(158, 175);
             LoginTitle.Name = "LoginTitle";
-            LoginTitle.Size = new Size(173, 58);
+            LoginTitle.Size = new Size(143, 48);
             LoginTitle.TabIndex = 1;
             LoginTitle.Text = "LOG IN";
             // 
@@ -138,9 +138,9 @@
             linkRegister.AutoSize = true;
             linkRegister.Font = new Font("Cambria", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
             linkRegister.LinkColor = Color.FromArgb(0, 117, 214);
-            linkRegister.Location = new Point(326, 579);
+            linkRegister.Location = new Point(303, 580);
             linkRegister.Name = "linkRegister";
-            linkRegister.Size = new Size(85, 26);
+            linkRegister.Size = new Size(73, 22);
             linkRegister.TabIndex = 7;
             linkRegister.TabStop = true;
             linkRegister.Text = "Sign up";
@@ -152,7 +152,7 @@
             label2.ForeColor = Color.FromArgb(0, 117, 214);
             label2.Location = new Point(63, 582);
             label2.Name = "label2";
-            label2.Size = new Size(268, 23);
+            label2.Size = new Size(234, 20);
             label2.TabIndex = 9;
             label2.Text = "Do not you have an account ?";
             // 
@@ -163,7 +163,7 @@
             txtUsername.ForeColor = Color.FromArgb(0, 117, 214);
             txtUsername.Location = new Point(99, 280);
             txtUsername.Name = "txtUsername";
-            txtUsername.Size = new Size(326, 29);
+            txtUsername.Size = new Size(326, 24);
             txtUsername.TabIndex = 10;
             // 
             // txtPassword
@@ -173,7 +173,7 @@
             txtPassword.ForeColor = Color.FromArgb(0, 117, 214);
             txtPassword.Location = new Point(99, 375);
             txtPassword.Name = "txtPassword";
-            txtPassword.Size = new Size(326, 29);
+            txtPassword.Size = new Size(326, 24);
             txtPassword.TabIndex = 11;
             // 
             // linkClear
@@ -183,7 +183,7 @@
             linkClear.LinkColor = Color.FromArgb(0, 117, 214);
             linkClear.Location = new Point(316, 438);
             linkClear.Name = "linkClear";
-            linkClear.Size = new Size(127, 26);
+            linkClear.Size = new Size(108, 22);
             linkClear.TabIndex = 12;
             linkClear.TabStop = true;
             linkClear.Text = "Clear fields";
@@ -191,7 +191,7 @@
             // 
             // FormLogin
             // 
-            AutoScaleDimensions = new SizeF(12F, 23F);
+            AutoScaleDimensions = new SizeF(10F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
             ClientSize = new Size(471, 644);
