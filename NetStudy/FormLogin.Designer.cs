@@ -121,6 +121,7 @@
             // btnLogin
             // 
             btnLogin.BackColor = Color.FromArgb(0, 117, 214);
+            btnLogin.Cursor = Cursors.Hand;
             btnLogin.FlatAppearance.BorderSize = 0;
             btnLogin.FlatStyle = FlatStyle.Flat;
             btnLogin.Font = new Font("Impact", 18F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -136,6 +137,8 @@
             // linkRegister
             // 
             linkRegister.AutoSize = true;
+            linkRegister.BackColor = Color.White;
+            linkRegister.Cursor = Cursors.Hand;
             linkRegister.Font = new Font("Cambria", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
             linkRegister.LinkColor = Color.FromArgb(0, 117, 214);
             linkRegister.Location = new Point(326, 579);
@@ -165,6 +168,7 @@
             txtUsername.Name = "txtUsername";
             txtUsername.Size = new Size(326, 29);
             txtUsername.TabIndex = 10;
+            txtUsername.TextChanged += txtUsername_TextChanged;
             // 
             // txtPassword
             // 
@@ -175,10 +179,12 @@
             txtPassword.Name = "txtPassword";
             txtPassword.Size = new Size(326, 29);
             txtPassword.TabIndex = 11;
+            txtPassword.TextChanged += txtPassword_TextChanged;
             // 
             // linkClear
             // 
             linkClear.AutoSize = true;
+            linkClear.Cursor = Cursors.Hand;
             linkClear.Font = new Font("Cambria", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
             linkClear.LinkColor = Color.FromArgb(0, 117, 214);
             linkClear.Location = new Point(316, 438);

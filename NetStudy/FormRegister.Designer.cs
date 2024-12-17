@@ -366,6 +366,7 @@
             // linkLogin
             // 
             linkLogin.AutoSize = true;
+            linkLogin.Cursor = Cursors.Hand;
             linkLogin.Font = new Font("Bahnschrift", 11F, FontStyle.Regular, GraphicsUnit.Point, 0);
             linkLogin.LinkColor = Color.MediumSlateBlue;
             linkLogin.Location = new Point(380, 892);

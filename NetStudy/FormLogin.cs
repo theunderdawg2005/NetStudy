@@ -26,7 +26,7 @@ namespace NetStudy
         public FormLogin()
         {
             InitializeComponent();
-            
+
         }
         public async void btnLogin_Click_1(object sender, EventArgs e)
         {
@@ -81,6 +81,16 @@ namespace NetStudy
             FormRegister register = new FormRegister();
             register.ShowDialog();
             this.Close();
+        }
+
+        private void txtUsername_TextChanged(object sender, EventArgs e)
+        {
+            btnLogin.Enabled = !string.IsNullOrWhiteSpace(txtUsername.Text);
+        }
+
+        private void txtPassword_TextChanged(object sender, EventArgs e)
+        {
+            btnLogin.Enabled = !string.IsNullOrWhiteSpace(txtPassword.Text);
         }
     }
 }

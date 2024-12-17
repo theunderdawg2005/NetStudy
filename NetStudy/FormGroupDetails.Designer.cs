@@ -29,7 +29,8 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
-            iconButton1 = new FontAwesome.Sharp.IconButton();
+            btnMemberList = new FontAwesome.Sharp.IconButton();
+            btnAddUser = new FontAwesome.Sharp.IconButton();
             btnSend = new FontAwesome.Sharp.IconButton();
             txtMessage = new TextBox();
             panelTop = new Panel();
@@ -43,7 +44,8 @@
             // panel1
             // 
             panel1.BackColor = Color.FromArgb(26, 25, 62);
-            panel1.Controls.Add(iconButton1);
+            panel1.Controls.Add(btnMemberList);
+            panel1.Controls.Add(btnAddUser);
             panel1.Controls.Add(btnSend);
             panel1.Controls.Add(txtMessage);
             panel1.Dock = DockStyle.Bottom;
@@ -52,28 +54,48 @@
             panel1.Size = new Size(1032, 85);
             panel1.TabIndex = 0;
             // 
-            // iconButton1
+            // btnMemberList
             // 
-            iconButton1.BackColor = Color.FromArgb(192, 0, 192);
-            iconButton1.FlatAppearance.BorderSize = 0;
-            iconButton1.FlatAppearance.MouseOverBackColor = Color.FromArgb(192, 192, 255);
-            iconButton1.FlatStyle = FlatStyle.Flat;
-            iconButton1.IconChar = FontAwesome.Sharp.IconChar.PersonCirclePlus;
-            iconButton1.IconColor = Color.Gainsboro;
-            iconButton1.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconButton1.IconSize = 40;
-            iconButton1.Location = new Point(12, 18);
-            iconButton1.Name = "iconButton1";
-            iconButton1.Size = new Size(49, 52);
-            iconButton1.TabIndex = 2;
-            iconButton1.UseVisualStyleBackColor = false;
-            iconButton1.Click += iconButton1_Click;
+            btnMemberList.BackColor = Color.FromArgb(192, 0, 192);
+            btnMemberList.Cursor = Cursors.Hand;
+            btnMemberList.FlatAppearance.BorderSize = 2;
+            btnMemberList.FlatStyle = FlatStyle.Flat;
+            btnMemberList.ForeColor = Color.Gainsboro;
+            btnMemberList.IconChar = FontAwesome.Sharp.IconChar.PeopleGroup;
+            btnMemberList.IconColor = Color.Gainsboro;
+            btnMemberList.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnMemberList.ImageAlign = ContentAlignment.TopCenter;
+            btnMemberList.Location = new Point(12, 16);
+            btnMemberList.Name = "btnMemberList";
+            btnMemberList.Size = new Size(52, 52);
+            btnMemberList.TabIndex = 3;
+            btnMemberList.UseVisualStyleBackColor = false;
+            btnMemberList.Click += btnMemberList_Click;
+            // 
+            // btnAddUser
+            // 
+            btnAddUser.BackColor = Color.FromArgb(192, 0, 192);
+            btnAddUser.Cursor = Cursors.Hand;
+            btnAddUser.FlatAppearance.BorderSize = 2;
+            btnAddUser.FlatStyle = FlatStyle.Flat;
+            btnAddUser.ForeColor = Color.Gainsboro;
+            btnAddUser.IconChar = FontAwesome.Sharp.IconChar.PersonCirclePlus;
+            btnAddUser.IconColor = Color.Gainsboro;
+            btnAddUser.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnAddUser.IconSize = 45;
+            btnAddUser.Location = new Point(79, 16);
+            btnAddUser.Name = "btnAddUser";
+            btnAddUser.Size = new Size(52, 52);
+            btnAddUser.TabIndex = 2;
+            btnAddUser.UseVisualStyleBackColor = false;
+            btnAddUser.Click += btnAddUser_Click;
             // 
             // btnSend
             // 
             btnSend.BackColor = Color.FromArgb(192, 0, 192);
-            btnSend.FlatAppearance.BorderSize = 0;
-            btnSend.FlatAppearance.MouseOverBackColor = Color.FromArgb(192, 192, 255);
+            btnSend.Cursor = Cursors.Hand;
+            btnSend.FlatAppearance.BorderColor = Color.Gainsboro;
+            btnSend.FlatAppearance.BorderSize = 2;
             btnSend.FlatStyle = FlatStyle.Flat;
             btnSend.IconChar = FontAwesome.Sharp.IconChar.PaperPlane;
             btnSend.IconColor = Color.Gainsboro;
@@ -90,7 +112,7 @@
             txtMessage.BackColor = Color.White;
             txtMessage.BorderStyle = BorderStyle.FixedSingle;
             txtMessage.Font = new Font("Cambria", 11F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtMessage.Location = new Point(360, 27);
+            txtMessage.Location = new Point(370, 27);
             txtMessage.Name = "txtMessage";
             txtMessage.Size = new Size(565, 33);
             txtMessage.TabIndex = 0;
@@ -112,7 +134,8 @@
             // btnLeave
             // 
             btnLeave.BackColor = Color.FromArgb(192, 0, 192);
-            btnLeave.FlatAppearance.BorderSize = 0;
+            btnLeave.Cursor = Cursors.Hand;
+            btnLeave.FlatAppearance.BorderSize = 2;
             btnLeave.FlatStyle = FlatStyle.Flat;
             btnLeave.IconChar = FontAwesome.Sharp.IconChar.SignOut;
             btnLeave.IconColor = Color.Gainsboro;
@@ -128,6 +151,7 @@
             // lblTitle
             // 
             lblTitle.AutoSize = true;
+            lblTitle.Cursor = Cursors.Hand;
             lblTitle.Font = new Font("Bahnschrift SemiBold", 14F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTitle.ForeColor = Color.Gainsboro;
             lblTitle.Location = new Point(21, 15);
@@ -135,6 +159,7 @@
             lblTitle.Size = new Size(201, 34);
             lblTitle.TabIndex = 0;
             lblTitle.Text = "{GroupName}  ";
+            lblTitle.Click += lblTitle_Click;
             // 
             // listMsg
             // 
@@ -156,7 +181,7 @@
             Controls.Add(panelTop);
             Controls.Add(panel1);
             Name = "FormGroupDetails";
-            Text = "FormGroupDetails";
+            Text = "Hội nhóm";
             Load += FormGroupDetails_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
@@ -173,7 +198,8 @@
         private Panel panelTop;
         private Label lblTitle;
         private ListBox listMsg;
-        private FontAwesome.Sharp.IconButton iconButton1;
+        private FontAwesome.Sharp.IconButton btnAddUser;
         private FontAwesome.Sharp.IconButton btnLeave;
+        private FontAwesome.Sharp.IconButton btnMemberList;
     }
 }

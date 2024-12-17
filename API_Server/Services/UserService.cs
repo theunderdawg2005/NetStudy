@@ -25,7 +25,7 @@ namespace API_Server.Services
          
         public async Task<List<User>> GetAllUserAsync() => await users.Find(_ =>  true).ToListAsync();
 
-        public async Task<(List<User>, int)>SearchUserAsync(string query, int page, int pageSize, string username)
+        public async Task<(List<User>, int)> SearchUserAsync(string query, int page, int pageSize, string username)
         {
             if(page <= 0 || pageSize <= 0)
             {

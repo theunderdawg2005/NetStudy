@@ -23,22 +23,31 @@ namespace NetStudy
         private string name;
         private DateTime timeStamp = DateTime.Now;
         private string roleUser;
-        public FormAddUser(string token, string name, string id, string username, string role)
+        private readonly UserService userService;
+        public static readonly HttpClient httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(@"https://localhost:7070/"),
+            Timeout = TimeSpan.FromMinutes(5)
+        };
+        public FormAddUser(string token, string grName, string id, string username, string role)
         {
             InitializeComponent();
             accessToken = token;
-            groupName = name;
+            groupName = grName;
             groupId = id;
             lblName.Text = groupName;
             groupService = new GroupService(accessToken);
-            this.name = username;
+            userService = new UserService(accessToken);
+            name = username;
             comboRole.Items.Add("User");
             if (role == "001")
             {
                 comboRole.Items.Add("Admin");
             }
+            
             comboRole.SelectedIndex = 0;
             roleUser = role;
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
             connection = new HubConnectionBuilder()
                 .WithUrl("https://localhost:7070/groupChatHub", opts =>
                 {
@@ -52,6 +61,12 @@ namespace NetStudy
         {
             var username = txtUsername.Text;
             var roleSelected = comboRole.SelectedItem.ToString();
+            var user = await userService.GetUserByUsername(username);
+            if(user == null)
+            {
+                MessageBox.Show("Người dùng không tồn tại!", "Error...", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }    
 
             if (string.IsNullOrWhiteSpace(username) && string.IsNullOrEmpty(roleSelected))
             {
@@ -67,11 +82,11 @@ namespace NetStudy
 
             if(roleUser == "002")
             {
-                var checkUser = await groupService.AddUserToGroupRequest(groupId, username);
+                var checkUser = await groupService.AddUserToGroupRequest(groupId, username, user.Name);
                 return;
             }    
            
-            var check = await groupService.AddUserToGroup(groupId, username, roleSelected);
+            var check = await groupService.AddUserToGroup(groupId, username, roleSelected, user.Name);
             if(check)
             {
                 await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{name} đã thêm {username} là {roleSelected}");

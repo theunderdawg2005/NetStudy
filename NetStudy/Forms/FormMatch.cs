@@ -180,7 +180,7 @@ namespace NetStudy.Forms
 
                 LinkLabel linkDelFriend = new LinkLabel
                 {
-                    Location = new Point(1024, 75),
+                    Location = new Point(1070, 75),
                     Size = new Size(150, 35),
                     Font = new Font("Arial", 9, FontStyle.Regular),
                     LinkColor = Color.IndianRed,

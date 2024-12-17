@@ -78,30 +78,30 @@ namespace NetStudy
         {
             int total;
             (memReq, total) = await groupService.GetJoinListByGroupId(groupId);
-            if(roleUser == "001")
+            if (roleUser == "001")
             {
                 IconButton btnUserRequest = new IconButton
                 {
-                     
+
                     FlatStyle = FlatStyle.Flat,
                     Text = $"User Requests ({total})",
                     TextAlign = ContentAlignment.MiddleLeft,
-                    Font = new Font("Bahnschrift",9, FontStyle.Bold),
+                    Font = new Font("Bahnschrift", 9, FontStyle.Bold),
                     BackColor = Color.FromArgb(192, 0, 192),
                     IconChar = IconChar.PersonWalkingArrowRight,
                     IconSize = 35,
                     IconColor = Color.Gainsboro,
                     ImageAlign = ContentAlignment.MiddleLeft,
                     TextImageRelation = TextImageRelation.ImageBeforeText,
-                    Location = new Point(729,12),
-                    Size = new Size(203,44)
+                    Location = new Point(729, 12),
+                    Size = new Size(203, 44)
                 };
                 btnUserRequest.Click += async (sender, e) =>
                 {
                     btnUserReq_Click(sender, e);
                 };
                 panelTop.Controls.Add(btnUserRequest);
-            }    
+            }
             await connection.StartAsync();
             await connection.SendAsync("JoinGroup", groupId);
             var data = await groupService.LoadMessageByGroupId(groupId);
@@ -120,34 +120,54 @@ namespace NetStudy
         {
             btnSend.Enabled = !string.IsNullOrWhiteSpace(txtMessage.Text);
         }
-
-        private void iconButton1_Click(object sender, EventArgs e)
-        {
-            
-            FormAddUser formAdd = new FormAddUser(
-                accessToken, 
-                GroupInfo["name"].ToString(), 
-                GroupInfo["id"].ToString(), 
-                UserInfo["name"].ToString(), 
-                roleUser
-            );
-            formAdd.ShowDialog();
-        }
-
         private async void btnLeave_Click(object sender, EventArgs e)
         {
             string username = UserInfo["username"].ToString();
             string name = UserInfo["name"].ToString();
-            await connection.InvokeAsync("LeaveGroup", groupId);
-            await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{name} đã rời khỏi nhóm");
-            await groupService.LeaveGroup(groupId, username);
-            await groupService.SendMessage(groupId, "Thông báo", $"{name} đã rời khỏi nhóm", DateTime.UtcNow);
+            var result = MessageBox.Show("Bạn có chắc muốn rời khỏi nhóm này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                await connection.InvokeAsync("LeaveGroup", groupId);
+                await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{name} đã rời khỏi nhóm");
+                await groupService.LeaveGroup(groupId, username);
+                await groupService.SendMessage(groupId, "Thông báo", $"{name} đã rời khỏi nhóm", DateTime.UtcNow);
+                this.Hide();
+                this.Close();
+            }
         }
 
         private void btnUserReq_Click(object sender, EventArgs e)
         {
             FormUserRequests formReq = new FormUserRequests(accessToken, groupId, memReq, UserInfo["name"].ToString());
             formReq.ShowDialog();
+        }
+
+        private void linkMemList_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+
+        }
+
+        private void btnAddUser_Click(object sender, EventArgs e)
+        {
+            FormAddUser formAdd = new  (
+                accessToken,
+                GroupInfo["name"].ToString(),
+                GroupInfo["id"].ToString(),
+                UserInfo["name"].ToString(),
+                roleUser
+            );
+            formAdd.ShowDialog();
+        }
+
+        private void lblTitle_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnMemberList_Click(object sender, EventArgs e)
+        {
+            FormMemberList memList = new FormMemberList(accessToken, groupId);
+            memList.ShowDialog();
         }
     }
 }

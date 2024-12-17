@@ -31,7 +31,7 @@ namespace NetStudy
         private List<string> reqList;
         private HubConnection connection;
         private string admin;
-        public FormUserRequests( string token, string id, List<string> list, string userAdmin)
+        public FormUserRequests(string token, string id, List<string> list, string userAdmin)
         {
             InitializeComponent();
             reqList = list;
@@ -47,10 +47,11 @@ namespace NetStudy
                 .Build();
         }
 
-        public void CreatePanel(List<string> memReq)
+        public async void CreatePanel()
         {
             flowLayoutPanel1.Controls.Clear();
-            foreach (string mem in memReq)
+            var (reqList, total) = await groupService.GetJoinListByGroupId(groupId);
+            foreach (string mem in reqList)
             {
                 Panel memPanel = new Panel
                 {
@@ -88,12 +89,18 @@ namespace NetStudy
                 };
                 btnAcpt.Click += async (sender, e) =>
                 {
-                    await groupService.AcptJoinReq(groupId, mem);
-                    btnAcpt.Text = "Đã thêm";
-                    btnAcpt.ForeColor = Color.Brown;
-                    btnAcpt.BackColor = Color.LightGreen;
-                    await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{admin} đã thêm {mem} là User");
-                    await groupService.SendMessage(groupId, "Thông báo", $"đã thêm {mem} là User", DateTime.UtcNow);
+                    var result = MessageBox.Show("Bạn muốn chấp nhận yêu cầu tham gia của người dùng này?", "Xác nhận",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        await groupService.AcptJoinReq(groupId, mem);
+                        btnAcpt.Text = "Đã thêm";
+                        btnAcpt.ForeColor = Color.Brown;
+                        btnAcpt.BackColor = Color.LightGreen;
+                        await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{admin} (admin) đã thêm {mem} là User");
+                        await groupService.SendMessage(groupId, "Thông báo", $"{admin} (admin) đã thêm {mem} là User", DateTime.UtcNow);
+                        CreatePanel();
+                    }
 
                 };
                 IconButton btnDel = new IconButton
@@ -109,13 +116,20 @@ namespace NetStudy
                 };
                 btnDel.Click += async (sender, e) =>
                 {
-                    await groupService.DelJoinReq(groupId, mem);
-                    btnDel.Text = "Đã xóa";
-                    btnDel.ForeColor = Color.White;
-                    btnDel.BackColor = Color.Red;
+                    var result = MessageBox.Show("Bạn muốn xóa yêu cầu tham gia của người dùng này?", "Xác nhận",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        await groupService.DelJoinReq(groupId, mem);
+                        btnDel.Text = "Đã xóa";
+                        btnDel.ForeColor = Color.White;
+                        btnDel.BackColor = Color.Red;
+                        CreatePanel();
+                    }
+
 
                 };
-                    
+
                 memPanel.Controls.Add(lblName);
                 lblName.Location = new Point(10, 10);
                 memPanel.Controls.Add(lblRole);
@@ -125,15 +139,18 @@ namespace NetStudy
                 flowLayoutPanel1.Controls.Add(memPanel);
             }
         }
-        public async Task LoadJoinReq()
-        { 
-            CreatePanel(reqList);
-        }
+
 
         private async void FormUserRequests_Load(object sender, EventArgs e)
         {
             await connection.StartAsync();
-            await LoadJoinReq();
+            CreatePanel();
+        }
+
+        private void btnExit_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            this.Close();
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace NetStudy
 {
-    partial class FormUserRequests
+    partial class FormMemberList
     {
         /// <summary>
         /// Required designer variable.
@@ -28,29 +28,28 @@
         /// </summary>
         private void InitializeComponent()
         {
-            labelTitle = new Label();
+            lblTitle = new Label();
             flowLayoutPanel1 = new FlowLayoutPanel();
             btnExit = new FontAwesome.Sharp.IconButton();
             SuspendLayout();
             // 
-            // labelTitle
+            // lblTitle
             // 
-            labelTitle.AutoSize = true;
-            labelTitle.Font = new Font("Bahnschrift", 22F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            labelTitle.ForeColor = Color.FromArgb(0, 117, 214);
-            labelTitle.Location = new Point(118, 19);
-            labelTitle.Name = "labelTitle";
-            labelTitle.Size = new Size(361, 53);
-            labelTitle.TabIndex = 1;
-            labelTitle.Text = "Joining Requests";
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new Font("Bahnschrift", 24F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblTitle.ForeColor = Color.Gainsboro;
+            lblTitle.Location = new Point(166, 21);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(257, 58);
+            lblTitle.TabIndex = 0;
+            lblTitle.Text = "Thành viên";
             // 
             // flowLayoutPanel1
             // 
-            flowLayoutPanel1.AutoScroll = true;
-            flowLayoutPanel1.Location = new Point(12, 90);
+            flowLayoutPanel1.Location = new Point(12, 98);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(559, 564);
-            flowLayoutPanel1.TabIndex = 2;
+            flowLayoutPanel1.Size = new Size(571, 626);
+            flowLayoutPanel1.TabIndex = 1;
             // 
             // btnExit
             // 
@@ -62,33 +61,33 @@
             btnExit.IconColor = Color.Black;
             btnExit.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnExit.IconSize = 30;
-            btnExit.Location = new Point(544, 3);
+            btnExit.Location = new Point(547, 12);
             btnExit.Name = "btnExit";
             btnExit.Size = new Size(36, 34);
-            btnExit.TabIndex = 3;
+            btnExit.TabIndex = 2;
             btnExit.UseVisualStyleBackColor = false;
             btnExit.Click += btnExit_Click;
             // 
-            // FormUserRequests
+            // FormMemberList
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.White;
-            ClientSize = new Size(583, 666);
+            BackColor = Color.FromArgb(34, 33, 74);
+            ClientSize = new Size(595, 736);
             Controls.Add(btnExit);
             Controls.Add(flowLayoutPanel1);
-            Controls.Add(labelTitle);
+            Controls.Add(lblTitle);
             FormBorderStyle = FormBorderStyle.None;
-            Name = "FormUserRequests";
-            Text = "FormUserRequests";
-            Load += FormUserRequests_Load;
+            Name = "FormMemberList";
+            Text = "Danh sách thành viên";
+            Load += FormMemberList_Load;
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
 
-        private Label labelTitle;
+        private Label lblTitle;
         private FlowLayoutPanel flowLayoutPanel1;
         private FontAwesome.Sharp.IconButton btnExit;
     }

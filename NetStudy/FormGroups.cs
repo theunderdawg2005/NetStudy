@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualBasic.ApplicationServices;
+﻿using FontAwesome.Sharp;
+using Microsoft.VisualBasic.ApplicationServices;
 using NetStudy.Models;
 using NetStudy.Services;
 using Newtonsoft.Json.Linq;
@@ -30,6 +31,7 @@ namespace NetStudy
             accessToken = token;
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
             UserInfo = info;
+            
             groupService = new GroupService(accessToken);
         }
 
@@ -48,6 +50,15 @@ namespace NetStudy
             }
 
         }
+        private async Task LoadGroupSearching(string searchString)
+        {
+
+            var (groups, total) = await groupService.SearchGroup(searchString);
+            if (groups != null && groups.Any())
+            {
+                PopulateGroupPanel(flowLayoutPanel1, groups);
+            }
+        }
         private void PopulateGroupPanel(FlowLayoutPanel flpanel, List<Group> groups)
         {
             flpanel.Controls.Clear();
@@ -61,12 +72,13 @@ namespace NetStudy
                     BorderStyle = BorderStyle.FixedSingle,
                     Padding = new Padding(10),
                     Margin = new Padding(5),
-                    BackColor = Color.Indigo
+                    BackColor = Color.Indigo,
+                    Cursor = Cursors.Hand
                 };
                 Label lblName = new Label
                 {
                     Text = group.Name,
-                    Location = new Point(10,10),
+                    Location = new Point(10, 10),
                     AutoSize = true,
                     Font = new Font("Cambria", 12, FontStyle.Bold),
                     ForeColor = Color.Gainsboro
@@ -80,27 +92,59 @@ namespace NetStudy
                     Font = new Font("Cambria", 10),
                     ForeColor = Color.Gainsboro
                 };
+                IconButton btnInfo = new IconButton
+                {
+                    AutoSize = true,
+                    Width = 35,
+                    Height = 35,
+                    BackColor = Color.FromArgb(34, 33, 74),
+                    FlatStyle = FlatStyle.Flat,
+                    
+                    Location = new Point(1035, 5),
+                    IconChar = IconChar.Info,
+                    IconColor = Color.Gainsboro,
+                    IconSize = 30,
+
+                };
+                btnInfo.Click += async (sender, e) =>
+                {
+                    var info = await groupService.GetGroupInfo(group.Id.ToString());
+                    
+                    FormGroupInfo grInfo = new FormGroupInfo(accessToken, info);
+                    grInfo.Show();
+                };
                 panel.Click += Group_Panel_Click;
                 panel.Controls.Add(lblName);
-
+                panel.Controls.Add(btnInfo);
                 panel.Controls.Add(lblId);
                 flpanel.Controls.Add(panel);
             }
-           
+
         }
 
         private async void Group_Panel_Click(object sender, EventArgs e)
         {
             var panel = sender as Panel;
-            var groupId = panel.Tag ;
+            var groupId = panel.Tag;
             var response = await httpClient.GetAsync($"api/groups/get-group/{groupId}");
             var res = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
+            var msg = JObject.Parse(res)["message"].ToString();
+            if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.BadRequest)
             {
-
-                MessageBox.Show($"Lỗi {res}", response.StatusCode.ToString(), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
+                MessageBox.Show($"{msg}", "Error...123", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+            else if(response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                var result = MessageBox.Show($"{msg} Bạn có muốn tham gia không?", "Error...", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                if (result == DialogResult.Yes)
+                {
+                    await groupService.JoinGroupReq(groupId.ToString(), UserInfo["username"].ToString(), UserInfo["name"].ToString());
+
+                }
+                return;
+            }    
             var info = JObject.Parse(res);
             var groupDetails = new FormGroupDetails(accessToken, UserInfo, info);
             groupDetails.ShowDialog();
@@ -108,7 +152,18 @@ namespace NetStudy
 
         private async void FormGroups_Load(object sender, EventArgs e)
         {
+            lblName.Text = UserInfo["name"].ToString();
             await LoadGroups();
+        }
+
+        private async void btnSearch_Click(object sender, EventArgs e)
+        {
+            await LoadGroupSearching(txtSearchGroup.Text);
+        }
+
+        private void txtSearchGroup_TextChanged(object sender, EventArgs e)
+        {
+            btnSearch.Enabled = !string.IsNullOrWhiteSpace(txtSearchGroup.Text);
         }
     }
 }
