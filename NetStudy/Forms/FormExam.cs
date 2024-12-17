@@ -18,6 +18,7 @@ namespace NetStudy.Forms
         private JObject UserInfo;
         private string accessToken;
         private QuestionService questionService;
+        private ChatBotService chatBotService;
         string correctAnswer;
 
         public FormExam(JObject info, string token)
@@ -123,7 +124,7 @@ namespace NetStudy.Forms
         }
 
         private void AddQuestionToPanel(QuestionDto question)
-        {
+        {   
             Panel questionPanel = new Panel
             {
                 Width = flowLayoutPanel1.Width - 20,
@@ -162,7 +163,7 @@ namespace NetStudy.Forms
             };
 
             editButton.Click += (s, e) => EditQuestion(question);
-            deleteButton.Click += (s, e) => DeleteQuestion(question);
+            deleteButton.Click += (s, e) => DeleteQuestion(question, UserInfo["username"].ToString());
 
             Panel buttonPanel = new Panel
             {
@@ -185,14 +186,34 @@ namespace NetStudy.Forms
             flowLayoutPanel1.AutoScroll = true;
         }
 
-        private void EditQuestion(QuestionDto question)
+        private async void EditQuestion(QuestionDto question)
         {
-            MessageBox.Show("Chức năng đang cập nhật");
+            FormUpdateQuestion formUpdateQuestion = new FormUpdateQuestion(UserInfo, accessToken, question);
+            formUpdateQuestion.Show();
+            this.Hide();
         }
 
-        private async void DeleteQuestion(QuestionDto question)
+        private async void DeleteQuestion(QuestionDto question, string username)
         {
-            MessageBox.Show("Chức năng đang cập nhật");
+            username = UserInfo["username"].ToString();
+            try
+            {
+                var result = await questionService.DeleteQuestionAsync(question, username);
+
+                if (result)
+                {
+                    MessageBox.Show("Question deleted successfully.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    await LoadListQuestion();
+                }
+                else
+                {
+                    MessageBox.Show("Failed to delete question.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
     }

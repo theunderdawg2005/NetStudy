@@ -21,11 +21,13 @@ namespace NetStudy.Forms
         public FormChat(string accessToken, string username)
         {
             InitializeComponent();
+            CustomizeGroupBox();
             _accessToken = accessToken;
             _currentUser = username;
             textBox_myusrname.Text = _currentUser;
             InitializeSignalR();
             LoadFriends();
+            comboBox_mystatus.SelectedItem = "Đang hoạt động";
         }
 
         private async void FormChat_Load(object sender, EventArgs e)
@@ -100,7 +102,7 @@ namespace NetStudy.Forms
                     return;
                 }
                 var responseBody = await response.Content.ReadAsStringAsync();
-                MessageBox.Show(responseBody);
+                //MessageBox.Show(responseBody);
 
                 var jsonResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
                 var friends = jsonResponse.GetProperty("data").EnumerateArray().Select(f => f.GetString()).ToList();
@@ -118,7 +120,7 @@ namespace NetStudy.Forms
                 var totalLabel = new Label
                 {
                     Text = $"Số lượng bạn bè: {totalFriends}",
-                    ForeColor = Color.FromArgb(0, 0, 0),
+                    ForeColor = Color.FromArgb(255, 255, 255),
                     AutoSize = true,
                     Location = new Point(10, yOffset),
                     Font = new Font("Arial", 12)
@@ -130,7 +132,7 @@ namespace NetStudy.Forms
                 foreach (var friend in friends)
                 {
                     var friendStatus = await GetFriendStatus(friend);
-                    var labelColor = friendStatus ? Color.FromArgb(0, 0, 255) : Color.FromArgb(0, 0, 0);
+                    var labelColor = friendStatus ? Color.FromArgb(0, 255, 0) : Color.FromArgb(255, 255, 255);
 
                     var label = new Label
                     {
@@ -183,19 +185,38 @@ namespace NetStudy.Forms
             await UpdateUserStatus(status);
         }
 
-        private async Task UpdateUserStatus(bool status)
+        private async Task UpdateUserStatus(bool opstatus)
         {
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
                 var url = $"https://localhost:7070/api/user/updateStatus";
-                var content = new StringContent(JsonSerializer.Serialize(new { Username = _currentUser, OpStatus = status }), System.Text.Encoding.UTF8, "application/json");
+                var content = new StringContent(JsonSerializer.Serialize(new { Username = _currentUser, OpStatus = opstatus }), System.Text.Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(url, content);
                 if (!response.IsSuccessStatusCode)
                 {
                     MessageBox.Show($"Error: {response.StatusCode} - {response.ReasonPhrase}");
                 }
             }
+        }
+
+        private void CustomizeGroupBox()
+        {
+            groupBox_doanchat.FlatStyle = FlatStyle.Flat;
+            groupBox_doanchat.Paint += (sender, e) =>
+            {
+                ControlPaint.DrawBorder(e.Graphics, groupBox_doanchat.ClientRectangle, System.Drawing.Color.Black, ButtonBorderStyle.Solid);
+            };
+        }
+
+        private void textBox_msg_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupBox_doanchat_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

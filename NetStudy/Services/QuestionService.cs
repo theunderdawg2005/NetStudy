@@ -235,7 +235,7 @@ namespace NetStudy.Services
         {
             try
             {
-                var response = await httpClient.GetAsync($"api/question/{username}/get-correct-answer/{content}");
+                var response = await httpClient.GetAsync($"api/questions/{username}/get-correct-answer/{content}");
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadAsStringAsync();
@@ -251,6 +251,44 @@ namespace NetStudy.Services
                 return ex.Message;
             }
         }
+
+        public async Task<bool> DeleteQuestionAsync(QuestionDto question, string username)
+        {
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri($"api/questions/{username}/delete-question", UriKind.Relative),
+                Content = new StringContent(JsonConvert.SerializeObject(question), Encoding.UTF8, "application/json")
+            };
+
+            var response = await httpClient.SendAsync(request);
+
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> UpdateQuestionAsync(QuestionDto oldQuestion, QuestionDto newQuestion, string username)
+        {
+            var payload = new
+            {
+                OldQuestion = oldQuestion,
+                NewQuestion = newQuestion
+            };
+
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Patch,
+                RequestUri = new Uri($"api/questions/{username}/update-question", UriKind.Relative),
+                Content = new StringContent(
+                    JsonConvert.SerializeObject(payload),
+                    Encoding.UTF8,
+                    "application/json")
+            };
+
+            var response = await httpClient.SendAsync(request);
+
+            return response.IsSuccessStatusCode;
+        }
+
 
         public class ApiResponse<T>
         {

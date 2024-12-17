@@ -15,6 +15,7 @@ namespace NetStudy
         private JObject UserInfo;
         private string accessToken;
         private ChatBotService chatBotService;
+        private RichTextBox tB_respones;
 
         public ChatBot(JObject info, string token)
         {
@@ -29,16 +30,18 @@ namespace NetStudy
         private async void btn_send_Click(object sender, EventArgs e)
         {
             string message = tB_message.Text;
-            if (message == "")
+            if (string.IsNullOrWhiteSpace(message))
             {
                 MessageBox.Show("Please enter a message");
                 return;
             }
             try
             {
-                string UserName = UserInfo["username"].ToString();
-                string messageWithLabel = UserName + ": " + message + Environment.NewLine;
-                tB_respones.AppendText(messageWithLabel);
+                string userName = UserInfo["username"].ToString();
+                string messageWithLabel = $"{userName}: {message}{Environment.NewLine}";
+
+                AppendColoredText(tB_respones, userName + ": ", Color.Green);
+                AppendColoredText(tB_respones, message + Environment.NewLine, Color.Black);
 
                 var responseData = await chatBotService.Chat(message);
                 if (responseData != null && !string.IsNullOrEmpty(responseData.Response))
@@ -50,8 +53,9 @@ namespace NetStudy
                         .Where(line => !string.IsNullOrWhiteSpace(line))
                     );
 
-                    string botResponse = "Gemini: " + Environment.NewLine + formattedResponse + Environment.NewLine;
-                    tB_respones.AppendText(botResponse);
+                    AppendColoredText(tB_respones, "Gemini: ", Color.Blue);
+                    AppendColoredText(tB_respones, formattedResponse + Environment.NewLine, Color.Black);
+
                     tB_message.Clear();
                 }
                 else
@@ -63,6 +67,15 @@ namespace NetStudy
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void AppendColoredText(RichTextBox richTextBox, string text, Color color)
+        {
+            richTextBox.SelectionStart = richTextBox.TextLength;
+            richTextBox.SelectionLength = 0;
+            richTextBox.SelectionColor = color;
+            richTextBox.AppendText(text);
+            richTextBox.SelectionColor = richTextBox.ForeColor;
         }
 
         private void btn_clear2_Click(object sender, EventArgs e)
@@ -81,32 +94,13 @@ namespace NetStudy
 
                 tB_filepath.Text = filePath;
 
-                string pdfContentBase64 = ReadPdfFileAsBase64(filePath);
-
-                if (!string.IsNullOrEmpty(pdfContentBase64))
+                if (!string.IsNullOrEmpty(filePath))
                 {
-                    string storedPdfContent = pdfContentBase64;
 
-                    MessageBox.Show("File uploaded and content encoded to Base64.");
+                    MessageBox.Show("File uploaded.");
                 }
             }
         }
 
-        private string ReadPdfFileAsBase64(string filePath)
-        {
-            try
-            {
-                byte[] fileContent = File.ReadAllBytes(filePath);
-
-                string base64Content = Convert.ToBase64String(fileContent);
-
-                return base64Content;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error reading file: {ex.Message}");
-                return null;
-            }
-        }
     }
 }

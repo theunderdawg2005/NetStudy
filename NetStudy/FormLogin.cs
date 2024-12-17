@@ -83,6 +83,11 @@ namespace NetStudy
             this.Close();
         }
 
+        private void FormLogin_Load(object sender, EventArgs e)
+        {
+
+        }
+
         private void txtUsername_TextChanged(object sender, EventArgs e)
         {
             btnLogin.Enabled = !string.IsNullOrWhiteSpace(txtUsername.Text);

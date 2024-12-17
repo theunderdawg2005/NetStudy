@@ -29,41 +29,40 @@
         private void InitializeComponent()
         {
             btn_send = new Button();
-            tB_respones = new TextBox();
             btn_clear2 = new Button();
             btn_upload = new Button();
             tB_filepath = new TextBox();
             tB_message = new TextBox();
             lbl_username = new Label();
+            tB_respones = new RichTextBox();
             SuspendLayout();
             // 
             // btn_send
             // 
+            btn_send.BackColor = Color.Indigo;
+            btn_send.FlatStyle = FlatStyle.Flat;
+            btn_send.Font = new Font("Cambria", 10F, FontStyle.Bold);
+            btn_send.ForeColor = Color.Gainsboro;
             btn_send.Location = new Point(708, 12);
             btn_send.Name = "btn_send";
             btn_send.Size = new Size(94, 29);
             btn_send.TabIndex = 2;
             btn_send.Text = "Send";
-            btn_send.UseVisualStyleBackColor = true;
+            btn_send.UseVisualStyleBackColor = false;
             btn_send.Click += btn_send_Click;
-            // 
-            // tB_respones
-            // 
-            tB_respones.Location = new Point(25, 98);
-            tB_respones.Multiline = true;
-            tB_respones.Name = "tB_respones";
-            tB_respones.ScrollBars = ScrollBars.Vertical;
-            tB_respones.Size = new Size(883, 552);
-            tB_respones.TabIndex = 5;
             // 
             // btn_clear2
             // 
+            btn_clear2.BackColor = Color.Indigo;
+            btn_clear2.FlatStyle = FlatStyle.Flat;
+            btn_clear2.Font = new Font("Cambria", 10F, FontStyle.Bold);
+            btn_clear2.ForeColor = Color.Gainsboro;
             btn_clear2.Location = new Point(814, 12);
             btn_clear2.Name = "btn_clear2";
             btn_clear2.Size = new Size(94, 29);
             btn_clear2.TabIndex = 6;
             btn_clear2.Text = "Clear";
-            btn_clear2.UseVisualStyleBackColor = true;
+            btn_clear2.UseVisualStyleBackColor = false;
             btn_clear2.Click += btn_clear2_Click;
             // 
             // btn_upload
@@ -93,23 +92,35 @@
             // lbl_username
             // 
             lbl_username.AutoSize = true;
+            lbl_username.FlatStyle = FlatStyle.Popup;
+            lbl_username.Font = new Font("Cambria", 11F);
+            lbl_username.ForeColor = Color.Gainsboro;
             lbl_username.Location = new Point(37, 15);
             lbl_username.Name = "lbl_username";
-            lbl_username.Size = new Size(78, 20);
+            lbl_username.Size = new Size(94, 22);
             lbl_username.TabIndex = 10;
             lbl_username.Text = "UserName";
+            // 
+            // tB_respones
+            // 
+            tB_respones.Location = new Point(-1, 94);
+            tB_respones.Name = "tB_respones";
+            tB_respones.Size = new Size(932, 579);
+            tB_respones.TabIndex = 11;
+            tB_respones.Text = "";
             // 
             // ChatBot
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(26, 25, 62);
             ClientSize = new Size(932, 673);
+            Controls.Add(tB_respones);
             Controls.Add(lbl_username);
             Controls.Add(tB_message);
             Controls.Add(tB_filepath);
             Controls.Add(btn_upload);
             Controls.Add(btn_clear2);
-            Controls.Add(tB_respones);
             Controls.Add(btn_send);
             Name = "ChatBot";
             Text = "ChatBot";
@@ -119,7 +130,6 @@
 
         #endregion
         private Button btn_send;
-        private TextBox tB_respones;
         private Button btn_clear2;
         private Button btn_upload;
         private TextBox tB_filepath;

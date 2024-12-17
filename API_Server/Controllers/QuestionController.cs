@@ -273,9 +273,8 @@ namespace API_Server.Controllers
             }
         }
 
-        [Authorize]
-        [HttpPut("{username}/delete-question/{question}")]
-        public async Task<IActionResult> DeleteQuestion(QuestionDTO question)
+        [HttpDelete("{username}/delete-question")]
+        public async Task<IActionResult> DeleteQuestion([FromBody] QuestionDTO question, [FromRoute] string username)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
             if (!_jwtService.IsValidate(authorizationHeader))
@@ -288,8 +287,8 @@ namespace API_Server.Controllers
 
             try
             {
-                var deletedQuestion = await _questionService.DeleteQuestion(question);
-                if (deletedQuestion == null)
+                var deletedQuestion = await _questionService.DeleteQuestion(question, username);
+                if (!deletedQuestion)
                 {
                     return NotFound(new
                     {
@@ -305,8 +304,58 @@ namespace API_Server.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new
+                {
+                    message = "Đã xảy ra lỗi!",
+                    error = ex.Message
+                });
             }
+        }
+
+        [Authorize]
+        [HttpPatch("{username}/update-question")]
+        public async Task<IActionResult> UpdateQuestion([FromBody] QuestionUpdateRequest request, [FromRoute] string username)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+
+            try
+            {
+                var updatedQuestion = await _questionService.UpdateQuestion(request.OldQuestion, request.NewQuestion, username);
+                if (updatedQuestion == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Không tìm thấy câu hỏi!"
+                    });
+                }
+
+                return Ok(new
+                {
+                    message = "Cập nhật câu hỏi thành công!",
+                    info = updatedQuestion
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = "Đã xảy ra lỗi!",
+                    error = ex.Message
+                });
+            }
+        }
+
+        public class QuestionUpdateRequest
+        {
+            public QuestionDTO OldQuestion { get; set; } 
+            public QuestionDTO NewQuestion { get; set; } 
         }
 
     }
