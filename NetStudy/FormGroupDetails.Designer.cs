@@ -37,6 +37,7 @@
             btnLeave = new FontAwesome.Sharp.IconButton();
             lblTitle = new Label();
             listMsg = new ListBox();
+            btnInfo = new FontAwesome.Sharp.IconButton();
             panel1.SuspendLayout();
             panelTop.SuspendLayout();
             SuspendLayout();
@@ -44,6 +45,7 @@
             // panel1
             // 
             panel1.BackColor = Color.FromArgb(26, 25, 62);
+            panel1.Controls.Add(btnInfo);
             panel1.Controls.Add(btnMemberList);
             panel1.Controls.Add(btnAddUser);
             panel1.Controls.Add(btnSend);
@@ -65,7 +67,7 @@
             btnMemberList.IconColor = Color.Gainsboro;
             btnMemberList.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnMemberList.ImageAlign = ContentAlignment.TopCenter;
-            btnMemberList.Location = new Point(12, 16);
+            btnMemberList.Location = new Point(148, 16);
             btnMemberList.Name = "btnMemberList";
             btnMemberList.Size = new Size(52, 52);
             btnMemberList.TabIndex = 3;
@@ -92,6 +94,7 @@
             // 
             // btnSend
             // 
+            btnSend.AutoSize = true;
             btnSend.BackColor = Color.FromArgb(192, 0, 192);
             btnSend.Cursor = Cursors.Hand;
             btnSend.FlatAppearance.BorderColor = Color.Gainsboro;
@@ -102,7 +105,7 @@
             btnSend.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnSend.Location = new Point(958, 15);
             btnSend.Name = "btnSend";
-            btnSend.Size = new Size(56, 55);
+            btnSend.Size = new Size(58, 58);
             btnSend.TabIndex = 1;
             btnSend.UseVisualStyleBackColor = false;
             btnSend.Click += btnSend_Click;
@@ -133,6 +136,7 @@
             // 
             // btnLeave
             // 
+            btnLeave.AutoSize = true;
             btnLeave.BackColor = Color.FromArgb(192, 0, 192);
             btnLeave.Cursor = Cursors.Hand;
             btnLeave.FlatAppearance.BorderSize = 2;
@@ -143,7 +147,7 @@
             btnLeave.IconSize = 35;
             btnLeave.Location = new Point(975, 13);
             btnLeave.Name = "btnLeave";
-            btnLeave.Size = new Size(45, 44);
+            btnLeave.Size = new Size(45, 45);
             btnLeave.TabIndex = 3;
             btnLeave.UseVisualStyleBackColor = false;
             btnLeave.Click += btnLeave_Click;
@@ -170,6 +174,25 @@
             listMsg.Name = "listMsg";
             listMsg.Size = new Size(1009, 500);
             listMsg.TabIndex = 2;
+            // 
+            // btnInfo
+            // 
+            btnInfo.BackColor = Color.FromArgb(192, 0, 192);
+            btnInfo.Cursor = Cursors.Hand;
+            btnInfo.FlatAppearance.BorderSize = 2;
+            btnInfo.FlatStyle = FlatStyle.Flat;
+            btnInfo.ForeColor = Color.Gainsboro;
+            btnInfo.IconChar = FontAwesome.Sharp.IconChar.Info;
+            btnInfo.IconColor = Color.Gainsboro;
+            btnInfo.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnInfo.IconSize = 38;
+            btnInfo.ImageAlign = ContentAlignment.TopCenter;
+            btnInfo.Location = new Point(12, 16);
+            btnInfo.Name = "btnInfo";
+            btnInfo.Size = new Size(52, 52);
+            btnInfo.TabIndex = 4;
+            btnInfo.UseVisualStyleBackColor = false;
+            btnInfo.Click += btnInfo_Click;
             // 
             // FormGroupDetails
             // 
@@ -201,5 +224,6 @@
         private FontAwesome.Sharp.IconButton btnAddUser;
         private FontAwesome.Sharp.IconButton btnLeave;
         private FontAwesome.Sharp.IconButton btnMemberList;
+        private FontAwesome.Sharp.IconButton btnInfo;
     }
 }

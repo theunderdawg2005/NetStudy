@@ -8,10 +8,12 @@ namespace API_Server.Services
     {
         private readonly IMongoCollection<Group> _chatGroups;
         private readonly UserService _userService;
+        private readonly IMongoCollection<GroupChatMessage> _groupChatMessage;
         public GroupService(MongoDbService db, UserService userService)
         {
             _chatGroups = db.ChatGroup;
             _userService = userService;
+            _groupChatMessage = db.GroupChatMessage;
         }
 
         public async Task<Group> CreateGroup(Group chatGroup)
@@ -278,5 +280,69 @@ namespace API_Server.Services
             int totalPages = (int)Math.Ceiling((double)total / pageSize);
             return (usersFound, totalPages);
         }
+
+        public async Task<bool> DeleteGroup(string groupId, string creatorName)
+        {
+   
+            try
+            {
+                var (members, total) = await GetMemList(groupId);
+                foreach (var member in members)
+                {
+                    var user = await _userService.GetUserByUserName(member.Username);
+                    user.ChatGroup.Remove(groupId);
+                    await _userService.UpdateUser(user);
+                }
+                var del = await _chatGroups.DeleteOneAsync(g => g.Id.ToString() == groupId);
+                return del.DeletedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi xóa group: {ex.Message}");
+            }
+        }
+
+        public async Task<bool> UpdateGroupInfo(string groupId, string newName, string newDescription)
+        {
+            
+            var filter = Builders<Group>.Filter.Eq(g => g.Id, groupId);
+            var updates = new List<UpdateDefinition<Group>>();
+
+            if(!string.IsNullOrEmpty(newName))
+            {
+                updates.Add(Builders<Group>.Update.Set(g => g.Name, newName));
+            }    
+            if(!string.IsNullOrEmpty(newDescription))
+            {
+                updates.Add(Builders<Group>.Update.Set(g => g.Description, newDescription));
+            }    
+            if(updates.Count == 0)
+            {
+                return false;
+            }    
+
+            var updateDef = Builders<Group>.Update.Combine(updates);
+            var res = await _chatGroups.UpdateOneAsync(filter, updateDef);
+            return res.ModifiedCount > 0;
+        }
+
+        public async Task<bool> ChangeRoleUser(string groupId, string reqUsername)
+        {
+            
+            var member = await GetMemberInGroup(groupId, reqUsername);
+            member.Role = (member.Role == "002") ? "001" : "002";
+            var filter = Builders<Group>.Filter.Eq(g => g.Id, groupId);
+            var group = await _chatGroups.Find(filter).FirstOrDefaultAsync();
+            var existingMember = group.Members.FirstOrDefault(m => m.Username == reqUsername);
+            if (existingMember != null)
+            {
+                existingMember.Role = member.Role;
+            }
+            var update = Builders<Group>.Update.Set(g => g.Members, group.Members);
+            var result = await _chatGroups.UpdateOneAsync(filter, update);
+
+            return result.ModifiedCount > 0;
+        }
+        
     }
 }

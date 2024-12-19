@@ -1,6 +1,8 @@
-﻿using API_Server.Models;
+﻿using API_Server.DTOs;
+using API_Server.Models;
 using API_Server.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
@@ -49,7 +51,7 @@ namespace API_Server.Controllers
                 {
                     Name = user.Name,
                     Username = username,
-                    Role = "001"
+                    Role = "003"
                 };
                 groupModel.Members.Add(creator);
                 var group = new Group
@@ -460,6 +462,67 @@ namespace API_Server.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPost("{groupId}/change-role/{reqUsername}")]
+        public async Task<IActionResult> ChangeRole(string groupId, string reqUsername)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var username = await _jwtService.GetUsernameFromToken(authorizationHeader);
+            if (username == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Người dùng không tồn tại"
+                });
+            }
+            try
+            {
+                var group = await _chatGroupService.GetGroupById(groupId);
+                if (group == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Không tìm thấy nhóm"
+                    });
+                }
+                var checkJoined = await _chatGroupService.IsInGroup(username, groupId);
+                if (!checkJoined)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Bạn chưa tham gia nhóm này!",
+                    });
+                }
+                var member = await _chatGroupService.GetMemberInGroup(groupId, username);
+                if (member.Role == "002")
+                {
+                    return BadRequest(new
+                    {
+                        message = "Bạn không được chỉnh sửa vai trò!",
+                    });
+                }
+                var check = await _chatGroupService.ChangeRoleUser(groupId, reqUsername);
+                if (check)
+                {
+                    return Ok(new
+                    {
+                        message = "Đã cập nhật quyền của người dùng!",
+                    });
+                }
+                return BadRequest(new
+                {
+                    message = "Không thể cập nhật quyền của người dùng!",
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                });
+            }
+        }
+
         //GET METHOD
         [Authorize]
         [HttpGet("get-group/{groupId}")]
@@ -639,7 +702,118 @@ namespace API_Server.Controllers
         }
 
         //DELETE METHOD
-        
+        [Authorize]
+        [HttpDelete("delete-group/{groupId}")]
+        public async Task<IActionResult> DeleteGroup(string groupId)
+        {
+            var authHeader = Request.Headers["Authorization"].ToString();
+            var username = await _jwtService.GetUsernameFromToken(authHeader);
+
+            if (username == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+
+            try
+            {
+                var group = await _chatGroupService.GetGroupById(groupId);
+                if(group == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Không tìm thấy nhóm!"
+                    });
+                }    
+
+                if(group.Creator != username)
+                {
+                    return StatusCode(403, new
+                    {
+                        message = "Bạn không được xóa group!",
+                    });
+                }
+
+                var isDeleted = await _chatGroupService.DeleteGroup(groupId, username);
+                if(isDeleted)
+                {
+                    return Ok(new
+                    {
+                        message = "Đã xóa nhóm!"
+                    });
+                }
+                else
+                {
+                    return BadRequest(new
+                    {
+                        message = "Xóa group thất bại!"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
+        [Authorize]
+        [HttpPatch("update-group-info/{groupId}")]
+        public async Task<IActionResult> UpdateGroupInfo(string groupId, [FromBody] UpdateGroupDTO updateGroup)
+        {
+            var authHeader = Request.Headers["Authorization"].ToString();
+            var username = await _jwtService.GetUsernameFromToken(authHeader);
+
+            if (username == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+            try
+            {
+                var group = await _chatGroupService.GetGroupById(groupId);
+                if(group == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Không tìm thấy nhóm!",
+
+                    });
+                }
+
+                if(updateGroup == null)
+                {
+                    return BadRequest(new
+                    {
+                       mesage = "Không có cập nhật!",
+                    });
+                }    
+                
+                var check = await _chatGroupService.UpdateGroupInfo(groupId, updateGroup.Name, updateGroup.Description);
+                if(check)
+                {
+                    return Ok(new
+                    {
+                        message = "Đã cập nhật thông tin nhóm!",
+                    });
+                }    
+               
+                return BadRequest(new
+                {
+                    message = "Không cập nhật được thông tin!"
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
     }
 }

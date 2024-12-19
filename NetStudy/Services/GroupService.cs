@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Interop;
 
 namespace NetStudy.Services
@@ -34,11 +35,11 @@ namespace NetStudy.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var groups = info["data"].ToObject<List<Group>>();
-                    if(groups != null && groups.Any())
+                    if (groups != null && groups.Any())
                     {
                         var teamGroups = groups.ToList();
                         return teamGroups;
-                    }    
+                    }
                     else
                     {
                         MessageBox.Show("Bạn chưa tham gia vào nhóm nào!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -48,7 +49,7 @@ namespace NetStudy.Services
                 else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     return null;
-                }    
+                }
                 else
                 {
                     var errorMessage = JObject.Parse(res)["message"]?.ToString();
@@ -95,8 +96,8 @@ namespace NetStudy.Services
                 var json = JsonConvert.SerializeObject(group);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 return await _httpClient.PostAsync($"api/groups/{username}/create", content);
-                
-                       
+
+
             }
             catch (Exception ex)
             {
@@ -104,9 +105,9 @@ namespace NetStudy.Services
                 return null;
             }
         }
-        
 
-        public async Task<(List<Group>,int)> SearchGroup(string query, int page = 1, int pageSize = 5)
+
+        public async Task<(List<Group>, int)> SearchGroup(string query, int page = 1, int pageSize = 5)
         {
             try
             {
@@ -116,14 +117,14 @@ namespace NetStudy.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var groups = info["data"].ToObject<List<Group>>();
-                    var total = int.Parse(info["total"].ToString());
+                    var total = int.Parse(info["totalPages"].ToString());
                     return (groups, total);
                 }
                 else
                 {
                     var msg = info["message"].ToString();
                     MessageBox.Show(msg, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return (null,0);
+                    return (null, 0);
                 }
             }
             catch (Exception ex)
@@ -146,23 +147,23 @@ namespace NetStudy.Services
                 var response = await _httpClient.PostAsync($"api/groups/join-request/{groupId}", content);
                 var res = await response.Content.ReadAsStringAsync();
                 var msg = JObject.Parse(res)["message"].ToString();
-                if(response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode)
                 {
                     MessageBox.Show(msg, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
-                }    
+                }
                 else
                 {
                     MessageBox.Show(msg, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            catch(Exception ex) { throw new Exception(ex.Message); }
+            catch (Exception ex) { throw new Exception(ex.Message); }
         }
         public async Task<bool> AddUserToGroup(string groupId, string username, string role, string name)
         {
             try
             {
-                  
+
                 var reqBody = new
                 {
                     Name = name,
@@ -174,11 +175,11 @@ namespace NetStudy.Services
 
                 var response = await _httpClient.PostAsync($"api/groups/{groupId}/add-user", content);
                 var res = await response.Content.ReadAsStringAsync();
-                if(response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode)
                 {
                     MessageBox.Show("Thêm người dùng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return true;
-                }  
+                }
                 else
                 {
                     var errorMessage = JObject.Parse(res)["message"]?.ToString();
@@ -186,7 +187,7 @@ namespace NetStudy.Services
                     return false;
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
@@ -208,7 +209,7 @@ namespace NetStudy.Services
                 var res = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Đã gửi yêu cầu thêm thành viên!", "Thông báo" ,MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Đã gửi yêu cầu thêm thành viên!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return true;
                 }
                 else
@@ -228,7 +229,7 @@ namespace NetStudy.Services
         {
             try
             {
-                
+
                 var newMsg = new GroupMessage
                 {
                     Sender = user,
@@ -246,7 +247,7 @@ namespace NetStudy.Services
                 }
                 else
                 {
-                    var error = JObject.Parse(res)["message"]?.ToString();   
+                    var error = JObject.Parse(res)["message"]?.ToString();
                     MessageBox.Show(error, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -287,14 +288,14 @@ namespace NetStudy.Services
                 var total = int.Parse(info["total"].ToString());
                 if (response.IsSuccessStatusCode)
                 {
-                    return (reqs,total);
+                    return (reqs, total);
                 }
                 else
                 {
                     var error = info["message"].ToString();
                     MessageBox.Show(error, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return (new List<string>(),0);
-                }    
+                    return (new List<string>(), 0);
+                }
             }
             catch (Exception ex)
             {
@@ -358,6 +359,46 @@ namespace NetStudy.Services
             }
         }
 
+        public async Task DeleteGroup(string groupId, string username)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"api/groups/delete-group/{groupId}");
+                var res = await response.Content.ReadAsStringAsync();
+                var msg = JObject.Parse(res)["message"].ToString();
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show(msg, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                else
+                {
+                    MessageBox.Show(msg, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public async Task DeleteAllMessage(string groupId)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"api/group-chat-message/delete-all-message/{groupId}");
+                var res = await response.Content.ReadAsStringAsync();
+                var message = JObject.Parse(res)["message"].ToString();
+                return;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+        }
+
         public async Task<List<MemberRole>> GetMemberList(string groupId)
         {
             try
@@ -367,7 +408,7 @@ namespace NetStudy.Services
                 JObject obj = JObject.Parse(res);
                 var memList = obj["data"].ToObject<List<MemberRole>>();
                 var msg = obj["message"].ToString();
-                if(response.StatusCode != System.Net.HttpStatusCode.OK)
+                if (response.StatusCode != System.Net.HttpStatusCode.OK)
                 {
                     MessageBox.Show(msg, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
@@ -396,7 +437,62 @@ namespace NetStudy.Services
                 MessageBox.Show($"Lỗi khi gửi yêu cầu: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-        }    
+        }
 
+        public async Task UpdateGroupInfo(string groupId, string name, string description)
+        {
+            try
+            {
+                var updateReq = new
+                {
+                    Name = name,
+                    Description = description
+                };
+                var json = JsonConvert.SerializeObject(updateReq);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PatchAsync($"api/groups/update-group-info/{groupId}", content);
+                var res = await response.Content.ReadAsStringAsync();
+                var message = JObject.Parse(res)["message"].ToString();
+                if(response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show(message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }    
+                else
+                {
+                    MessageBox.Show(message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return ;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+        }
+        public async Task ChangeRole(string groupId, string reqUsername)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync($"api/groups/{groupId}/change-role/{reqUsername}", null);
+                var res = await response.Content.ReadAsStringAsync();
+                var message = JObject.Parse(res)["message"].ToString();
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show(message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                else
+                {
+                    MessageBox.Show(message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+        }
     }
 }

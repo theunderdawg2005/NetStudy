@@ -40,7 +40,7 @@ namespace NetStudy
             userService = new UserService(accessToken);
             name = username;
             comboRole.Items.Add("User");
-            if (role == "001")
+            if (role == "001" || role == "003")
             {
                 comboRole.Items.Add("Admin");
             }

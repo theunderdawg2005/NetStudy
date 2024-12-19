@@ -46,14 +46,16 @@
             // 
             // flowLayoutPanel1
             // 
+            flowLayoutPanel1.AutoScroll = true;
             flowLayoutPanel1.Location = new Point(12, 98);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(571, 626);
+            flowLayoutPanel1.Size = new Size(571, 588);
             flowLayoutPanel1.TabIndex = 1;
             // 
             // btnExit
             // 
             btnExit.BackColor = Color.IndianRed;
+            btnExit.Cursor = Cursors.Hand;
             btnExit.FlatAppearance.BorderColor = Color.Gainsboro;
             btnExit.FlatAppearance.BorderSize = 2;
             btnExit.FlatStyle = FlatStyle.Flat;

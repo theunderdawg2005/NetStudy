@@ -30,7 +30,6 @@
         {
             lblTitle = new Label();
             groupBox1 = new GroupBox();
-            linkExit = new LinkLabel();
             label4 = new Label();
             label3 = new Label();
             txtDescription = new RichTextBox();
@@ -39,6 +38,8 @@
             PicPassword = new FontAwesome.Sharp.IconPictureBox();
             panel1 = new Panel();
             PicUser = new FontAwesome.Sharp.IconPictureBox();
+            btnExit = new FontAwesome.Sharp.IconButton();
+            linkDelGroup = new LinkLabel();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)PicPassword).BeginInit();
             ((System.ComponentModel.ISupportInitialize)PicUser).BeginInit();
@@ -58,7 +59,6 @@
             // groupBox1
             // 
             groupBox1.BackColor = Color.White;
-            groupBox1.Controls.Add(linkExit);
             groupBox1.Controls.Add(label4);
             groupBox1.Controls.Add(label3);
             groupBox1.Controls.Add(txtDescription);
@@ -76,19 +76,6 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Giới thiệu về nhóm";
             // 
-            // linkExit
-            // 
-            linkExit.AutoSize = true;
-            linkExit.Font = new Font("Cambria", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            linkExit.LinkColor = Color.FromArgb(0, 117, 214);
-            linkExit.Location = new Point(256, 480);
-            linkExit.Name = "linkExit";
-            linkExit.Size = new Size(52, 26);
-            linkExit.TabIndex = 24;
-            linkExit.TabStop = true;
-            linkExit.Text = "Exit";
-            linkExit.LinkClicked += linkExit_LinkClicked;
-            // 
             // label4
             // 
             label4.AutoSize = true;
@@ -96,9 +83,9 @@
             label4.ForeColor = Color.FromArgb(0, 117, 214);
             label4.Location = new Point(86, 139);
             label4.Name = "label4";
-            label4.Size = new Size(116, 23);
+            label4.Size = new Size(60, 23);
             label4.TabIndex = 23;
-            label4.Text = "Description";
+            label4.Text = "Mô tả";
             // 
             // label3
             // 
@@ -107,12 +94,13 @@
             label3.ForeColor = Color.FromArgb(0, 117, 214);
             label3.Location = new Point(86, 37);
             label3.Name = "label3";
-            label3.Size = new Size(64, 23);
+            label3.Size = new Size(102, 23);
             label3.TabIndex = 22;
-            label3.Text = "Name";
+            label3.Text = "Tên nhóm";
             // 
             // txtDescription
             // 
+            txtDescription.BackColor = Color.White;
             txtDescription.Font = new Font("Cambria", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
             txtDescription.Location = new Point(140, 174);
             txtDescription.Name = "txtDescription";
@@ -179,12 +167,43 @@
             PicUser.TabIndex = 13;
             PicUser.TabStop = false;
             // 
+            // btnExit
+            // 
+            btnExit.BackColor = Color.IndianRed;
+            btnExit.FlatAppearance.BorderColor = Color.Gainsboro;
+            btnExit.FlatAppearance.BorderSize = 2;
+            btnExit.FlatStyle = FlatStyle.Flat;
+            btnExit.IconChar = FontAwesome.Sharp.IconChar.Close;
+            btnExit.IconColor = Color.Black;
+            btnExit.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnExit.IconSize = 30;
+            btnExit.Location = new Point(543, 3);
+            btnExit.Name = "btnExit";
+            btnExit.Size = new Size(36, 34);
+            btnExit.TabIndex = 4;
+            btnExit.UseVisualStyleBackColor = false;
+            btnExit.Click += btnExit_Click;
+            // 
+            // linkDelGroup
+            // 
+            linkDelGroup.AutoSize = true;
+            linkDelGroup.LinkColor = Color.FromArgb(192, 0, 192);
+            linkDelGroup.Location = new Point(12, 9);
+            linkDelGroup.Name = "linkDelGroup";
+            linkDelGroup.Size = new Size(123, 25);
+            linkDelGroup.TabIndex = 5;
+            linkDelGroup.TabStop = true;
+            linkDelGroup.Text = "Giải tán nhóm";
+            linkDelGroup.LinkClicked += linkDelGroup_LinkClicked;
+            // 
             // FormGroupInfo
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
             ClientSize = new Size(582, 626);
+            Controls.Add(linkDelGroup);
+            Controls.Add(btnExit);
             Controls.Add(groupBox1);
             Controls.Add(lblTitle);
             FormBorderStyle = FormBorderStyle.None;
@@ -203,7 +222,6 @@
 
         private Label lblTitle;
         private GroupBox groupBox1;
-        private LinkLabel linkExit;
         private Label label4;
         private Label label3;
         private RichTextBox txtDescription;
@@ -212,5 +230,7 @@
         private FontAwesome.Sharp.IconPictureBox PicPassword;
         private Panel panel1;
         private FontAwesome.Sharp.IconPictureBox PicUser;
+        private FontAwesome.Sharp.IconButton btnExit;
+        private LinkLabel linkDelGroup;
     }
 }

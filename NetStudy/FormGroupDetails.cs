@@ -78,7 +78,7 @@ namespace NetStudy
         {
             int total;
             (memReq, total) = await groupService.GetJoinListByGroupId(groupId);
-            if (roleUser == "001")
+            if (roleUser == "001" || roleUser == "003")
             {
                 IconButton btnUserRequest = new IconButton
                 {
@@ -124,9 +124,26 @@ namespace NetStudy
         {
             string username = UserInfo["username"].ToString();
             string name = UserInfo["name"].ToString();
+
+            if (roleUser == "003")
+            {
+                var res = MessageBox.Show("Bạn có chắc muốn rời khỏi nhóm này? (Bạn là chủ nhóm và khi bạn rời khỏi thì nhóm sẽ giải tán)", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (res == DialogResult.Yes)
+                {
+                    await groupService.DeleteGroup(groupId, username);
+                    await groupService.DeleteAllMessage(groupId);
+                    await connection.InvokeAsync("LeaveGroup", groupId);
+                    await groupService.LeaveGroup(groupId, username);
+                    this.Hide();
+                    this.Close();
+                }
+                return;
+            }
+
             var result = MessageBox.Show("Bạn có chắc muốn rời khỏi nhóm này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
+
                 await connection.InvokeAsync("LeaveGroup", groupId);
                 await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{name} đã rời khỏi nhóm");
                 await groupService.LeaveGroup(groupId, username);
@@ -149,7 +166,7 @@ namespace NetStudy
 
         private void btnAddUser_Click(object sender, EventArgs e)
         {
-            FormAddUser formAdd = new  (
+            FormAddUser formAdd = new(
                 accessToken,
                 GroupInfo["name"].ToString(),
                 GroupInfo["id"].ToString(),
@@ -166,8 +183,14 @@ namespace NetStudy
 
         private void btnMemberList_Click(object sender, EventArgs e)
         {
-            FormMemberList memList = new FormMemberList(accessToken, groupId);
+            FormMemberList memList = new FormMemberList(accessToken, groupId, roleUser, UserInfo["username"].ToString());
             memList.ShowDialog();
+        }
+
+        private void btnInfo_Click(object sender, EventArgs e)
+        {
+            FormGroupInfo formInfo = new FormGroupInfo(accessToken, GroupInfo, roleUser, UserInfo["username"].ToString());
+            formInfo.ShowDialog();
         }
     }
 }

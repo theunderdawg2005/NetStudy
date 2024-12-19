@@ -59,6 +59,7 @@
             // 
             btnSearch.AutoSize = true;
             btnSearch.BackColor = Color.FromArgb(192, 0, 192);
+            btnSearch.Cursor = Cursors.Hand;
             btnSearch.FlatAppearance.BorderColor = Color.Gainsboro;
             btnSearch.FlatAppearance.BorderSize = 2;
             btnSearch.FlatStyle = FlatStyle.Flat;
@@ -95,6 +96,7 @@
             // linkCreateGroup
             // 
             linkCreateGroup.AutoSize = true;
+            linkCreateGroup.Cursor = Cursors.Hand;
             linkCreateGroup.Font = new Font("Cambria", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
             linkCreateGroup.LinkColor = Color.FromArgb(128, 128, 255);
             linkCreateGroup.Location = new Point(1010, 19);
@@ -135,6 +137,7 @@
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(182, 33);
             comboBox1.TabIndex = 4;
+            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
             // 
             // lblPage
             // 
@@ -166,7 +169,7 @@
             Controls.Add(panel2);
             Controls.Add(panel1);
             Name = "FormGroups";
-            Text = " ";
+            Text = " Hội nhóm";
             Load += FormGroups_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();

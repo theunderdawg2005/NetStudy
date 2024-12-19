@@ -99,5 +99,31 @@ namespace API_Server.Controllers
                 });
             }
         }
+
+        [Authorize]
+        [HttpDelete("delete-all-message/{groupId}")]
+        public async Task<IActionResult> DeleteAllMessage(string groupId)
+        {
+            try
+            {
+
+                var result = await groupChatMsgService.DeleteAllMessageByGroupId(groupId);
+                if (result)
+                {
+                    return Ok(new
+                    {
+                        message = "Xóa tất cả tin nhắn thành công!",
+                    });
+                }
+                return NotFound(new
+                {
+                    message = "Không tìm thấy tin nhắn nào để xóa"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

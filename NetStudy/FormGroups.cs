@@ -17,6 +17,8 @@ namespace NetStudy
 {
     public partial class FormGroups : Form
     {
+        private int currPage = 1;
+        private int pageSize = 5;
         private string accessToken;
         private readonly JObject UserInfo;
         public static readonly HttpClient httpClient = new HttpClient
@@ -31,7 +33,7 @@ namespace NetStudy
             accessToken = token;
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
             UserInfo = info;
-            
+
             groupService = new GroupService(accessToken);
         }
 
@@ -50,13 +52,14 @@ namespace NetStudy
             }
 
         }
-        private async Task LoadGroupSearching(string searchString)
+        private async Task LoadGroupSearching(string searchString, int page)
         {
 
-            var (groups, total) = await groupService.SearchGroup(searchString);
+            var (groups, total) = await groupService.SearchGroup(searchString, page, pageSize);
             if (groups != null && groups.Any())
             {
                 PopulateGroupPanel(flowLayoutPanel1, groups);
+                UpdatePage(total);
             }
         }
         private void PopulateGroupPanel(FlowLayoutPanel flpanel, List<Group> groups)
@@ -99,8 +102,8 @@ namespace NetStudy
                     Height = 35,
                     BackColor = Color.FromArgb(34, 33, 74),
                     FlatStyle = FlatStyle.Flat,
-                    
-                    Location = new Point(1035, 5),
+
+                    Location = new Point(1060, 5),
                     IconChar = IconChar.Info,
                     IconColor = Color.Gainsboro,
                     IconSize = 30,
@@ -109,8 +112,8 @@ namespace NetStudy
                 btnInfo.Click += async (sender, e) =>
                 {
                     var info = await groupService.GetGroupInfo(group.Id.ToString());
-                    
-                    FormGroupInfo grInfo = new FormGroupInfo(accessToken, info);
+
+                    FormGroupInfo grInfo = new FormGroupInfo(accessToken, info, "000", UserInfo["username"].ToString());
                     grInfo.Show();
                 };
                 panel.Click += Group_Panel_Click;
@@ -131,11 +134,11 @@ namespace NetStudy
             var msg = JObject.Parse(res)["message"].ToString();
             if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.BadRequest)
             {
-                
-                MessageBox.Show($"{msg}", "Error...123", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                MessageBox.Show($"{msg}", "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            else if(response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
                 var result = MessageBox.Show($"{msg} Bạn có muốn tham gia không?", "Error...", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                 if (result == DialogResult.Yes)
@@ -144,7 +147,7 @@ namespace NetStudy
 
                 }
                 return;
-            }    
+            }
             var info = JObject.Parse(res);
             var groupDetails = new FormGroupDetails(accessToken, UserInfo, info);
             groupDetails.ShowDialog();
@@ -158,12 +161,33 @@ namespace NetStudy
 
         private async void btnSearch_Click(object sender, EventArgs e)
         {
-            await LoadGroupSearching(txtSearchGroup.Text);
+            await LoadGroupSearching(txtSearchGroup.Text, currPage); 
         }
 
         private void txtSearchGroup_TextChanged(object sender, EventArgs e)
         {
             btnSearch.Enabled = !string.IsNullOrWhiteSpace(txtSearchGroup.Text);
+        }
+
+        private void UpdatePage(int newTotalPages)
+        {
+
+            comboBox1.Items.Clear();
+            for (int i = 1; i <= newTotalPages; i++)
+            {
+                comboBox1.Items.Add(i);
+            }
+            comboBox1.Enabled = newTotalPages > 1;
+
+        }
+
+        private async void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if(comboBox1.SelectedIndex >= 0)
+            { 
+                currPage = comboBox1.SelectedIndex + 1;
+                await LoadGroupSearching(txtSearchGroup.Text, currPage);
+            }    
         }
     }
 }
