@@ -39,6 +39,7 @@
             // 
             // btn_send
             // 
+            btn_send.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btn_send.BackColor = Color.Indigo;
             btn_send.FlatStyle = FlatStyle.Flat;
             btn_send.Font = new Font("Cambria", 10F, FontStyle.Bold);
@@ -53,6 +54,7 @@
             // 
             // btn_clear2
             // 
+            btn_clear2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btn_clear2.BackColor = Color.Indigo;
             btn_clear2.FlatStyle = FlatStyle.Flat;
             btn_clear2.Font = new Font("Cambria", 10F, FontStyle.Bold);
@@ -67,6 +69,7 @@
             // 
             // btn_upload
             // 
+            btn_upload.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btn_upload.Location = new Point(708, 51);
             btn_upload.Name = "btn_upload";
             btn_upload.Size = new Size(94, 29);
@@ -77,6 +80,7 @@
             // 
             // tB_filepath
             // 
+            tB_filepath.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             tB_filepath.Location = new Point(137, 51);
             tB_filepath.Name = "tB_filepath";
             tB_filepath.Size = new Size(538, 27);
@@ -84,6 +88,7 @@
             // 
             // tB_message
             // 
+            tB_message.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             tB_message.Location = new Point(137, 12);
             tB_message.Name = "tB_message";
             tB_message.Size = new Size(538, 27);
@@ -103,7 +108,8 @@
             // 
             // tB_respones
             // 
-            tB_respones.Location = new Point(-1, 94);
+            tB_respones.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tB_respones.Location = new Point(12, 86);
             tB_respones.Name = "tB_respones";
             tB_respones.Size = new Size(932, 579);
             tB_respones.TabIndex = 11;
@@ -114,7 +120,7 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(26, 25, 62);
-            ClientSize = new Size(932, 673);
+            ClientSize = new Size(956, 685);
             Controls.Add(tB_respones);
             Controls.Add(lbl_username);
             Controls.Add(tB_message);
