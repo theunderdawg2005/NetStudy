@@ -154,6 +154,7 @@
             Controls.Add(tB_title);
             Name = "FormCreateQuestion";
             Text = "FormCreateQuestion";
+            FormClosed += FormCreateQuestion_FormClosed;
             ResumeLayout(false);
             PerformLayout();
         }

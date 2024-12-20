@@ -240,7 +240,7 @@ namespace API_Server.Controllers
                     message = "Yêu cầu không hợp lệ!"
                 });
             }    
-            //Tìm thông tin người dùng
+
             var user = await _userService.GetUserByUserName(username);
 
             if (user == null)

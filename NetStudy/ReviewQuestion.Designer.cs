@@ -43,6 +43,7 @@
             // 
             // tB_data
             // 
+            tB_data.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tB_data.Font = new Font("Segoe UI", 14F);
             tB_data.Location = new Point(42, 57);
             tB_data.Multiline = true;
@@ -105,6 +106,7 @@
             // 
             // tB_topic
             // 
+            tB_topic.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             tB_topic.Location = new Point(144, 15);
             tB_topic.Name = "tB_topic";
             tB_topic.Size = new Size(383, 27);
@@ -112,6 +114,7 @@
             // 
             // btn_review
             // 
+            btn_review.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btn_review.BackColor = Color.Indigo;
             btn_review.FlatStyle = FlatStyle.Flat;
             btn_review.Font = new Font("Cambria", 10F, FontStyle.Bold);
@@ -195,6 +198,7 @@
             Controls.Add(tB_data);
             Name = "ReviewQuestion";
             Text = "ReviewQuestion";
+            FormClosed += ReviewQuestion_FormClosed;
             ResumeLayout(false);
             PerformLayout();
         }

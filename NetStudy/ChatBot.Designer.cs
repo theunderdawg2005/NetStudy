@@ -124,6 +124,7 @@
             Controls.Add(btn_send);
             Name = "ChatBot";
             Text = "ChatBot";
+            FormClosed += ChatBot_FormClosed;
             ResumeLayout(false);
             PerformLayout();
         }
