@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace API_Server.Models
+namespace API_Server.DTOs
 {
-    public class AddUserRequest
+    public class AddUserRequestDTO
     {
         [Required]
         public string Username { get; set; }

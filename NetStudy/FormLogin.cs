@@ -97,5 +97,11 @@ namespace NetStudy
         {
             btnLogin.Enabled = !string.IsNullOrWhiteSpace(txtPassword.Text);
         }
+
+        private void linkForgetPass_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            ForgetPass forgetPass = new ForgetPass(userService);
+            forgetPass.Show();
+        }
     }
 }

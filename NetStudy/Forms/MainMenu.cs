@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
@@ -14,6 +15,7 @@ using FontAwesome.Sharp;
 using NetStudy.Forms;
 using NetStudy.Services;
 using Newtonsoft.Json.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace NetStudy.Forms
 {
@@ -182,11 +184,91 @@ namespace NetStudy.Forms
         {
 
         }
+        public void DrawCircular(PictureBox pictureBox)
+        {
+            int width = pictureBox.Width;
+            int height = pictureBox.Height;
+
+            GraphicsPath path = new GraphicsPath();
+            path.AddEllipse(0, 0, width, height);
+            pictureBox.Region = new Region(path);
+        }
+
+        private async void LoadImage(string imgUrl)
+        {
+            try
+            {
+
+                if (string.IsNullOrWhiteSpace(imgUrl) ||
+                !Uri.TryCreate(imgUrl, UriKind.Absolute, out var uriRes) ||
+                !(uriRes.Scheme == Uri.UriSchemeHttp || uriRes.Scheme == Uri.UriSchemeHttps))
+                {
+                    avaPic.Image = LoadDefaultImg();
+                    return;
+                }
+                var imageBytes = await httpClient.GetByteArrayAsync(imgUrl);
+                using (var ms = new MemoryStream(imageBytes))
+                {
+                    if (ms != null && ms.CanRead)
+                    {
+                        ms.Seek(0, SeekOrigin.Begin);
+                        Image image = Image.FromStream(ms);
+                        avaPic.Image = image;
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải ảnh: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private Image LoadDefaultImg()
+        {
+            string defaultUrl = "https://i.pinimg.com/736x/62/ee/b3/62eeb37155f0df95a708586aed9165c5.jpg";
+            using (var client = new HttpClient())
+            {
+                var bytes = client.GetByteArrayAsync(defaultUrl).Result;
+                using (var ms = new MemoryStream(bytes))
+                {
+                    return Image.FromStream(ms);
+                }
+            }
+        }
 
         private void btnGroupChat_Click(object sender, EventArgs e)
         {
             ActivateButton(sender, RGBColors.color5);
             OpenChildForm(new FormGroups(accessToken, UserInfo));
+        }
+        private void setUserInfo()
+        {
+            lblName.Text = UserInfo["name"].ToString();
+            LoadImage(UserInfo["avatar"].ToString());
+        }
+
+        private void MainMenu_Load(object sender, EventArgs e)
+        {
+            setUserInfo();
+            DrawCircular(avaPic);
+        }
+
+        private void panelLogo_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void lblName_Click(object sender, EventArgs e)
+        {
+            FormUpdateUser formUpdateUser = new FormUpdateUser(accessToken, UserInfo);
+            formUpdateUser.Show();
+        }
+
+        private void btnSettingUser_Click(object sender, EventArgs e)
+        {
+            FormUpdateUser formUpdateUser = new FormUpdateUser(accessToken, UserInfo);
+            formUpdateUser.Show();
         }
     }
 }

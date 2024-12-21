@@ -41,6 +41,7 @@
             txtUsername = new TextBox();
             txtPassword = new TextBox();
             linkClear = new LinkLabel();
+            linkForgetPass = new LinkLabel();
             ((System.ComponentModel.ISupportInitialize)PicUser).BeginInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)PicPassword).BeginInit();
@@ -195,12 +196,28 @@
             linkClear.Text = "Clear fields";
             linkClear.LinkClicked += linkClear_LinkClicked_1;
             // 
+            // linkForgetPass
+            // 
+            linkForgetPass.AutoSize = true;
+            linkForgetPass.BackColor = Color.White;
+            linkForgetPass.Cursor = Cursors.Hand;
+            linkForgetPass.Font = new Font("Cambria", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            linkForgetPass.LinkColor = Color.FromArgb(0, 117, 214);
+            linkForgetPass.Location = new Point(158, 548);
+            linkForgetPass.Name = "linkForgetPass";
+            linkForgetPass.Size = new Size(156, 22);
+            linkForgetPass.TabIndex = 13;
+            linkForgetPass.TabStop = true;
+            linkForgetPass.Text = "Forget Password";
+            linkForgetPass.LinkClicked += linkForgetPass_LinkClicked;
+            // 
             // FormLogin
             // 
             AutoScaleDimensions = new SizeF(10F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(471, 644);
+            ClientSize = new Size(478, 660);
+            Controls.Add(linkForgetPass);
             Controls.Add(linkClear);
             Controls.Add(txtPassword);
             Controls.Add(txtUsername);
@@ -242,5 +259,6 @@
         private TextBox txtUsername;
         private TextBox txtPassword;
         private LinkLabel linkClear;
+        private LinkLabel linkForgetPass;
     }
 }

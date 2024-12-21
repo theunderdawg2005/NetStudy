@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.JsonPatch;
 using Org.BouncyCastle.Asn1.Ocsp;
+using API_Server.DTOs;
 
 namespace API_Server.Controllers
 {
@@ -20,13 +21,15 @@ namespace API_Server.Controllers
         private readonly EmailService _emailService;
         private readonly JwtService _jwtService;
         private readonly UserService _userService;
+        private readonly ImageService _imageService;
         private readonly IMongoCollection<User> users;
-        public UserController(MongoDbService context, EmailService emailService, JwtService jwtService, UserService userService)
+        public UserController(MongoDbService context, EmailService emailService, JwtService jwtService, UserService userService, ImageService imageService)
         {
             _context = context;
             _emailService = emailService;
             _jwtService = jwtService;
             _userService = userService;
+            _imageService = imageService;
             users = _context.Users;
         }
 
@@ -35,7 +38,7 @@ namespace API_Server.Controllers
         private static string? curentOtp;
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] Register registerModel)
+        public async Task<IActionResult> Register([FromBody] RegisterDTO registerModel)
         {
             var (success, message) = await _userService.RegisterAsync(registerModel);
             if (!success)
@@ -47,7 +50,7 @@ namespace API_Server.Controllers
         }
 
         [HttpPost("Verify-Otp")]
-        public async Task<IActionResult> VerifyOtp([FromBody] Otp otpModel)
+        public async Task<IActionResult> VerifyOtp([FromBody] OtpRequest otpModel)
         {
             var (success, message, user) = await _userService.VerifyOtpAsync(otpModel);
 
@@ -94,6 +97,7 @@ namespace API_Server.Controllers
                 Name = data.Name,
                 Username = data.Username,
                 Email = data.Email,
+                Avatar = data.Avatar
             });
         }
 
@@ -227,6 +231,8 @@ namespace API_Server.Controllers
             return BadRequest("Không thể cập nhật trạng thái.");
         }
 
+        
+
         //GET METHOD
         //Lấy data của người dùng
         [HttpGet("{username}")]
@@ -255,7 +261,8 @@ namespace API_Server.Controllers
             {
                 name = user.Name,
                 username = user.Username,
-                email = user.Email
+                email = user.Email,
+                avatar = user.Avatar
             };
             return Ok(new
             {
@@ -663,10 +670,10 @@ namespace API_Server.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("forget-password")]
-        public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequest request)
+        [HttpPost("forget-password/{email}")]
+        public async Task<IActionResult> ForgetPassword([FromRoute] string email)
         {
-            if(string.IsNullOrEmpty(request.Email))
+            if(string.IsNullOrEmpty(email))
             {
                 return BadRequest(new
                 {
@@ -674,12 +681,12 @@ namespace API_Server.Controllers
                 });
             }
 
-            var result = await _userService.ForgetPasswordAsync(request.Email);
+            var result = await _userService.ForgetPasswordAsync(email);
             if (result.Success)
             {
                 return Ok(new
                 {
-                    message = "Mã OTP đã được gửi đến email của bạn!"
+                    message = "Yêu cầu thành công! Mã OTP đã được gửi đến email của bạn!"
                 });
             }
             return BadRequest(new
@@ -709,7 +716,7 @@ namespace API_Server.Controllers
 
             if (!result.Success)
             {
-                return BadRequest(result);
+                return BadRequest(result.Message);
             }
 
             return Ok(new { Success = true, Message = "Đổi mật khẩu thành công!" });
@@ -744,6 +751,15 @@ namespace API_Server.Controllers
         [HttpPost("change-password-with-otp")]
         public async Task<IActionResult> ChangePasswordWithOtp([FromBody] ChangePasswordRequest request)
         {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new
+                {
+                    message = "Yêu cầu không hợp lệ!"
+                });
+            }
+
             if (string.IsNullOrEmpty(request.Username) ||
                 string.IsNullOrEmpty(request.CurrentPassword) ||
                 string.IsNullOrEmpty(request.NewPassword) ||
@@ -769,6 +785,68 @@ namespace API_Server.Controllers
             return Ok(result);
         }
 
+        //PATCH METHOD
+        [Authorize]
+        [HttpPatch("update-info")]
+        public async Task<IActionResult> UpdateUserInfo([FromForm] UpdateUserDTO updateUserDTO)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            // Xác minh token và lấy username
+            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            if (claimsPrincipal == null)
+            {
+                return Unauthorized("Access token không hợp lệ");
+            }
+
+            var userIdClaim = claimsPrincipal.FindFirst("userId");//Tìm id của user
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            {
+                return Unauthorized("Access token không hợp lệ");
+            }
+            var userId = userIdClaim.Value;
+            try
+            {
+                var check = await _userService.UpdateUserInfo(userId,updateUserDTO.Username, updateUserDTO.Name, updateUserDTO.Avatar, updateUserDTO.Email);
+                if (check)
+                {
+                    var user = await _userService.GetUserById(userId);
+                    return Ok(new
+                    {
+                        message = "Cập nhật thành công!",
+                        userUpdated = new {
+                            username = user.Username,
+                            name = user.Name,
+                            avatar = user.Avatar,
+                            email = user.Email,
+                        }
+                    });
+                }
+                else
+                {
+                    return BadRequest(new
+                    {
+                        message = "Không thể cập nhật!"
+                    });
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message,
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }
 

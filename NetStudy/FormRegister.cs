@@ -15,7 +15,8 @@ namespace NetStudy
 {
     public partial class FormRegister : Form
     {
-        private readonly UserService userService;
+   
+        
         public static readonly HttpClient httpClient = new HttpClient
         {
             BaseAddress = new Uri(@"https://localhost:7070/"),
@@ -24,24 +25,10 @@ namespace NetStudy
         public FormRegister()
         {
             InitializeComponent();
-            
+
             LoadForm();
         }
-        public async Task<string> Register(dynamic registerModel)
-        {
-            try
-            {
-                var json = JsonConvert.SerializeObject(registerModel);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await httpClient.PostAsync("api/user/register", content);
-                return await response.Content.ReadAsStringAsync();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-        }
+        
         public void LoadForm()
         {
             int year = DateTime.Now.Year;
@@ -66,6 +53,7 @@ namespace NetStudy
         {
             return Regex.IsMatch(username, "^[a-zA-Z0-9]{4,25}$");
         }
+            
         public void UpdateDate()
         {
             if (cmbYear.SelectedItem == null || cmbMonth.SelectedItem == null)
@@ -84,7 +72,21 @@ namespace NetStudy
             }
             cmbDate.SelectedIndex = 0;
         }
-
+        public async Task<string> Register(dynamic registerModel)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(registerModel);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await httpClient.PostAsync("api/user/register", content);
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+        }
 
         private async void btnRegister_Click(object sender, EventArgs e)
         {
@@ -121,6 +123,7 @@ namespace NetStudy
                 return;
             }
 
+
             var register = new
             {
                 name = fullName,
@@ -128,14 +131,15 @@ namespace NetStudy
                 dateOfBirth = dateOfBirth.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
                 email = email,
                 password = password,
-                confirmPassword = confirmedPass
+                confirmPassword = confirmedPass,
+                
             };
             var response = await Register(register);
-            if (response.Contains("thành công", StringComparison.OrdinalIgnoreCase))
+            if (response.Contains("đã được gửi", StringComparison.OrdinalIgnoreCase))
             {
                 this.Hide();
                 MessageBox.Show($"Mã OTP đã được gửi qua email {email}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                VerifyOtp verifyOtp = new VerifyOtp();
+                VerifyOtp verifyOtp = new VerifyOtp(register.email);
                 verifyOtp.ShowDialog();
                 this.Close();
             }
@@ -145,6 +149,7 @@ namespace NetStudy
                 return;
             }
         }
+        
 
         private void cmbYear_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -155,5 +160,7 @@ namespace NetStudy
         {
             UpdateDate();
         }
+
+        
     }
 }

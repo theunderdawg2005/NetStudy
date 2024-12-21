@@ -22,12 +22,12 @@ namespace NetStudy
             BaseAddress = new Uri(@"https://localhost:7070/"),
             Timeout = TimeSpan.FromMinutes(5)
         };
-        public VerifyOtp()
+        private string _email;
+        public VerifyOtp(string email)
         {
             InitializeComponent();
-            
+            _email = email;
         }
-
 
         public async Task<string> VeriOtp(dynamic otpModel)
         {
@@ -61,7 +61,8 @@ namespace NetStudy
             }
             var OTP = new
             {
-                otp = txtOTP.Text.Trim(),
+                Email = _email,
+                Code = txtOTP.Text.Trim(),
             };
             var response = await VeriOtp(OTP);
             if (response.Contains("thành công", StringComparison.OrdinalIgnoreCase))
