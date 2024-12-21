@@ -1,6 +1,7 @@
 ﻿using NetStudy.Services;
 using Newtonsoft.Json.Linq;
 using NetStudy.Helper;
+using NetStudy.Forms;
 
 namespace NetStudy
 {
@@ -17,11 +18,13 @@ namespace NetStudy
         private QuestionService questionService;
         string correctAnswer;
         private QuestionHelper questionHelper;
+        private FormExam FormExam;
 
-        public ReviewQuestion(JObject info, string token)
+        public ReviewQuestion(JObject info, string token, FormExam formExam)
         {
             InitializeComponent();
             UserInfo = info;
+            FormExam = formExam;
             accessToken = token;
             lbl_username.Text = UserInfo["username"].ToString();
             questionService = new QuestionService(accessToken);
@@ -270,5 +273,9 @@ namespace NetStudy
             }
         }
 
+        private void ReviewQuestion_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            FormExam.Show();
+        }
     }
 }

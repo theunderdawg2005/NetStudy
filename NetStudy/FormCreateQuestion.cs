@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using NetStudy.Models;
 using Newtonsoft.Json;
+using NetStudy.Forms;
 
 namespace NetStudy
 {
@@ -16,13 +17,16 @@ namespace NetStudy
         private string accessToken;
         private QuestionService questionService;
         private JObject UserInfo;
+        private FormExam FormExam;
 
-        public FormCreateQuestion(JObject info, string token)
+        public FormCreateQuestion(JObject info, string token, FormExam formExam)
         {
             InitializeComponent();
             accessToken = token;
             UserInfo = info;
             questionService = new QuestionService(accessToken);
+            this.FormClosed += FormCreateQuestion_FormClosed;
+            FormExam = formExam;
         }
 
         private async void btn_create_Click(object sender, EventArgs e)
@@ -50,6 +54,9 @@ namespace NetStudy
             if (response.Message.Contains("thành công"))
             {
                 MessageBox.Show("Tạo câu hỏi thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                tB_content.Clear();
+                tB_correctanswer.Clear();
+                tB_title.Clear();
             }
             else
             {
@@ -62,6 +69,11 @@ namespace NetStudy
             tB_content.Clear();
             tB_correctanswer.Clear();
             tB_title.Clear();
+        }
+
+        private void FormCreateQuestion_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            FormExam.Show();
         }
     }
 }

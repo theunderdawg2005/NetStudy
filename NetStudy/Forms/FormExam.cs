@@ -47,7 +47,7 @@ namespace NetStudy.Forms
 
         private void btn_createquestion_Click(object sender, EventArgs e)
         {
-            FormCreateQuestion formCreateQuestion = new FormCreateQuestion(UserInfo, accessToken);
+            FormCreateQuestion formCreateQuestion = new FormCreateQuestion(UserInfo, accessToken, this);
             formCreateQuestion.Show();
             this.Hide();
         }
@@ -59,14 +59,14 @@ namespace NetStudy.Forms
 
         private void btn_review_Click(object sender, EventArgs e)
         {
-            ReviewQuestion reviewQuestion = new ReviewQuestion(UserInfo, accessToken);
+            ReviewQuestion reviewQuestion = new ReviewQuestion(UserInfo, accessToken, this);
             reviewQuestion.Show();
             this.Hide();
         }
 
         private void btn_AI_Click(object sender, EventArgs e)
         {
-            ChatBot chatBot = new ChatBot(UserInfo, accessToken);
+            ChatBot chatBot = new ChatBot(UserInfo, accessToken, this);
             chatBot.Show();
             this.Hide();
         }
