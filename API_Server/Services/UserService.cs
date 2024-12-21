@@ -395,5 +395,126 @@ namespace API_Server.Services
 
             return result.ModifiedCount > 0;
         }
+
+        public async Task<(bool Success, string Message)> ForgetPasswordAsync(string email)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.Email, email);
+            var user = await users.Find(filter).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return (false, "Email không tồn tại trong hệ thống.");
+            }
+
+            var otp = new Random().Next(100000, 999999).ToString();
+            _currentOtp = otp;
+            _currentEmail = email;
+
+            emailService.SendOtpEmail(email, otp);
+
+            return (true, "OTP đã được gửi đến email của bạn.");
+        }
+
+        public async Task<(bool Success, string Message)> ResetPasswordAsync(string email, string otp, string newPassword, string confirmPassword)
+        {
+            if (string.IsNullOrEmpty(_currentEmail) || _currentEmail != email)
+            {
+                return (false, "Email không khớp với email yêu cầu quên mật khẩu.");
+            }
+
+            if (_currentOtp != otp)
+            {
+                return (false, "OTP không hợp lệ.");
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                return (false, "Mật khẩu mới và xác nhận mật khẩu không khớp.");
+            }
+
+            var filter = Builders<User>.Filter.Eq(u => u.Email, email);
+            var user = await users.Find(filter).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return (false, "Không tìm thấy người dùng với email này.");
+            }
+
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+            var update = Builders<User>.Update.Set(u => u.PasswordHash, hashedPassword);
+            var result = await users.UpdateOneAsync(filter, update);
+
+            if (result.ModifiedCount == 0)
+            {
+                return (false, "Đặt lại mật khẩu thất bại.");
+            }
+
+            _currentOtp = string.Empty;
+            _currentEmail = string.Empty;
+
+            return (true, "Đặt lại mật khẩu thành công.");
+        }
+
+        public async Task<(bool Success, string Message)> SendChangePasswordOtpAsync(string username)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.Username, username);
+            var user = await users.Find(filter).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return (false, "Người dùng không tồn tại.");
+            }
+
+            var otp = new Random().Next(100000, 999999).ToString();
+            _currentOtp = otp;
+            _currentEmail = user.Email;
+
+            emailService.SendOtpEmail(user.Email, otp);
+
+            return (true, "OTP đã được gửi đến email của bạn.");
+        }
+
+        public async Task<(bool Success, string Message)> ChangePasswordWithOtpAsync(string username, string currentPassword, string newPassword, string confirmPassword, string otp)
+        {
+            if (newPassword != confirmPassword)
+            {
+                return (false, "Mật khẩu mới và xác nhận mật khẩu không khớp.");
+            }
+
+            if (_currentOtp != otp)
+            {
+                return (false, "OTP không hợp lệ.");
+            }
+
+            var filter = Builders<User>.Filter.Eq(u => u.Username, username);
+            var user = await users.Find(filter).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return (false, "Người dùng không tồn tại.");
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash))
+            {
+                return (false, "Mật khẩu hiện tại không đúng.");
+            }
+
+            var hashedNewPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+            var update = Builders<User>.Update.Set(u => u.PasswordHash, hashedNewPassword);
+            var result = await users.UpdateOneAsync(filter, update);
+
+            if (result.ModifiedCount == 0)
+            {
+                return (false, "Thay đổi mật khẩu thất bại.");
+            }
+
+            _currentOtp = string.Empty;
+            _currentEmail = string.Empty;
+
+            return (true, "Thay đổi mật khẩu thành công.");
+        }
+
     }
 }

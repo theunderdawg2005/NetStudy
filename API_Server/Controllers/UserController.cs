@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.JsonPatch;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace API_Server.Controllers
 {
@@ -660,5 +661,114 @@ namespace API_Server.Controllers
 
             return Ok("Xóa người dùng thành công.");
         }
+
+        [AllowAnonymous]
+        [HttpPost("forget-password")]
+        public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequest request)
+        {
+            if(string.IsNullOrEmpty(request.Email))
+            {
+                return BadRequest(new
+                {
+                    message = "Email không được để trống!"
+                });
+            }
+
+            var result = await _userService.ForgetPasswordAsync(request.Email);
+            if (result.Success)
+            {
+                return Ok(new
+                {
+                    message = "Mã OTP đã được gửi đến email của bạn!"
+                });
+            }
+            return BadRequest(new
+            {
+                message = result.Message
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Email) ||
+                string.IsNullOrEmpty(request.Otp) ||
+                string.IsNullOrEmpty(request.NewPassword) ||
+                string.IsNullOrEmpty(request.ConfirmPassword))
+            {
+                return BadRequest(new { Success = false, Message = "Thông tin không được để trống." });
+            }
+
+            var result = await _userService.ResetPasswordAsync(
+                request.Email,
+                request.Otp,
+                request.NewPassword,
+                request.ConfirmPassword
+            );
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(new { Success = true, Message = "Đổi mật khẩu thành công!" });
+        }
+
+        [Authorize]
+        [HttpPost("{username}/request-change-password")]
+        public async Task<IActionResult> RequestChangePassword([FromRoute]string username)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (!_jwtService.IsValidate(authorizationHeader))
+            {
+                return Unauthorized(new { message = "Yêu cầu không hợp lệ!" });
+            }
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest(new { Success = false, Message = "Tên người dùng không được để trống." });
+            }
+
+            var result = await _userService.SendChangePasswordOtpAsync(username);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpPost("change-password-with-otp")]
+        public async Task<IActionResult> ChangePasswordWithOtp([FromBody] ChangePasswordRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Username) ||
+                string.IsNullOrEmpty(request.CurrentPassword) ||
+                string.IsNullOrEmpty(request.NewPassword) ||
+                string.IsNullOrEmpty(request.ConfirmPassword) ||
+                string.IsNullOrEmpty(request.Otp))
+            {
+                return BadRequest(new { Success = false, Message = "Tất cả các trường đều là bắt buộc." });
+            }
+
+            var result = await _userService.ChangePasswordWithOtpAsync(
+                request.Username,
+                request.CurrentPassword,
+                request.NewPassword,
+                request.ConfirmPassword,
+                request.Otp
+            );
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
     }
 }
+
