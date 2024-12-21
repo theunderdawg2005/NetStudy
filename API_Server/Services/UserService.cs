@@ -11,15 +11,17 @@ namespace API_Server.Services
         private readonly IMongoCollection<Group> groups;
 
         private EmailService emailService;
+        private ImageService imageService;
         private readonly Dictionary<string, User> _users;
         private string? _currentOtp;
         private string? _currentEmail;
 
 
-        public UserService(MongoDbService db, EmailService email) {
+        public UserService(MongoDbService db, EmailService email, ImageService imgService) {
             users = db.Users;
             groups = db.ChatGroup;
             emailService = email;
+            imageService = imgService;
             _users = new Dictionary<string, User>();
         }
          
@@ -63,6 +65,68 @@ namespace API_Server.Services
         public async Task UpdateUser(User user)
         {
             await users.ReplaceOneAsync(u => u.Username == user.Username, user);
+        }
+        public async Task<bool> UpdateUserInfo(string userId, string username, string name, IFormFile avatar, string email)
+        {
+            ObjectId obj = ObjectId.Parse(userId);
+            var filter = Builders<User>.Filter.Eq(u => u.Id, obj);
+            var user = await GetUserById(userId);
+            if (user == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy người dùng");
+            }
+            var updates = new List<UpdateDefinition<User>>();
+            if (username != user.Username)
+            {
+                var filterField = Builders<User>.Filter.Eq(u => u.Username, username);
+
+
+                var existingUser = await users.Find(filterField).FirstOrDefaultAsync();
+                if (existingUser != null)
+                {
+                    throw new ArgumentException("Tên hoặc email người dùng đã tồn tại!");
+                }
+            }
+            if (email != user.Email)
+            {
+                var filterField = Builders<User>.Filter.Eq(u => u.Email, email);
+
+
+                var existingUser = await users.Find(filterField).FirstOrDefaultAsync();
+                if (existingUser != null)
+                {
+                    throw new ArgumentException("Tên hoặc email người dùng đã tồn tại!");
+                }
+            }
+            if (!string.IsNullOrEmpty(username))
+            {
+                updates.Add(Builders<User>.Update.Set(u => u.Username, username));
+            }    
+            if (!string.IsNullOrEmpty(name))
+            {
+                updates.Add(Builders<User>.Update.Set(u => u.Name,name));
+            }
+            if (!string.IsNullOrEmpty(email))
+            {
+                updates.Add(Builders<User>.Update.Set(u => u.Email, email));
+            }
+            if (avatar != null && avatar.Length > 0)
+            {
+                var imgUrl = await imageService.UploadImage(new ImageDTO
+                {
+                    file = avatar
+                });
+                updates.Add(Builders<User>.Update.Set(u => u.Avatar, imgUrl));
+            }
+            if(updates.Count == 0)
+            {
+                return false;
+            }
+
+            var update = Builders<User>.Update.Combine(updates);
+
+            var result = await users.UpdateOneAsync(filter, update);
+            return result.ModifiedCount > 0;
         }
         public async Task<bool> IsJoined(string username, string groupId)
         {
@@ -265,7 +329,7 @@ namespace API_Server.Services
             }
         }
 
-        public async Task<(bool Success, string Message)> RegisterAsync(Register registerModel)
+        public async Task<(bool Success, string Message)> RegisterAsync(RegisterDTO registerModel)
         {
             if (registerModel.Password != registerModel.ConfirmPassword)
             {
@@ -287,7 +351,7 @@ namespace API_Server.Services
             _currentOtp = otp;
 
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerModel.Password);
-
+            
             var user = new User
             {
                 Name = registerModel.Name,
@@ -296,6 +360,7 @@ namespace API_Server.Services
                 PasswordHash = hashedPassword,
                 DateOfBirth = registerModel.DateOfBirth.Date,
                 Email = registerModel.Email,
+                
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -339,6 +404,7 @@ namespace API_Server.Services
                 PasswordHash = tempUser.PasswordHash,
                 DateOfBirth = tempUser.DateOfBirth,
                 Email = tempUser.Email,
+                Avatar = "https://i.pinimg.com/736x/62/ee/b3/62eeb37155f0df95a708586aed9165c5.jpg",
                 CreatedAt = DateTime.UtcNow,
                 IsEmailVerified = true,
                 OpStatus = true
@@ -351,6 +417,7 @@ namespace API_Server.Services
                 Name = newUser.Name,
                 Username = newUser.Username,
                 Email = newUser.Email,
+                
                 DateOfBirth = newUser.DateOfBirth,
                 Status = newUser.Status,
                 OpStatus = newUser.OpStatus,
@@ -395,5 +462,7 @@ namespace API_Server.Services
 
             return result.ModifiedCount > 0;
         }
+
+        
     }
 }

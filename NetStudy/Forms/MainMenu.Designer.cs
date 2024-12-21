@@ -38,14 +38,16 @@
             btnDocument = new FontAwesome.Sharp.IconButton();
             btnDashboard = new FontAwesome.Sharp.IconButton();
             panelLogo = new Panel();
-            btnHome = new PictureBox();
+            lblName = new Label();
+            avaPic = new PictureBox();
             panelTitleBar = new Panel();
+            btnSettingUser = new FontAwesome.Sharp.IconButton();
             lblTitleChildForm = new Label();
             iconCurrentChildForm = new FontAwesome.Sharp.IconPictureBox();
             panelDesktop = new Panel();
             panelMenu.SuspendLayout();
             panelLogo.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)btnHome).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)avaPic).BeginInit();
             panelTitleBar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)iconCurrentChildForm).BeginInit();
             SuspendLayout();
@@ -238,29 +240,42 @@
             // 
             // panelLogo
             // 
-            panelLogo.Controls.Add(btnHome);
+            panelLogo.Controls.Add(lblName);
+            panelLogo.Controls.Add(avaPic);
             panelLogo.Dock = DockStyle.Top;
             panelLogo.Location = new Point(0, 0);
             panelLogo.Margin = new Padding(4);
             panelLogo.Name = "panelLogo";
             panelLogo.Size = new Size(275, 175);
             panelLogo.TabIndex = 0;
+            panelLogo.Paint += panelLogo_Paint;
             // 
-            // btnHome
+            // lblName
             // 
-            btnHome.Image = (Image)resources.GetObject("btnHome.Image");
-            btnHome.Location = new Point(28, 39);
-            btnHome.Margin = new Padding(4);
-            btnHome.Name = "btnHome";
-            btnHome.Size = new Size(202, 104);
-            btnHome.SizeMode = PictureBoxSizeMode.Zoom;
-            btnHome.TabIndex = 0;
-            btnHome.TabStop = false;
-            btnHome.Click += btnHome_Click;
+            lblName.AutoSize = true;
+            lblName.Cursor = Cursors.Hand;
+            lblName.Font = new Font("Cambria", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblName.ForeColor = Color.Gainsboro;
+            lblName.Location = new Point(56, 135);
+            lblName.Name = "lblName";
+            lblName.Size = new Size(170, 28);
+            lblName.TabIndex = 1;
+            lblName.Text = "User Full Name";
+            lblName.Click += lblName_Click;
+            // 
+            // avaPic
+            // 
+            avaPic.Location = new Point(81, 12);
+            avaPic.Name = "avaPic";
+            avaPic.Size = new Size(111, 111);
+            avaPic.SizeMode = PictureBoxSizeMode.StretchImage;
+            avaPic.TabIndex = 0;
+            avaPic.TabStop = false;
             // 
             // panelTitleBar
             // 
             panelTitleBar.BackColor = Color.FromArgb(26, 25, 62);
+            panelTitleBar.Controls.Add(btnSettingUser);
             panelTitleBar.Controls.Add(lblTitleChildForm);
             panelTitleBar.Controls.Add(iconCurrentChildForm);
             panelTitleBar.Dock = DockStyle.Top;
@@ -269,6 +284,25 @@
             panelTitleBar.Name = "panelTitleBar";
             panelTitleBar.Size = new Size(1205, 93);
             panelTitleBar.TabIndex = 1;
+            // 
+            // btnSettingUser
+            // 
+            btnSettingUser.AutoSize = true;
+            btnSettingUser.BackColor = Color.FromArgb(26, 25, 62);
+            btnSettingUser.Cursor = Cursors.Hand;
+            btnSettingUser.FlatAppearance.BorderColor = Color.Gainsboro;
+            btnSettingUser.FlatAppearance.BorderSize = 2;
+            btnSettingUser.FlatStyle = FlatStyle.Flat;
+            btnSettingUser.IconChar = FontAwesome.Sharp.IconChar.Cog;
+            btnSettingUser.IconColor = Color.Gainsboro;
+            btnSettingUser.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnSettingUser.IconSize = 35;
+            btnSettingUser.Location = new Point(1148, 23);
+            btnSettingUser.Name = "btnSettingUser";
+            btnSettingUser.Size = new Size(45, 45);
+            btnSettingUser.TabIndex = 4;
+            btnSettingUser.UseVisualStyleBackColor = false;
+            btnSettingUser.Click += btnSettingUser_Click;
             // 
             // lblTitleChildForm
             // 
@@ -320,9 +354,11 @@
             Name = "MainMenu";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "NETSTUDY";
+            Load += MainMenu_Load;
             panelMenu.ResumeLayout(false);
             panelLogo.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)btnHome).EndInit();
+            panelLogo.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)avaPic).EndInit();
             panelTitleBar.ResumeLayout(false);
             panelTitleBar.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)iconCurrentChildForm).EndInit();
@@ -339,11 +375,13 @@
         private FontAwesome.Sharp.IconButton btnClass;
         private FontAwesome.Sharp.IconButton btnChat;
         private FontAwesome.Sharp.IconButton btnDocument;
-        private PictureBox btnHome;
         private Panel panelTitleBar;
         private Label lblTitleChildForm;
         private FontAwesome.Sharp.IconPictureBox iconCurrentChildForm;
         private Panel panelDesktop;
         private FontAwesome.Sharp.IconButton btnGroupChat;
+        private PictureBox avaPic;
+        private Label lblName;
+        private FontAwesome.Sharp.IconButton btnSettingUser;
     }
 }

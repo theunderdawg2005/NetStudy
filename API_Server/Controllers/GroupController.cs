@@ -78,7 +78,7 @@ namespace API_Server.Controllers
 
         [Authorize]
         [HttpPost("{groupId}/add-user")]
-        public async Task<IActionResult> AddUserToGroup(string groupId, [FromBody] AddUserRequest userReq)
+        public async Task<IActionResult> AddUserToGroup(string groupId, [FromBody] AddUserRequestDTO userReq)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
             var username = await _jwtService.GetUsernameFromToken(authorizationHeader);
@@ -182,7 +182,7 @@ namespace API_Server.Controllers
 
         [Authorize]
         [HttpPost("{groupId}/add-user-request")]
-        public async Task<IActionResult> AddUserToGroupRequest(string groupId, [FromBody] AddUserRequest userReq)
+        public async Task<IActionResult> AddUserToGroupRequest(string groupId, [FromBody] AddUserRequestDTO userReq)
         {
             
             var authorizationHeader = Request.Headers["Authorization"].ToString();

@@ -34,6 +34,7 @@ builder.Services.AddSingleton<QuestionService>();
 
 builder.Services.AddSingleton<ChatBotService>();
 
+builder.Services.AddSingleton<ImageService>();
 
 builder.Services.AddHttpClient();
 

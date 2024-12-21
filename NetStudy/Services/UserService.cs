@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -33,7 +34,69 @@ namespace NetStudy.Services
             return await response.Content.ReadAsStringAsync();
         }
 
-        
+        public async Task<bool> LogOut()
+        {
+            var response = await httpClient.PostAsync("api/user/logout", null);
+            var res = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<JObject> UpdateUserInfo(string username, string name, string email, string file)
+        {
+            try
+            {
+                using(var form = new MultipartFormDataContent())
+                {
+                    if(!string.IsNullOrEmpty(username))
+                    {
+                        form.Add(new StringContent(username), "username");
+                    }    
+                    if(!string.IsNullOrEmpty(name))
+                    {
+                        form.Add(new StringContent(name), "name");
+                    }
+                    if (!string.IsNullOrEmpty(email))
+                    {
+                        form.Add(new StringContent(email), "email");
+                    }
+                    if (!string.IsNullOrEmpty(file) && System.IO.File.Exists(file))
+                    {
+                        var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
+                        var content = new StreamContent(stream);
+                        content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+                        form.Add(content, "avatar", Path.GetFileName(file));
+                    }
+                    else
+                    {
+                        form.Add(new StreamContent(Stream.Null), "avatar", "current image");
+                    }
+                    var response = await httpClient.PatchAsync("api/user/update-info", form);
+                    var res = await response.Content.ReadAsStringAsync();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        JObject info = JObject.Parse(res);
+                        return info;
+                    }
+                    else
+                    {
+                        throw new Exception($"{response.StatusCode} - {res}");
+                    }
+                }
+            }
+            
+            catch (JsonReaderException)
+            {
+                throw new Exception("Phản hồi từ server không phải JSON hợp lệ.");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi: {ex.Message}");
+            }
+        }
 
         public async Task<bool> SendFriendRequest(string username,string targetUsername,Button btnFriend, string token)
         {
@@ -79,7 +142,7 @@ namespace NetStudy.Services
                 else
                 {
                     var error = userInfo["message"].ToString();
-                    MessageBox.Show(error, "Error...", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(error, "Error...123", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
                 }
             }

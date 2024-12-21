@@ -29,9 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormRegister));
-            iconPictureBox1 = new FontAwesome.Sharp.IconPictureBox();
-            labelTitle = new Label();
-            labelTitle2 = new Label();
             iconPictureBox2 = new FontAwesome.Sharp.IconPictureBox();
             panel1 = new Panel();
             txtFullName = new TextBox();
@@ -64,50 +61,17 @@
             panel8 = new Panel();
             iconPictureBox7 = new FontAwesome.Sharp.IconPictureBox();
             cmbDate = new ComboBox();
-            ((System.ComponentModel.ISupportInitialize)iconPictureBox1).BeginInit();
+            iconPictureBox1 = new FontAwesome.Sharp.IconPictureBox();
+            labelTitle2 = new Label();
+            labelTitle = new Label();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox4).BeginInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox5).BeginInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox6).BeginInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox7).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)iconPictureBox1).BeginInit();
             SuspendLayout();
-            // 
-            // iconPictureBox1
-            // 
-            iconPictureBox1.BackColor = Color.White;
-            iconPictureBox1.ForeColor = Color.FromArgb(0, 117, 214);
-            iconPictureBox1.IconChar = FontAwesome.Sharp.IconChar.DoorOpen;
-            iconPictureBox1.IconColor = Color.FromArgb(0, 117, 214);
-            iconPictureBox1.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            iconPictureBox1.IconSize = 111;
-            iconPictureBox1.Location = new Point(25, 28);
-            iconPictureBox1.Name = "iconPictureBox1";
-            iconPictureBox1.Size = new Size(120, 111);
-            iconPictureBox1.TabIndex = 0;
-            iconPictureBox1.TabStop = false;
-            // 
-            // labelTitle
-            // 
-            labelTitle.AutoSize = true;
-            labelTitle.Font = new Font("Bahnschrift", 24F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            labelTitle.ForeColor = Color.FromArgb(0, 117, 214);
-            labelTitle.Location = new Point(151, 28);
-            labelTitle.Name = "labelTitle";
-            labelTitle.Size = new Size(321, 58);
-            labelTitle.TabIndex = 1;
-            labelTitle.Text = "GET STARTED";
-            // 
-            // labelTitle2
-            // 
-            labelTitle2.AutoSize = true;
-            labelTitle2.Font = new Font("Bahnschrift", 24F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            labelTitle2.ForeColor = Color.FromArgb(0, 117, 214);
-            labelTitle2.Location = new Point(151, 81);
-            labelTitle2.Name = "labelTitle2";
-            labelTitle2.Size = new Size(378, 58);
-            labelTitle2.TabIndex = 2;
-            labelTitle2.Text = "WITH NETSTUDY";
             // 
             // iconPictureBox2
             // 
@@ -287,9 +251,9 @@
             label1.ForeColor = Color.FromArgb(0, 117, 214);
             label1.Location = new Point(25, 167);
             label1.Name = "label1";
-            label1.Size = new Size(161, 27);
+            label1.Size = new Size(117, 27);
             label1.TabIndex = 20;
-            label1.Text = "Your Full Name";
+            label1.Text = "Tên đầy đủ";
             // 
             // label2
             // 
@@ -298,9 +262,9 @@
             label2.ForeColor = Color.FromArgb(0, 117, 214);
             label2.Location = new Point(25, 273);
             label2.Name = "label2";
-            label2.Size = new Size(162, 27);
+            label2.Size = new Size(113, 27);
             label2.TabIndex = 21;
-            label2.Text = "Your Username";
+            label2.Text = "Username";
             // 
             // label3
             // 
@@ -309,9 +273,9 @@
             label3.ForeColor = Color.FromArgb(0, 117, 214);
             label3.Location = new Point(24, 380);
             label3.Name = "label3";
-            label3.Size = new Size(117, 27);
+            label3.Size = new Size(68, 27);
             label3.TabIndex = 22;
-            label3.Text = "Your Email";
+            label3.Text = "Email";
             // 
             // label4
             // 
@@ -320,9 +284,9 @@
             label4.ForeColor = Color.FromArgb(0, 117, 214);
             label4.Location = new Point(25, 483);
             label4.Name = "label4";
-            label4.Size = new Size(158, 27);
+            label4.Size = new Size(102, 27);
             label4.TabIndex = 23;
-            label4.Text = "Your Password";
+            label4.Text = "Mật khẩu";
             // 
             // label5
             // 
@@ -331,9 +295,9 @@
             label5.ForeColor = Color.FromArgb(0, 117, 214);
             label5.Location = new Point(25, 700);
             label5.Name = "label5";
-            label5.Size = new Size(286, 27);
+            label5.Size = new Size(251, 27);
             label5.TabIndex = 24;
-            label5.Text = "Your Birthday (dd/mm/yyyy)";
+            label5.Text = "Ngày sinh (dd/mm/yyyy)";
             // 
             // btnRegister
             // 
@@ -343,7 +307,7 @@
             btnRegister.FlatStyle = FlatStyle.Flat;
             btnRegister.Font = new Font("Bahnschrift SemiBold", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnRegister.ForeColor = Color.White;
-            btnRegister.Location = new Point(198, 829);
+            btnRegister.Location = new Point(189, 831);
             btnRegister.Name = "btnRegister";
             btnRegister.Size = new Size(139, 48);
             btnRegister.TabIndex = 25;
@@ -357,7 +321,7 @@
             label6.BackColor = Color.White;
             label6.Font = new Font("Cambria", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label6.ForeColor = Color.FromArgb(0, 117, 214);
-            label6.Location = new Point(76, 893);
+            label6.Location = new Point(67, 889);
             label6.Name = "label6";
             label6.Size = new Size(307, 26);
             label6.TabIndex = 26;
@@ -369,7 +333,7 @@
             linkLogin.Cursor = Cursors.Hand;
             linkLogin.Font = new Font("Bahnschrift", 11F, FontStyle.Regular, GraphicsUnit.Point, 0);
             linkLogin.LinkColor = Color.MediumSlateBlue;
-            linkLogin.Location = new Point(380, 892);
+            linkLogin.Location = new Point(371, 888);
             linkLogin.Name = "linkLogin";
             linkLogin.Size = new Size(67, 27);
             linkLogin.TabIndex = 27;
@@ -412,9 +376,9 @@
             label7.ForeColor = Color.FromArgb(0, 117, 214);
             label7.Location = new Point(24, 589);
             label7.Name = "label7";
-            label7.Size = new Size(243, 27);
+            label7.Size = new Size(191, 27);
             label7.TabIndex = 34;
-            label7.Text = "Confirm Your Password";
+            label7.Text = "Nhập lại mật khẩu";
             // 
             // txtConfirmedPassword
             // 
@@ -459,12 +423,48 @@
             cmbDate.Size = new Size(100, 34);
             cmbDate.TabIndex = 35;
             // 
+            // iconPictureBox1
+            // 
+            iconPictureBox1.BackColor = Color.White;
+            iconPictureBox1.ForeColor = Color.FromArgb(0, 117, 214);
+            iconPictureBox1.IconChar = FontAwesome.Sharp.IconChar.DoorOpen;
+            iconPictureBox1.IconColor = Color.FromArgb(0, 117, 214);
+            iconPictureBox1.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            iconPictureBox1.IconSize = 111;
+            iconPictureBox1.Location = new Point(25, 28);
+            iconPictureBox1.Name = "iconPictureBox1";
+            iconPictureBox1.Size = new Size(120, 111);
+            iconPictureBox1.TabIndex = 0;
+            iconPictureBox1.TabStop = false;
+            // 
+            // labelTitle2
+            // 
+            labelTitle2.AutoSize = true;
+            labelTitle2.Font = new Font("Bahnschrift", 24F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            labelTitle2.ForeColor = Color.FromArgb(0, 117, 214);
+            labelTitle2.Location = new Point(151, 81);
+            labelTitle2.Name = "labelTitle2";
+            labelTitle2.Size = new Size(378, 58);
+            labelTitle2.TabIndex = 2;
+            labelTitle2.Text = "WITH NETSTUDY";
+            // 
+            // labelTitle
+            // 
+            labelTitle.AutoSize = true;
+            labelTitle.Font = new Font("Bahnschrift", 24F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            labelTitle.ForeColor = Color.FromArgb(0, 117, 214);
+            labelTitle.Location = new Point(151, 28);
+            labelTitle.Name = "labelTitle";
+            labelTitle.Size = new Size(321, 58);
+            labelTitle.TabIndex = 1;
+            labelTitle.Text = "GET STARTED";
+            // 
             // FormRegister
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(542, 938);
+            ClientSize = new Size(542, 923);
             Controls.Add(cmbDate);
             Controls.Add(label7);
             Controls.Add(txtConfirmedPassword);
@@ -499,28 +499,24 @@
             Controls.Add(labelTitle2);
             Controls.Add(labelTitle);
             Controls.Add(iconPictureBox1);
-            FormBorderStyle = FormBorderStyle.None;
+            FormBorderStyle = FormBorderStyle.Fixed3D;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4);
             Name = "FormRegister";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Đăng kí NetStudy";
-            ((System.ComponentModel.ISupportInitialize)iconPictureBox1).EndInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox2).EndInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox3).EndInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox4).EndInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox5).EndInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox6).EndInit();
             ((System.ComponentModel.ISupportInitialize)iconPictureBox7).EndInit();
+            ((System.ComponentModel.ISupportInitialize)iconPictureBox1).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
-
-        private FontAwesome.Sharp.IconPictureBox iconPictureBox1;
-        private Label labelTitle;
-        private Label labelTitle2;
         private FontAwesome.Sharp.IconPictureBox iconPictureBox2;
         private Panel panel1;
         private TextBox txtFullName;
@@ -554,5 +550,8 @@
         private Panel panel8;
         private FontAwesome.Sharp.IconPictureBox iconPictureBox7;
         private ComboBox cmbDate;
+        private FontAwesome.Sharp.IconPictureBox iconPictureBox1;
+        private Label labelTitle2;
+        private Label labelTitle;
     }
 }

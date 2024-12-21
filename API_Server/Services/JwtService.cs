@@ -39,6 +39,7 @@ namespace API_Server.Services
 
             var claims = new[]
             {
+
                 new Claim(JwtRegisteredClaimNames.Name, user.Name),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, jti),

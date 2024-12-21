@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.JsonPatch;
+using API_Server.DTOs;
 
 namespace API_Server.Controllers
 {
@@ -19,13 +20,15 @@ namespace API_Server.Controllers
         private readonly EmailService _emailService;
         private readonly JwtService _jwtService;
         private readonly UserService _userService;
+        private readonly ImageService _imageService;
         private readonly IMongoCollection<User> users;
-        public UserController(MongoDbService context, EmailService emailService, JwtService jwtService, UserService userService)
+        public UserController(MongoDbService context, EmailService emailService, JwtService jwtService, UserService userService, ImageService imageService)
         {
             _context = context;
             _emailService = emailService;
             _jwtService = jwtService;
             _userService = userService;
+            _imageService = imageService;
             users = _context.Users;
         }
 
@@ -34,7 +37,7 @@ namespace API_Server.Controllers
         private static string? curentOtp;
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] Register registerModel)
+        public async Task<IActionResult> Register([FromBody] RegisterDTO registerModel)
         {
             var (success, message) = await _userService.RegisterAsync(registerModel);
             if (!success)
@@ -93,6 +96,7 @@ namespace API_Server.Controllers
                 Name = data.Name,
                 Username = data.Username,
                 Email = data.Email,
+                Avatar = data.Avatar
             });
         }
 
@@ -226,6 +230,8 @@ namespace API_Server.Controllers
             return BadRequest("Không thể cập nhật trạng thái.");
         }
 
+        
+
         //GET METHOD
         //Lấy data của người dùng
         [HttpGet("{username}")]
@@ -254,7 +260,8 @@ namespace API_Server.Controllers
             {
                 name = user.Name,
                 username = user.Username,
-                email = user.Email
+                email = user.Email,
+                avatar = user.Avatar
             };
             return Ok(new
             {
@@ -659,6 +666,69 @@ namespace API_Server.Controllers
             await _context.Users.DeleteOneAsync(u => u.Username == username);
 
             return Ok("Xóa người dùng thành công.");
+        }
+
+        //PATCH METHOD
+        [Authorize]
+        [HttpPatch("update-info")]
+        public async Task<IActionResult> UpdateUserInfo([FromForm] UpdateUserDTO updateUserDTO)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            // Xác minh token và lấy username
+            var claimsPrincipal = _jwtService.ValidateToken(accessToken);//Trả về giá trị người dùng của token
+            if (claimsPrincipal == null)
+            {
+                return Unauthorized("Access token không hợp lệ");
+            }
+
+            var userIdClaim = claimsPrincipal.FindFirst("userId");//Tìm id của user
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            {
+                return Unauthorized("Access token không hợp lệ");
+            }
+            var userId = userIdClaim.Value;
+            try
+            {
+                var check = await _userService.UpdateUserInfo(userId,updateUserDTO.Username, updateUserDTO.Name, updateUserDTO.Avatar, updateUserDTO.Email);
+                if (check)
+                {
+                    var user = await _userService.GetUserById(userId);
+                    return Ok(new
+                    {
+                        message = "Cập nhật thành công!",
+                        userUpdated = new {
+                            username = user.Username,
+                            name = user.Name,
+                            avatar = user.Avatar,
+                            email = user.Email,
+                        }
+                    });
+                }
+                else
+                {
+                    return BadRequest(new
+                    {
+                        message = "Không thể cập nhật!"
+                    });
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message,
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
     }
 }
