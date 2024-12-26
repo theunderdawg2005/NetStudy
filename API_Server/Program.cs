@@ -36,6 +36,8 @@ builder.Services.AddSingleton<ChatBotService>();
 
 builder.Services.AddSingleton<ImageService>();
 
+builder.Services.AddSingleton<TaskService>();
+
 builder.Services.AddHttpClient();
 
 // Add services to the container.
