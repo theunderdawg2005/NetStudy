@@ -581,6 +581,11 @@ namespace API_Server.Services
 
             return (true, "Thay đổi mật khẩu thành công.");
         }
-        
+
+        public async Task<List<string>> GetUserGroups(string userName)
+        {
+            var user = await GetUserByUserName(userName);
+            return user?.ChatGroup ?? new List<string>();
+        }
     }
 }

@@ -38,6 +38,8 @@ builder.Services.AddSingleton<ImageService>();
 
 builder.Services.AddSingleton<TaskService>();
 
+builder.Services.AddSingleton<DocumentService>();
+
 builder.Services.AddHttpClient();
 
 // Add services to the container.
