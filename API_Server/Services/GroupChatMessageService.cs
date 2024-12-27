@@ -6,20 +6,27 @@ namespace API_Server.Services
     public class GroupChatMessageService
     {
         private readonly IMongoCollection<GroupChatMessage> groupChatMessage;
-        public GroupChatMessageService(MongoDbService db)
+        private readonly AesService encryptionService;
+        //private readonly string privateKey;
+        public GroupChatMessageService(MongoDbService db, AesService hybridEncryptionService)
         {
             groupChatMessage = db.GroupChatMessage;
+            encryptionService = hybridEncryptionService;
+            
         }
 
         public async Task SendMessage(GroupChatMessage message)
         {
+            
             await groupChatMessage.InsertOneAsync(message);
         }
           
-        public async Task<List<GroupChatMessage>> GetMessageByGroupId(string groupId)
+        public async Task<List<GroupChatMessage>> GetMessageByGroupId(string groupId, string username)
         {
             var filter = Builders<GroupChatMessage>.Filter.Eq(gr => gr.GroupId, groupId);
-            return await groupChatMessage.Find(filter).SortBy(msg => msg.TimeStamp).ToListAsync();
+            var msgs = await groupChatMessage.Find(filter).SortBy(msg => msg.TimeStamp).ToListAsync();
+            
+            return msgs;
         }
         public async Task<bool> DeleteAllMessageByGroupId(string groupId)
         {

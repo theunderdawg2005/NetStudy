@@ -45,6 +45,7 @@
             lblTitleChildForm = new Label();
             iconCurrentChildForm = new FontAwesome.Sharp.IconPictureBox();
             panelDesktop = new Panel();
+            linkRefresh = new LinkLabel();
             panelMenu.SuspendLayout();
             panelLogo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)avaPic).BeginInit();
@@ -55,6 +56,7 @@
             // panelMenu
             // 
             panelMenu.BackColor = Color.FromArgb(31, 30, 68);
+            panelMenu.Controls.Add(linkRefresh);
             panelMenu.Controls.Add(btnGroupChat);
             panelMenu.Controls.Add(btnMatch);
             panelMenu.Controls.Add(btnExam);
@@ -271,6 +273,7 @@
             avaPic.SizeMode = PictureBoxSizeMode.StretchImage;
             avaPic.TabIndex = 0;
             avaPic.TabStop = false;
+            avaPic.Click += avaPic_Click;
             // 
             // panelTitleBar
             // 
@@ -341,6 +344,18 @@
             panelDesktop.TabIndex = 2;
             panelDesktop.Paint += panelDesktop_Paint;
             // 
+            // linkRefresh
+            // 
+            linkRefresh.AutoSize = true;
+            linkRefresh.LinkColor = Color.FromArgb(192, 0, 192);
+            linkRefresh.Location = new Point(12, 755);
+            linkRefresh.Name = "linkRefresh";
+            linkRefresh.Size = new Size(113, 25);
+            linkRefresh.TabIndex = 8;
+            linkRefresh.TabStop = true;
+            linkRefresh.Text = "Refresh Page";
+            linkRefresh.LinkClicked += linkRefresh_LinkClicked;
+            // 
             // MainMenu
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -356,6 +371,7 @@
             Text = "NETSTUDY";
             Load += MainMenu_Load;
             panelMenu.ResumeLayout(false);
+            panelMenu.PerformLayout();
             panelLogo.ResumeLayout(false);
             panelLogo.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)avaPic).EndInit();
@@ -383,5 +399,6 @@
         private PictureBox avaPic;
         private Label lblName;
         private FontAwesome.Sharp.IconButton btnSettingUser;
+        private LinkLabel linkRefresh;
     }
 }

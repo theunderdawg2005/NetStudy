@@ -19,6 +19,7 @@ namespace API_Server.DTOs
         public string? Password { get; set; }
         [Required]
         public string? ConfirmPassword { get; set; }
+        public string  PublicKey { get; set; }
         
         public DateTime DateOfBirth { get; set; }
     }

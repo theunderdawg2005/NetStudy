@@ -45,6 +45,54 @@ namespace NetStudy.Services
             return false;
         }
 
+        private async void LoadImage(string imgUrl, PictureBox avaPic)
+        {
+            try
+            {
+
+                if (string.IsNullOrWhiteSpace(imgUrl) ||
+                !Uri.TryCreate(imgUrl, UriKind.Absolute, out var uriRes) ||
+                !(uriRes.Scheme == Uri.UriSchemeHttp || uriRes.Scheme == Uri.UriSchemeHttps))
+                {
+                    avaPic.Image = LoadDefaultImg();
+                    return;
+                }
+                var imageBytes = await httpClient.GetByteArrayAsync(imgUrl);
+                using (var ms = new MemoryStream(imageBytes))
+                {
+                    if (ms != null && ms.CanRead)
+                    {
+                        ms.Seek(0, SeekOrigin.Begin);
+                        Image image = Image.FromStream(ms);
+                        avaPic.Image = image;
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải ảnh: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private Image LoadDefaultImg()
+        {
+            string defaultUrl = "https://i.pinimg.com/736x/62/ee/b3/62eeb37155f0df95a708586aed9165c5.jpg";
+            using (var client = new HttpClient())
+            {
+                var bytes = client.GetByteArrayAsync(defaultUrl).Result;
+                using (var ms = new MemoryStream(bytes))
+                {
+                    return Image.FromStream(ms);
+                }
+            }
+        }
+
+        public async Task SetUserInfo(string userName, string avatar, Label lbl, PictureBox avaPic)
+        {
+            lbl.Text = userName;
+            LoadImage(avatar, avaPic);
+        }
         public async Task<JObject> UpdateUserInfo(string username, string name, string email, string file)
         {
             try

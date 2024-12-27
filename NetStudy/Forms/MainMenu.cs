@@ -33,6 +33,7 @@ namespace NetStudy.Forms
             Timeout = TimeSpan.FromMinutes(5)
         };
         private TokenService _tokenService;
+        private readonly UserService _userService;
         //Constructor
         public MainMenu(string accessToken, JObject info)
         {
@@ -48,7 +49,7 @@ namespace NetStudy.Forms
             this.accessToken = accessToken;
             var tokenService = new TokenService(httpClient);
             _tokenService = tokenService;
-
+            _userService = new UserService(accessToken);
             _tokenService.SetTokens(accessToken);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             UserInfo = info;
@@ -194,69 +195,24 @@ namespace NetStudy.Forms
             pictureBox.Region = new Region(path);
         }
 
-        private async void LoadImage(string imgUrl)
-        {
-            try
-            {
 
-                if (string.IsNullOrWhiteSpace(imgUrl) ||
-                !Uri.TryCreate(imgUrl, UriKind.Absolute, out var uriRes) ||
-                !(uriRes.Scheme == Uri.UriSchemeHttp || uriRes.Scheme == Uri.UriSchemeHttps))
-                {
-                    avaPic.Image = LoadDefaultImg();
-                    return;
-                }
-                var imageBytes = await httpClient.GetByteArrayAsync(imgUrl);
-                using (var ms = new MemoryStream(imageBytes))
-                {
-                    if (ms != null && ms.CanRead)
-                    {
-                        ms.Seek(0, SeekOrigin.Begin);
-                        Image image = Image.FromStream(ms);
-                        avaPic.Image = image;
-
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Lỗi khi tải ảnh: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private Image LoadDefaultImg()
-        {
-            string defaultUrl = "https://i.pinimg.com/736x/62/ee/b3/62eeb37155f0df95a708586aed9165c5.jpg";
-            using (var client = new HttpClient())
-            {
-                var bytes = client.GetByteArrayAsync(defaultUrl).Result;
-                using (var ms = new MemoryStream(bytes))
-                {
-                    return Image.FromStream(ms);
-                }
-            }
-        }
 
         private void btnGroupChat_Click(object sender, EventArgs e)
         {
             ActivateButton(sender, RGBColors.color5);
             OpenChildForm(new FormGroups(accessToken, UserInfo));
         }
-        private void setUserInfo()
-        {
-            lblName.Text = UserInfo["name"].ToString();
-            LoadImage(UserInfo["avatar"].ToString());
-        }
 
-        private void MainMenu_Load(object sender, EventArgs e)
+
+        private async void MainMenu_Load(object sender, EventArgs e)
         {
-            setUserInfo();
+            await _userService.SetUserInfo(UserInfo["name"].ToString(), UserInfo["avatar"].ToString(), lblName, avaPic);
             DrawCircular(avaPic);
         }
 
         private void panelLogo_Paint(object sender, PaintEventArgs e)
         {
-
+            
         }
 
         private void lblName_Click(object sender, EventArgs e)
@@ -269,6 +225,17 @@ namespace NetStudy.Forms
         {
             FormUpdateUser formUpdateUser = new FormUpdateUser(accessToken, UserInfo);
             formUpdateUser.Show();
+        }
+
+        private void avaPic_Click(object sender, EventArgs e)
+        {
+            FormUpdateUser formUpdateUser = new FormUpdateUser(accessToken, UserInfo);
+            formUpdateUser.Show();
+        }
+
+        private async void linkRefresh_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            await _userService.SetUserInfo(UserInfo["name"].ToString(), UserInfo["avatar"].ToString(), lblName, avaPic);
         }
     }
 }

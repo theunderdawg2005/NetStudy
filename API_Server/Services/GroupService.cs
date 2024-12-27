@@ -2,6 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 
+
 namespace API_Server.Services
 {
     public class GroupService
@@ -9,22 +10,53 @@ namespace API_Server.Services
         private readonly IMongoCollection<Group> _chatGroups;
         private readonly UserService _userService;
         private readonly IMongoCollection<GroupChatMessage> _groupChatMessage;
-        public GroupService(MongoDbService db, UserService userService)
+        private readonly AesService _aesService;
+        private readonly IMongoCollection<KeyModel> _keys;
+        public GroupService(MongoDbService db, UserService userService, AesService aesService)
         {
             _chatGroups = db.ChatGroup;
             _userService = userService;
             _groupChatMessage = db.GroupChatMessage;
+            _aesService = aesService;
+            _keys = db.KeyModel;
         }
 
         public async Task<Group> CreateGroup(Group chatGroup)
         {
-             await _chatGroups.InsertOneAsync(chatGroup);
+
+            await _chatGroups.InsertOneAsync(chatGroup);
+            
             return chatGroup;
         }
-
+        public async Task<string> GetKey(string groupId, string username)
+        {
+            var filter = Builders<KeyModel>.Filter.And(
+                    Builders<KeyModel>.Filter.Eq(g => g.GroupId, groupId),
+                    Builders<KeyModel>.Filter.Eq(g => g.Username, username)
+            );
+            var checkKey = await _keys.Find(filter).FirstOrDefaultAsync();
+            if (checkKey != null)
+            {
+                return checkKey.Key;
+            }
+            else
+            {
+                var key = await SaveKeyByGroupId(groupId, username);
+                return key;
+            } 
+                
+        }
+        public async Task<string> SaveKeyByGroupId(string id, string username)
+        {
+            
+            var key = await _aesService.GenerateAesKey(id, username);
+            return key;
+        }    
         public async Task<Group> GetGroupById(string groupId)
         {
-            return await _chatGroups.Find(g => g.Id.ToString() == groupId).FirstOrDefaultAsync();
+            
+
+            return await _chatGroups.Find(g => g.Id.ToString() == groupId).FirstOrDefaultAsync(); 
         }
 
         public async Task<Group> GetGroupByName(string groupName)
@@ -82,7 +114,8 @@ namespace API_Server.Services
                 Username = userName,
                 Role = (role == "Admin") ? "001" : "002"
             };
-
+             
+            
             var update = Builders<Group>.Update.AddToSet(g => g.Members, member);
             await _chatGroups.UpdateOneAsync(g => g.Id.ToString() == groupId, update);
             return true;
@@ -169,7 +202,6 @@ namespace API_Server.Services
                     Username = user.Username,
                     Role = "002"
                 };
-
                 group.MemberRequest.Remove(req);
                 group.Members.Add(member);
                 var addGroup = await _userService.AddGroupToUser(req, groupId);

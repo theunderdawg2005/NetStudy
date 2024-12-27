@@ -129,6 +129,7 @@ namespace NetStudy
         {
             var panel = sender as Panel;
             var groupId = panel.Tag;
+            
             var response = await httpClient.GetAsync($"api/groups/get-group/{groupId}");
             var res = await response.Content.ReadAsStringAsync();
             var msg = JObject.Parse(res)["message"].ToString();
@@ -148,9 +149,11 @@ namespace NetStudy
                 }
                 return;
             }
+           
+        
             var info = JObject.Parse(res);
             var groupDetails = new FormGroupDetails(accessToken, UserInfo, info);
-            groupDetails.ShowDialog();
+            groupDetails.Show();
         }
 
         private async void FormGroups_Load(object sender, EventArgs e)

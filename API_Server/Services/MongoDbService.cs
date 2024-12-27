@@ -20,5 +20,6 @@ namespace API_Server.Services
         public IMongoCollection<GroupChatMessage> GroupChatMessage => _db.GetCollection<GroupChatMessage>("GroupChatMessage");
         public IMongoCollection<ListQuestion> ListQuestions => _db.GetCollection<ListQuestion>("Questions");
         public IMongoCollection<Otp> Otp => _db.GetCollection<Otp>("Otp");
+        public IMongoCollection<KeyModel> KeyModel => _db.GetCollection<KeyModel>("Key");
     }
 }

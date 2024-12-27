@@ -523,6 +523,8 @@ namespace API_Server.Controllers
             }
         }
 
+        
+
         //GET METHOD
         [Authorize]
         [HttpGet("get-group/{groupId}")]
@@ -557,12 +559,15 @@ namespace API_Server.Controllers
                 });
             }
 
+            var key = await _chatGroupService.GetKey(groupId, username);
+
             return Ok(new
             {
                 message = "Đã lấy nhóm thành công!",
                 id = group.Id.ToString(),
                 name = group.Name,
                 description = group.Description,
+                Key = key,
                 members = group.Members,
             });
         }

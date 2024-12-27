@@ -8,6 +8,8 @@ namespace API_Server.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+        public string PrivateKey { get; set; }
+        public string PublicKey { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }
         public string? Username { get; set; }

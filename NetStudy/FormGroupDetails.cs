@@ -25,6 +25,8 @@ namespace NetStudy
         private readonly JObject GroupInfo;
         private string groupId;
         private readonly GroupService groupService;
+        private readonly RsaService rsaService;
+        private readonly AesService aesService;
         private readonly List<MemberRole> members;
         private List<string> memReq;
         private string roleUser;
@@ -33,6 +35,8 @@ namespace NetStudy
             BaseAddress = new Uri(@"https://localhost:7070/"),
             Timeout = TimeSpan.FromMinutes(5)
         };
+        private string _key;
+
         public FormGroupDetails(string token, JObject info, JObject groupInfo)
         {
             InitializeComponent();
@@ -41,6 +45,9 @@ namespace NetStudy
             UserInfo = info;
             GroupInfo = groupInfo;
             groupId = groupInfo["id"].ToString();
+            rsaService = new RsaService();
+            aesService = new AesService();
+            _key = rsaService.Decrypt(GroupInfo["key"].ToString());
             members = GroupInfo["members"].ToObject<List<MemberRole>>();
             var user = members.FirstOrDefault(u => u.Username == UserInfo["username"].ToString());
             roleUser = user.Role;
@@ -70,12 +77,15 @@ namespace NetStudy
         {
             DateTime timeStamp = DateTime.UtcNow;
             await connection.InvokeAsync("SendMessageGroup", groupId, UserInfo["name"].ToString(), txtMessage.Text);
-            await groupService.SendMessage(groupId, UserInfo["name"].ToString(), txtMessage.Text, timeStamp);
+            var content = aesService.EncryptMessage(txtMessage.Text, _key);
+            await groupService.SendMessage(groupId, UserInfo["name"].ToString(), content, timeStamp);
             txtMessage.Clear();
         }
 
         private async void FormGroupDetails_Load(object sender, EventArgs e)
         {
+            
+           
             int total;
             (memReq, total) = await groupService.GetJoinListByGroupId(groupId);
             if (roleUser == "001" || roleUser == "003")
@@ -102,18 +112,20 @@ namespace NetStudy
                 };
                 panelTop.Controls.Add(btnUserRequest);
             }
+             
             await connection.StartAsync();
             await connection.SendAsync("JoinGroup", groupId);
             var data = await groupService.LoadMessageByGroupId(groupId);
             listMsg.Items.Clear();
             foreach (var message in data)
             {
+                var content = aesService.DecryptMessage(message.Content, _key);
                 var time = message.TimeStamp;
                 TimeZoneInfo gmtPlus7 = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 DateTime gmt7Time = TimeZoneInfo.ConvertTimeFromUtc(time, gmtPlus7);
                 listMsg.Items.Add(" ");
                 listMsg.Items.Add($"{gmt7Time.ToString("dd/MM/yyyy hh:mm tt")}");
-                listMsg.Items.Add($"{message.Sender}: {message.Content}");
+                listMsg.Items.Add($"{message.Sender}: {content}");
             }
         }
         private void txtMessage_TextChanged(object sender, EventArgs e)

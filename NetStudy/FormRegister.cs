@@ -22,10 +22,11 @@ namespace NetStudy
             BaseAddress = new Uri(@"https://localhost:7070/"),
             Timeout = TimeSpan.FromMinutes(5)
         };
+        private readonly RsaService rsaService;
         public FormRegister()
         {
             InitializeComponent();
-
+            rsaService = new RsaService();
             LoadForm();
         }
         
@@ -76,8 +77,11 @@ namespace NetStudy
         {
             try
             {
+                
                 var json = JsonConvert.SerializeObject(registerModel);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                
                 var response = await httpClient.PostAsync("api/user/register", content);
                 return await response.Content.ReadAsStringAsync();
             }
@@ -99,7 +103,8 @@ namespace NetStudy
             int day = int.Parse(cmbDate.SelectedItem.ToString());
             int month = int.Parse(cmbMonth.SelectedItem.ToString());
             int year = int.Parse(cmbYear.SelectedItem.ToString());
-
+            var (publicKey, privateKey) = rsaService.GenerateKeys();
+            File.WriteAllText("private_key.pem", privateKey);
             DateTime dateOfBirth;
             if (!DateTime.TryParse($"{year}-{month}-{day}", out dateOfBirth))
             {
@@ -130,6 +135,7 @@ namespace NetStudy
                 username = username,
                 dateOfBirth = dateOfBirth.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
                 email = email,
+                publicKey = publicKey,
                 password = password,
                 confirmPassword = confirmedPass,
                 

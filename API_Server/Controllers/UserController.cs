@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.JsonPatch;
 using Org.BouncyCastle.Asn1.Ocsp;
 using API_Server.DTOs;
+using NetStudy.Services;
 
 namespace API_Server.Controllers
 {
@@ -22,8 +23,9 @@ namespace API_Server.Controllers
         private readonly JwtService _jwtService;
         private readonly UserService _userService;
         private readonly ImageService _imageService;
+        private readonly RsaService _rsaService;
         private readonly IMongoCollection<User> users;
-        public UserController(MongoDbService context, EmailService emailService, JwtService jwtService, UserService userService, ImageService imageService)
+        public UserController(MongoDbService context, EmailService emailService, JwtService jwtService, UserService userService, ImageService imageService, RsaService rsaService)
         {
             _context = context;
             _emailService = emailService;
@@ -31,11 +33,11 @@ namespace API_Server.Controllers
             _userService = userService;
             _imageService = imageService;
             users = _context.Users;
+            _rsaService = rsaService;
         }
 
         private static readonly ConcurrentDictionary<string, User> _users = new ConcurrentDictionary<string, User>();
-        private static string? currentEmail;
-        private static string? curentOtp;
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO registerModel)
@@ -86,8 +88,7 @@ namespace API_Server.Controllers
                 Username = data.Username,
                 Jti = jti
             };
-
-            await _context.Tokens.InsertOneAsync(tokenData);
+            await _jwtService.SaveToken(tokenData);
 
             return Ok(new
             {
@@ -140,6 +141,8 @@ namespace API_Server.Controllers
                     message = "Không tìm thấy người dùng."
                 });
             }
+
+            //await _rsaService.DeleteKey(username);
 
             var filter = Builders<TokenData>.Filter.Eq(t => t.Username, username);
             await _context.Tokens.DeleteManyAsync(filter);

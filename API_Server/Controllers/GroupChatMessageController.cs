@@ -11,10 +11,13 @@ namespace API_Server.Controllers
     {
         private readonly GroupChatMessageService groupChatMsgService;
         private readonly JwtService _jwtService;
-        public GroupChatMessageController(GroupChatMessageService gcms, JwtService jt) 
+        private readonly HybridEncryptionService _hybridEncryptionService;
+        private readonly AesService _aesService;
+        public GroupChatMessageController(GroupChatMessageService gcms, JwtService jt, AesService aesService) 
         {
             groupChatMsgService = gcms;
             _jwtService = jt;
+            _aesService = aesService;
         }
 
         [Authorize]
@@ -22,16 +25,18 @@ namespace API_Server.Controllers
         public async Task<IActionResult> SendMessage([FromBody] SendGroupMessage msgModel)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
-            if (!_jwtService.IsValidate(authorizationHeader))
+            var username = await _jwtService.GetUsernameFromToken(authorizationHeader);
+            if (username == null)
             {
                 return Unauthorized(new
                 {
                     message = "Yêu cầu không hợp lệ!"
                 });
             }
+            
             try
             {
-                
+                //var (content, enKey, enIV) = _hybridEncryptionService.EncryptMessage(msgModel.Content, username);
                 var message = new GroupChatMessage
                 {
                     Sender = msgModel.Sender,
@@ -63,19 +68,24 @@ namespace API_Server.Controllers
         public async Task<IActionResult> GetMessageByGroupId([FromQuery]string groupId)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
-            if (!_jwtService.IsValidate(authorizationHeader))
+            var username = await _jwtService.GetUsernameFromToken(authorizationHeader);
+            if (username == null)
             {
                 return Unauthorized(new
                 {
                     message = "Yêu cầu không hợp lệ!"
                 });
             }
+            
             try
             {
-                var msgs = await groupChatMsgService.GetMessageByGroupId(groupId);
+
+                var msgs = await groupChatMsgService.GetMessageByGroupId(groupId, username);
                 
+                  
                 var res = msgs.Select(m => new
                 {
+                    
                     id = m.Id.ToString(),
                     sender = m.Sender,
                     groupId = m.GroupId,

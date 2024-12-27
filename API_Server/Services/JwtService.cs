@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using API_Server.Models;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
+using NetStudy.Services;
 
 namespace API_Server.Services
 {
@@ -19,16 +20,20 @@ namespace API_Server.Services
         private readonly string _audience;
         private readonly IMongoCollection<TokenData> _tokenData;
         private readonly UserService _userService;
+        private readonly RsaService _rsaService;
 
-        public JwtService(IConfiguration configuration, MongoDbService db, UserService userService)
+        public JwtService(IConfiguration configuration, MongoDbService db, UserService userService, RsaService rsaService)
         {
             _configuration = configuration;
             _tokenData = db.Tokens;
             _userService = userService;
+            _rsaService = rsaService;
             _secret = _configuration["JwtSettings:Secret"] ?? throw new ArgumentNullException(nameof(_secret));
             _issuer = _configuration["JwtSettings:Issuer"] ?? throw new ArgumentNullException(nameof(_issuer));
             _audience = _configuration["JwtSettings:Audience"] ?? throw new ArgumentNullException(nameof(_audience));
         }
+
+        
 
         public string GenerateAccessToken(User user)
         {
@@ -163,16 +168,20 @@ namespace API_Server.Services
                 existedToken.RefreshTokensUsed = token.RefreshTokensUsed;
                 existedToken.RefreshTokenExpiryTime = token.RefreshTokenExpiryTime;
                 existedToken.Jti = token.Jti;
+                existedToken.PublicKey = token.PublicKey ?? existedToken.PublicKey;
+                existedToken.PrivateKey = token.PrivateKey ?? existedToken.PrivateKey;
 
                 await _tokenData.ReplaceOneAsync(td => td.Id == existedToken.Id, existedToken);
             }
             else
             {
+                
+               
                 await _tokenData.InsertOneAsync(token);
             }
         }
         
-        public async Task<string> NewGenerateAccessToken(string refreshToken, string userName)
+        public async Task<(string, string)> GenerateNewAccessToken(string refreshToken, string userName)
         {
             var token = await GetRefreshToken(refreshToken);
             var isValidated = await ValidateRefreshToken(refreshToken, userName);
@@ -192,7 +201,7 @@ namespace API_Server.Services
 
             await SaveToken(token);
 
-            return newAccessToken;
+            return (newAccessToken, newRefreshToken);
         }
         public string GetJtiFromAccessToken(string token)
         {
@@ -200,6 +209,25 @@ namespace API_Server.Services
             var jwtToken = tokenHandler.ReadToken(token) as JwtSecurityToken;
             var jti = jwtToken?.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Jti)?.Value;
             return jti ?? string.Empty;
+        }
+        public async Task<string> EncryptMessage(string tokenId, string message)
+        {
+            var tokenData = await _tokenData.Find(t => t.Id == tokenId).FirstOrDefaultAsync();
+            if (tokenData != null || string.IsNullOrEmpty(tokenData.PublicKey))
+            {
+                throw new Exception("Key not found!");
+
+            }
+            var keyBytes = Convert.FromBase64String(tokenData.PublicKey);
+
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                rsa.ImportRSAPublicKey(keyBytes, out _);
+                var messageBytes = Encoding.UTF8.GetBytes(message);
+                var encryptedBytes = rsa.Encrypt(messageBytes, false);
+
+                return Convert.ToBase64String(encryptedBytes);
+            }
         }
     }
 }

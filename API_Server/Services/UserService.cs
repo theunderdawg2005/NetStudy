@@ -365,6 +365,7 @@ namespace API_Server.Services
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerModel.Password),
                 DateOfBirth = registerModel.DateOfBirth,
                 Email = registerModel.Email,
+                PublicKey = registerModel.PublicKey,
                 Avatar = "https://i.pinimg.com/736x/62/ee/b3/62eeb37155f0df95a708586aed9165c5.jpg",
                 CreatedAt = DateTime.UtcNow,
                 IsEmailVerified = false,
@@ -402,6 +403,7 @@ namespace API_Server.Services
                 PasswordHash = tempUser.PasswordHash,
                 DateOfBirth = tempUser.DateOfBirth,
                 Email = tempUser.Email,
+                PublicKey = tempUser.PublicKey,
                 Avatar = "https://i.pinimg.com/736x/62/ee/b3/62eeb37155f0df95a708586aed9165c5.jpg",
                 CreatedAt = DateTime.UtcNow,
                 IsEmailVerified = true,
@@ -415,7 +417,7 @@ namespace API_Server.Services
                 Name = newUser.Name,
                 Username = newUser.Username,
                 Email = newUser.Email,
-                
+                PublicKey = newUser.PublicKey,
                 DateOfBirth = newUser.DateOfBirth,
                 Status = newUser.Status,
                 OpStatus = newUser.OpStatus,
@@ -448,7 +450,7 @@ namespace API_Server.Services
 
             return (true, "Đăng nhập thành công", user);
         }
-
+        
         public async Task<bool> UpdateUserStatusAsync(string username, bool opStatus)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Username, username);

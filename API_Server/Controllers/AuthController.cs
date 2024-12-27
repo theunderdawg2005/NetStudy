@@ -16,12 +16,14 @@ namespace API_Server.Controllers
         private readonly JwtService _jwtService;
         private readonly MongoDbService _context;
         private readonly string _secret;
+        private readonly IMongoCollection<TokenData> _tokenData;
 
         public AuthController(JwtService jwtService, MongoDbService context, IConfiguration configuration)
         {
             _jwtService = jwtService;
             _context = context;
             _secret = configuration["JwtSettings:Secret"] ?? throw new ArgumentNullException(nameof(_secret));
+            _tokenData = _context.Tokens;
         }
 
         [HttpPost]
@@ -114,17 +116,31 @@ namespace API_Server.Controllers
             string userName = request.Username;
             try
             {
-                var newAccessToken = await _jwtService.NewGenerateAccessToken(refreshToken, userName);
+                var tokenData = await _tokenData.Find(t => t.Username == userName).FirstOrDefaultAsync();
+                if (tokenData.RefreshTokensUsed.Contains(refreshToken))
+                {
+                    var filter = Builders<TokenData>.Filter.Eq(t => t.Username, userName);
+                    await _tokenData.DeleteManyAsync(filter);
+                    return BadRequest(new
+                    {
+                        message = "Có gì đó không ổn! Vui lòng đăng nhập lại"
+                    });
+                }
+                var (newAccessToken, newRefreshToken) = await _jwtService.GenerateNewAccessToken(refreshToken, userName);
 
                 return Ok(new
                 {
-                    accessToken = newAccessToken
+                    accessToken = newAccessToken,
+                    refreshToken = newRefreshToken
                 }
                 );
             }
-            catch (UnauthorizedAccessException ex)
+            catch (Exception ex)
             {
-                return Unauthorized(ex.Message);
+                return StatusCode(500, new
+                {
+                    message = ex.Message
+                });
 
             }
         }

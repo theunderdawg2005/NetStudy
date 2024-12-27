@@ -10,6 +10,8 @@ namespace API_Server.Models
         public string Id { get; set; }
         public string Sender { get; set; }
         public string GroupId { get; set; }
+        public string EncryptedKey { get; set; } 
+        public string EncryptedIV { get; set; }
         public string Content { get; set; }
         public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
     }

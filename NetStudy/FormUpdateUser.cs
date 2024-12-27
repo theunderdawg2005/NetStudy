@@ -170,14 +170,18 @@ namespace NetStudy
 
         private async void linkLogOut_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var check = await userService.LogOut();
-            if (check)
+            var res = MessageBox.Show("Bạn có chắc muốn đăng xuất?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (res == DialogResult.Yes)
             {
-                Application.Exit();
-            }
-            else
-            {
-                MessageBox.Show("Đăng xuất thất bại!");
+                var check = await userService.LogOut();
+                if (check)
+                {
+                    Application.Exit();
+                }
+                else
+                {
+                    MessageBox.Show("Đăng xuất thất bại!");
+                }
             }
         }
 
@@ -203,6 +207,11 @@ namespace NetStudy
             {
                 MessageBox.Show($"Lỗi: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void FormUpdateUser_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            
         }
     }
 }

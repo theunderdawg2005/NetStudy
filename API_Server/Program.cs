@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.SignalR;
 using System.Text;
+using NetStudy.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,11 @@ builder.Services.AddSingleton<ChatBotService>();
 
 builder.Services.AddSingleton<ImageService>();
 
+builder.Services.AddSingleton<RsaService>();
+
+builder.Services.AddSingleton<AesService>();
+
+builder.Services.AddSingleton<HybridEncryptionService>();
 builder.Services.AddHttpClient();
 
 // Add services to the container.

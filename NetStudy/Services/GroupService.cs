@@ -20,9 +20,11 @@ namespace NetStudy.Services
             BaseAddress = new Uri(@"https://localhost:7070/")
         };
         private string accessToken;
+        private readonly AesService _aesService;
         public GroupService(string token)
         {
             accessToken = token;
+            _aesService = new AesService();
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
         }
         public async Task<List<Group>> LoadGroups(string username)
@@ -229,7 +231,7 @@ namespace NetStudy.Services
         {
             try
             {
-
+                
                 var newMsg = new GroupMessage
                 {
                     Sender = user,
@@ -310,7 +312,14 @@ namespace NetStudy.Services
                 var response = await _httpClient.PostAsync($"api/groups/{groupId}/accept-join-req/{reqUser}", null);
                 var res = await response.Content.ReadAsStringAsync();
                 JObject msg = JObject.Parse(res);
-                MessageBox.Show(msg["message"].ToString(), "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if(response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show(msg["message"].ToString(), "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }    
+                else
+                {
+                    MessageBox.Show(msg["message"].ToString(), "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {
