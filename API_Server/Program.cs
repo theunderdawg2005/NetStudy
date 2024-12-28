@@ -42,6 +42,11 @@ builder.Services.AddSingleton<RsaService>();
 builder.Services.AddSingleton<AesService>();
 
 builder.Services.AddSingleton<HybridEncryptionService>();
+
+builder.Services.AddSingleton<TaskService>();
+
+builder.Services.AddSingleton<DocumentService>();
+
 builder.Services.AddHttpClient();
 
 // Add services to the container.

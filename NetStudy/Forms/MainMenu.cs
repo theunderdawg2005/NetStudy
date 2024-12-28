@@ -142,12 +142,13 @@ namespace NetStudy.Forms
         private void btnDashboard_Click(object sender, EventArgs e)
         {
             ActivateButton(sender, RGBColors.color1);
-            OpenChildForm(new FormDashboard());
+            OpenChildForm(new FormDashboard(UserInfo, accessToken));
         }
         private void btnDocument_Click(object sender, EventArgs e)
         {
             ActivateButton(sender, RGBColors.color2);
-            OpenChildForm(new FormDocument());
+            string username = UserInfo["username"].ToString();
+            OpenChildForm(new FormDocument(accessToken, username));
         }
         private void btnChat_Click(object sender, EventArgs e)
         {
