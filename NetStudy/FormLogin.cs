@@ -18,6 +18,7 @@ namespace NetStudy
     public partial class FormLogin : Form
     {
         private readonly UserService userService;
+        private readonly AesService aesService;
         public static readonly HttpClient httpClient = new HttpClient
         {
             BaseAddress = new Uri(@"https://localhost:7070/"),
@@ -26,7 +27,7 @@ namespace NetStudy
         public FormLogin()
         {
             InitializeComponent();
-
+            aesService = new AesService();
         }
         public async void btnLogin_Click_1(object sender, EventArgs e)
         {
@@ -52,8 +53,9 @@ namespace NetStudy
                 if (response.IsSuccessStatusCode)
                 {
                     this.Hide();
+                    var key = aesService.DecryptPrivateKey(res["privateKey"].ToString(), password, res["salt"].ToString());
                     var accessToken = res["accessToken"].ToString();
-                    MainMenu menu = new MainMenu(accessToken, res);
+                    MainMenu menu = new MainMenu(accessToken, res, key);
                     //MessageBox.Show($"Access Token: {accessToken}", "Token");
                     menu.ShowDialog();
                     this.Close();

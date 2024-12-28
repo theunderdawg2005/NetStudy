@@ -33,7 +33,53 @@ namespace API_Server.Services
             _audience = _configuration["JwtSettings:Audience"] ?? throw new ArgumentNullException(nameof(_audience));
         }
 
-        
+        public string EncryptAes(string plainText)
+        {
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = GetKeyBytes(_secret);
+                aes.GenerateIV();
+
+                using (ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
+                {
+                    byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
+                    byte[] encryptedBytes = encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
+
+                    string encryptedText = Convert.ToBase64String(aes.IV) + ":" + Convert.ToBase64String(encryptedBytes);
+                    return encryptedText;
+                }
+            }
+        }
+        public string DecryptAES(string encryptedText)
+        {
+            string[] parts = encryptedText.Split(':');
+            if (parts.Length != 2)
+            {
+                throw new FormatException("Dữ liệu mã hóa không hợp lệ.");
+            }
+
+            byte[] iv = Convert.FromBase64String(parts[0]);
+            byte[] encryptedBytes = Convert.FromBase64String(parts[1]);
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = GetKeyBytes(_secret);
+                aes.IV = iv;
+
+                using (ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
+                {
+                    byte[] decryptedBytes = decryptor.TransformFinalBlock(encryptedBytes, 0, encryptedBytes.Length);
+                    return Encoding.UTF8.GetString(decryptedBytes);
+                }
+            }
+        }
+        private byte[] GetKeyBytes(string key)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                return sha256.ComputeHash(Encoding.UTF8.GetBytes(key));
+            }
+        }
 
         public string GenerateAccessToken(User user)
         {

@@ -27,7 +27,8 @@ namespace NetStudy
             Timeout = TimeSpan.FromMinutes(5)
         };
         private GroupService groupService;
-        public FormGroups(string token, JObject info)
+        private string _key;
+        public FormGroups(string token, JObject info, string key)
         {
             InitializeComponent();
             accessToken = token;
@@ -35,6 +36,7 @@ namespace NetStudy
             UserInfo = info;
 
             groupService = new GroupService(accessToken);
+            _key = key;
         }
 
         private void linkCreateGroup_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -152,7 +154,7 @@ namespace NetStudy
            
         
             var info = JObject.Parse(res);
-            var groupDetails = new FormGroupDetails(accessToken, UserInfo, info);
+            var groupDetails = new FormGroupDetails(accessToken, UserInfo, info, _key);
             groupDetails.Show();
         }
 

@@ -23,10 +23,12 @@ namespace NetStudy
             Timeout = TimeSpan.FromMinutes(5)
         };
         private readonly RsaService rsaService;
+        private readonly AesService aesService;
         public FormRegister()
         {
             InitializeComponent();
             rsaService = new RsaService();
+            aesService = new AesService();
             LoadForm();
         }
         
@@ -104,7 +106,8 @@ namespace NetStudy
             int month = int.Parse(cmbMonth.SelectedItem.ToString());
             int year = int.Parse(cmbYear.SelectedItem.ToString());
             var (publicKey, privateKey) = rsaService.GenerateKeys();
-            File.WriteAllText("private_key.pem", privateKey);
+            string salt;
+            var encryptedPrivateKey = aesService.EncryptPrivateKey(privateKey, password, out salt);
             DateTime dateOfBirth;
             if (!DateTime.TryParse($"{year}-{month}-{day}", out dateOfBirth))
             {
@@ -136,8 +139,10 @@ namespace NetStudy
                 dateOfBirth = dateOfBirth.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
                 email = email,
                 publicKey = publicKey,
+                privateKey = encryptedPrivateKey,
                 password = password,
                 confirmPassword = confirmedPass,
+                salt = salt,
                 
             };
             var response = await Register(register);

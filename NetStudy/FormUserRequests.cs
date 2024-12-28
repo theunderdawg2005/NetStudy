@@ -98,7 +98,6 @@ namespace NetStudy
                         btnAcpt.ForeColor = Color.Brown;
                         btnAcpt.BackColor = Color.LightGreen;
                         await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{admin} (admin) đã thêm {mem} là User");
-                        await groupService.SendMessage(groupId, "Thông báo", $"{admin} (admin) đã thêm {mem} là User", DateTime.UtcNow);
                         CreatePanel();
                     }
 

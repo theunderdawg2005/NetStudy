@@ -15,6 +15,7 @@ namespace API_Server.Models
         public string? Email { get; set; }
         public string? Avatar { get; set; }
         public string? PublicKey { get; set; }
+        public string? PrivateKey { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string? Password { get; set; }
         public string? PasswordHash { get; set; }
@@ -24,7 +25,9 @@ namespace API_Server.Models
         public List<string> Friends { get; set; } = new List<string>();
         public List<string> ChatGroup { get; set; } = new List<string>();
         public bool IsEmailVerified { get; set; } = false;
+        public string Salt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
 
     }
 }

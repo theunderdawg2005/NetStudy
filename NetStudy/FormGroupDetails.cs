@@ -36,8 +36,8 @@ namespace NetStudy
             Timeout = TimeSpan.FromMinutes(5)
         };
         private string _key;
-
-        public FormGroupDetails(string token, JObject info, JObject groupInfo)
+        private string aesKey;  
+        public FormGroupDetails(string token, JObject info, JObject groupInfo, string key)
         {
             InitializeComponent();
             btnSend.Enabled = false;
@@ -47,7 +47,9 @@ namespace NetStudy
             groupId = groupInfo["id"].ToString();
             rsaService = new RsaService();
             aesService = new AesService();
-            _key = rsaService.Decrypt(GroupInfo["key"].ToString());
+            _key = key;
+            string EnAesKey = GroupInfo["keys"][UserInfo["username"].ToString()].ToString();
+            aesKey = rsaService.Decrypt(EnAesKey, _key);
             members = GroupInfo["members"].ToObject<List<MemberRole>>();
             var user = members.FirstOrDefault(u => u.Username == UserInfo["username"].ToString());
             roleUser = user.Role;
@@ -77,7 +79,7 @@ namespace NetStudy
         {
             DateTime timeStamp = DateTime.UtcNow;
             await connection.InvokeAsync("SendMessageGroup", groupId, UserInfo["name"].ToString(), txtMessage.Text);
-            var content = aesService.EncryptMessage(txtMessage.Text, _key);
+            var content = aesService.EncryptMessage(txtMessage.Text, aesKey);
             await groupService.SendMessage(groupId, UserInfo["name"].ToString(), content, timeStamp);
             txtMessage.Clear();
         }
@@ -119,7 +121,7 @@ namespace NetStudy
             listMsg.Items.Clear();
             foreach (var message in data)
             {
-                var content = aesService.DecryptMessage(message.Content, _key);
+                var content = aesService.DecryptMessage(message.Content, aesKey);
                 var time = message.TimeStamp;
                 TimeZoneInfo gmtPlus7 = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 DateTime gmt7Time = TimeZoneInfo.ConvertTimeFromUtc(time, gmtPlus7);
@@ -159,7 +161,6 @@ namespace NetStudy
                 await connection.InvokeAsync("LeaveGroup", groupId);
                 await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{name} đã rời khỏi nhóm");
                 await groupService.LeaveGroup(groupId, username);
-                await groupService.SendMessage(groupId, "Thông báo", $"{name} đã rời khỏi nhóm", DateTime.UtcNow);
                 this.Hide();
                 this.Close();
             }
@@ -178,7 +179,7 @@ namespace NetStudy
 
         private void btnAddUser_Click(object sender, EventArgs e)
         {
-            FormAddUser formAdd = new(
+            FormAddUser formAdd = new FormAddUser(
                 accessToken,
                 GroupInfo["name"].ToString(),
                 GroupInfo["id"].ToString(),

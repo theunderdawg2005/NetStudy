@@ -146,11 +146,11 @@ namespace API_Server.Services
         }
         public async Task<bool> AddGroupToUser(string username, string groupId)
         {
-            var isJoined = await IsJoined(username, groupId);
-            if (isJoined)
-            {
-                return false;
-            }
+            //var isJoined = await IsJoined(username, groupId);
+            //if (isJoined)
+            //{
+            //    return false;
+            //}
             var update = Builders<User>.Update.AddToSet(u => u.ChatGroup, groupId);
             await users.UpdateOneAsync(u => u.Username == username, update);
             return true;
@@ -366,6 +366,8 @@ namespace API_Server.Services
                 DateOfBirth = registerModel.DateOfBirth,
                 Email = registerModel.Email,
                 PublicKey = registerModel.PublicKey,
+                PrivateKey = registerModel.PrivateKey,
+                Salt = registerModel.Salt,
                 Avatar = "https://i.pinimg.com/736x/62/ee/b3/62eeb37155f0df95a708586aed9165c5.jpg",
                 CreatedAt = DateTime.UtcNow,
                 IsEmailVerified = false,
@@ -404,6 +406,8 @@ namespace API_Server.Services
                 DateOfBirth = tempUser.DateOfBirth,
                 Email = tempUser.Email,
                 PublicKey = tempUser.PublicKey,
+                PrivateKey = tempUser.PrivateKey,
+                Salt = tempUser.Salt,
                 Avatar = "https://i.pinimg.com/736x/62/ee/b3/62eeb37155f0df95a708586aed9165c5.jpg",
                 CreatedAt = DateTime.UtcNow,
                 IsEmailVerified = true,

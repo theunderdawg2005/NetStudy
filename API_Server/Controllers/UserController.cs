@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Org.BouncyCastle.Asn1.Ocsp;
 using API_Server.DTOs;
 using NetStudy.Services;
+using System.Security.Cryptography.X509Certificates;
 
 namespace API_Server.Controllers
 {
@@ -98,7 +99,10 @@ namespace API_Server.Controllers
                 Name = data.Name,
                 Username = data.Username,
                 Email = data.Email,
-                Avatar = data.Avatar
+                Avatar = data.Avatar,
+                privateKey = data.PrivateKey,
+                PublicKey = data.PublicKey,
+                salt = data.Salt,
             });
         }
 

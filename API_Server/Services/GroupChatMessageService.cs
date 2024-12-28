@@ -20,7 +20,19 @@ namespace API_Server.Services
             
             await groupChatMessage.InsertOneAsync(message);
         }
-          
+        public async Task SendAnnouncement(string groupId, string content, string key)
+        {
+            var msgContent = encryptionService.Encrypt(content, key);
+            var msg = new GroupChatMessage
+            {
+                Sender = "Hệ thống",
+                GroupId = groupId,
+                Content = msgContent,
+                TimeStamp = DateTime.UtcNow,
+
+            };
+            await groupChatMessage.InsertOneAsync(msg);
+        }
         public async Task<List<GroupChatMessage>> GetMessageByGroupId(string groupId, string username)
         {
             var filter = Builders<GroupChatMessage>.Filter.Eq(gr => gr.GroupId, groupId);

@@ -1,6 +1,9 @@
 ﻿using API_Server.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using NetStudy.Services;
+using System.Data;
+using UglyToad.PdfPig.Core;
 
 
 namespace API_Server.Services
@@ -8,50 +11,62 @@ namespace API_Server.Services
     public class GroupService
     {
         private readonly IMongoCollection<Group> _chatGroups;
+        private readonly GroupChatMessageService _groupChatMessageService;
         private readonly UserService _userService;
         private readonly IMongoCollection<GroupChatMessage> _groupChatMessage;
         private readonly AesService _aesService;
-        private readonly IMongoCollection<KeyModel> _keys;
-        public GroupService(MongoDbService db, UserService userService, AesService aesService)
+        private readonly RsaService _rsaService;
+        private readonly JwtService _jwtService;
+        private string _key;
+        public GroupService(MongoDbService db, UserService userService,GroupChatMessageService groupChatMessageService, AesService aesService, RsaService rsaService, JwtService jwtService)
         {
             _chatGroups = db.ChatGroup;
             _userService = userService;
             _groupChatMessage = db.GroupChatMessage;
             _aesService = aesService;
-            _keys = db.KeyModel;
+            _rsaService = rsaService;
+            _jwtService = jwtService;
+            _groupChatMessageService = groupChatMessageService;
         }
 
         public async Task<Group> CreateGroup(Group chatGroup)
         {
 
+            string sessionKey = _aesService.GenerateAesKey();
+            var user = await _userService.GetUserByUserName(chatGroup.Creator);
+            chatGroup.GroupKey = _jwtService.EncryptAes(sessionKey);
+            chatGroup.SessionKeyEncrypted[chatGroup.Creator] = _rsaService.Encrypt(sessionKey, user.PublicKey);
             await _chatGroups.InsertOneAsync(chatGroup);
-            
             return chatGroup;
         }
-        public async Task<string> GetKey(string groupId, string username)
+        //public async Task<string> GetKey(string groupId, string username)
+        //{
+        //    var filter = Builders<KeyModel>.Filter.And(
+        //            Builders<KeyModel>.Filter.Eq(g => g.GroupId, groupId),
+        //            Builders<KeyModel>.Filter.Eq(g => g.Username, username)
+        //    );
+        //    var checkKey = await _keys.Find(filter).FirstOrDefaultAsync();
+        //    if (checkKey != null)
+        //    {
+        //        return checkKey.Key;
+        //    }
+        //    else
+        //    {
+        //        var key = await SaveKeyByGroupId(groupId, username);
+        //        return key;
+        //    } 
+
+        //}
+        //public async Task<string> SaveKeyByGroupId(string id, string username)
+        //{
+
+        //    var key = await _aesService.GenerateAesKey(username);
+        //    return key;
+        //}    
+        public void AssignPrivateKeyToGroup(string privateKey)
         {
-            var filter = Builders<KeyModel>.Filter.And(
-                    Builders<KeyModel>.Filter.Eq(g => g.GroupId, groupId),
-                    Builders<KeyModel>.Filter.Eq(g => g.Username, username)
-            );
-            var checkKey = await _keys.Find(filter).FirstOrDefaultAsync();
-            if (checkKey != null)
-            {
-                return checkKey.Key;
-            }
-            else
-            {
-                var key = await SaveKeyByGroupId(groupId, username);
-                return key;
-            } 
-                
+            _key = privateKey;
         }
-        public async Task<string> SaveKeyByGroupId(string id, string username)
-        {
-            
-            var key = await _aesService.GenerateAesKey(id, username);
-            return key;
-        }    
         public async Task<Group> GetGroupById(string groupId)
         {
             
@@ -98,14 +113,18 @@ namespace API_Server.Services
         // thêm user vào group cho admin
         public async Task<bool> AddUserToGroup(string groupId, string userName, string name ,string role)
         {
-            
+            var group = await GetGroupById(groupId);
+            if (group == null) 
+                throw new Exception("Group not found.");
             var isJoined = await IsInGroup(userName, groupId);
             if (isJoined)
             {
+                Console.WriteLine("Da join");
                 return false;
             }
             if(role != "User" && role != "Admin")
             {
+                Console.WriteLine("Sai role");
                 return false;
             }    
             var member = new MemberRole
@@ -114,10 +133,22 @@ namespace API_Server.Services
                 Username = userName,
                 Role = (role == "Admin") ? "001" : "002"
             };
-             
+
+            var groupKey = _jwtService.DecryptAES(group.GroupKey);
+
+
+            var newMem = await _userService.GetUserByUserName(userName);
+            group.SessionKeyEncrypted[userName] = _rsaService.Encrypt(groupKey, newMem.PublicKey);
+            await _groupChatMessageService.SendAnnouncement(groupId, $"Thêm người dùng {userName} là {role}", groupKey);
+            group.Members.Add(member);
+            var addGroup = await _userService.AddGroupToUser(userName, groupId);
+            if (!addGroup)
+            {
+                Console.WriteLine("Khong add dc!");
+                return false;
+            }
             
-            var update = Builders<Group>.Update.AddToSet(g => g.Members, member);
-            await _chatGroups.UpdateOneAsync(g => g.Id.ToString() == groupId, update);
+            await UpdateGroup(group);
             return true;
         }
         public async Task<bool> AddUserToGroupRequest(string groupId, string reqUsername)
@@ -202,6 +233,15 @@ namespace API_Server.Services
                     Username = user.Username,
                     Role = "002"
                 };
+                var groupKey = _jwtService.DecryptAES(group.GroupKey);
+
+
+                var newMem = await _userService.GetUserByUserName(req);
+                group.SessionKeyEncrypted[req] = _rsaService.Encrypt(groupKey, newMem.PublicKey);
+
+                Console.WriteLine("debug 3");
+                await _groupChatMessageService.SendAnnouncement(groupId, $"Thêm người dùng {req} là User", groupKey);
+
                 group.MemberRequest.Remove(req);
                 group.Members.Add(member);
                 var addGroup = await _userService.AddGroupToUser(req, groupId);
@@ -245,6 +285,7 @@ namespace API_Server.Services
         }    
         public async Task LeaveGroup(string groupId, string username)
         {
+            
             var group = await GetGroupById(groupId);
             if (group == null)
             {
@@ -260,10 +301,17 @@ namespace API_Server.Services
             {
                 throw new Exception("Người dùng không phải thành viên của nhóm này!");
             }
-
+            if (group.SessionKeyEncrypted.ContainsKey(username))
+            {
+                group.SessionKeyEncrypted.Remove(username);
+            }
             var filter = Builders<Group>.Filter.Eq(g => g.Id, groupId);
-            var update = Builders<Group>.Update.Set(g => g.Members, group.Members);
+            var update = Builders<Group>.Update
+                .Set(g => g.Members, group.Members)
+                .Set(g => g.SessionKeyEncrypted, group.SessionKeyEncrypted);
+
             await _chatGroups.UpdateOneAsync(filter, update);
+            await _groupChatMessageService.SendAnnouncement(groupId, $"{username} đã rời khỏi nhóm", _jwtService.DecryptAES(group.GroupKey));
         }
         public async Task<bool> RemoveUserFromGroup(string groupId, string username)
         {

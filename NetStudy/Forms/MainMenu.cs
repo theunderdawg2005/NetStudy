@@ -27,6 +27,7 @@ namespace NetStudy.Forms
         private Form currentChildForm;
         private JObject UserInfo;
         private string accessToken;
+        private string _key;
         public static readonly HttpClient httpClient = new HttpClient
         {
             BaseAddress = new Uri(@"https://localhost:7070/"),
@@ -35,7 +36,7 @@ namespace NetStudy.Forms
         private TokenService _tokenService;
         private readonly UserService _userService;
         //Constructor
-        public MainMenu(string accessToken, JObject info)
+        public MainMenu(string accessToken, JObject info, string key)
         {
             InitializeComponent();
             leftBorderBtn = new Panel();
@@ -53,6 +54,7 @@ namespace NetStudy.Forms
             _tokenService.SetTokens(accessToken);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             UserInfo = info;
+            _key = key;
         }
         //Structs
         private struct RGBColors
@@ -200,7 +202,7 @@ namespace NetStudy.Forms
         private void btnGroupChat_Click(object sender, EventArgs e)
         {
             ActivateButton(sender, RGBColors.color5);
-            OpenChildForm(new FormGroups(accessToken, UserInfo));
+            OpenChildForm(new FormGroups(accessToken, UserInfo, _key));
         }
 
 

@@ -38,18 +38,21 @@ namespace NetStudy.Services
             _rsa.ImportPkcs8PrivateKey(keyBytes, out _);
         }
 
-        // Mã hóa AES Key bằng Public Key
-        public string Encrypt(byte[] aesKeyBytes, string publicKey)
+        public string Encrypt(string plainText, string publicKey)
         {
-            byte[] encryptedBytes = _rsa.Encrypt(aesKeyBytes, RSAEncryptionPadding.OaepSHA256);
+            using var rsa = RSA.Create();
+            rsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(publicKey), out _);
+
+            var encryptedBytes = rsa.Encrypt(Encoding.UTF8.GetBytes(plainText), RSAEncryptionPadding.OaepSHA256);
             return Convert.ToBase64String(encryptedBytes);
         }
 
-        // Giải mã AES Key bằng Private Key
-        public string Decrypt(string encryptedAesKey)
+        public string Decrypt(string encryptedText, string privateKey)
         {
-            byte[] encryptedBytes = Convert.FromBase64String(encryptedAesKey);
-            byte[] decryptedBytes = _rsa.Decrypt(encryptedBytes, RSAEncryptionPadding.OaepSHA256);
+            using var rsa = RSA.Create();
+            rsa.ImportPkcs8PrivateKey(Convert.FromBase64String(privateKey), out _);
+
+            var decryptedBytes = rsa.Decrypt(Convert.FromBase64String(encryptedText), RSAEncryptionPadding.OaepSHA256);
             return Encoding.UTF8.GetString(decryptedBytes);
         }
         private void GenerateRsaKeys()
@@ -72,18 +75,6 @@ namespace NetStudy.Services
             // Ví dụ:
             Console.WriteLine("Gửi Public Key lên server: " + publicKey);
         }
-        private string DecryptAesKey(string encryptedAesKey)
-        {
-            var rsaService = new RsaService();
-
-            // Load Private Key từ file
-            string privateKey = File.ReadAllText("private_key.pem");
-
-            // Import Private Key
-            rsaService.ImportPrivateKey(privateKey);
-
-            // Giải mã AES Key
-            return rsaService.Decrypt(encryptedAesKey);
-        }
+        
     }
 }

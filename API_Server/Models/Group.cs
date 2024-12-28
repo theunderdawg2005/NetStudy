@@ -15,7 +15,9 @@ namespace API_Server.Models
 
         // Mảng lưu các thành viên (username và role) trong group
         public List<MemberRole> Members { get; set; } = new List<MemberRole>();
+        public string GroupKey { get; set; } // Aes key riêng của nhóm
         public List<string> MemberRequest { get; set; } = new List<string>();
+        public Dictionary<string, string> SessionKeyEncrypted { get; set; } = new Dictionary<string, string>();
     }
 
 }

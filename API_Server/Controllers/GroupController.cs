@@ -133,9 +133,16 @@ namespace API_Server.Controllers
                     });
                 }    
 
-                await _chatGroupService.AddUserToGroup(groupId, userReq.Username, user.Name, userReq.Role);
-                await _userService.AddGroupToUser(userReq.Username, groupId);
+                var check = await _chatGroupService.AddUserToGroup(groupId, userReq.Username, user.Name, userReq.Role);
+                
 
+                if(!check)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Không thể thêm ng dùng"
+                    });
+                }
                 return Ok(new
                 {
                     message = "Thêm người dùng thành công!"
@@ -559,7 +566,6 @@ namespace API_Server.Controllers
                 });
             }
 
-            var key = await _chatGroupService.GetKey(groupId, username);
 
             return Ok(new
             {
@@ -567,8 +573,8 @@ namespace API_Server.Controllers
                 id = group.Id.ToString(),
                 name = group.Name,
                 description = group.Description,
-                Key = key,
                 members = group.Members,
+                keys = group.SessionKeyEncrypted
             });
         }
 

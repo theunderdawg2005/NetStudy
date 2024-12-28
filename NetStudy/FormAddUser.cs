@@ -90,7 +90,7 @@ namespace NetStudy
             if(check)
             {
                 await connection.InvokeAsync("SendMessageGroup", groupId, "Thông báo", $"{name} đã thêm {username} là {roleSelected}");
-                await groupService.SendMessage(groupId, "Thông báo", $"đã thêm {username} là {roleSelected}", timeStamp);
+              
             }    
             
         }

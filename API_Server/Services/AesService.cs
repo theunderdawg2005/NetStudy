@@ -28,32 +28,13 @@ namespace API_Server.Services
             _iv = iv;
         }
 
-        public async Task<string> GenerateAesKey(string groupId, string username)
+        public string GenerateAesKey()
         {
-            var user = await _userService.GetUserByUserName(username);
-            if(user == null)
-            {
-                return null;
-            }
-            if (user.PublicKey == null)
-            {
-                return null;
-            }
-            using (var aes = Aes.Create())
-            {
-                aes.GenerateKey();
-                
-                string key = _rsaService.Encrypt(aes.Key, user.PublicKey);
-                var keyModel = new KeyModel
-                {
-                    GroupId = groupId,
-                    Key = key,
-                    Username = username,
-                };
-               
-                await _keys.InsertOneAsync(keyModel);
-                return key;
-            }
+            
+            using var aes = Aes.Create();
+            aes.GenerateKey();
+            return Convert.ToBase64String(aes.Key);
+ 
         }
 
         public string Encrypt(string plainText, string key)
