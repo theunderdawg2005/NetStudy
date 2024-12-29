@@ -8,10 +8,10 @@ namespace API_Server.Services
         private readonly IMongoCollection<GroupChatMessage> groupChatMessage;
         private readonly AesService encryptionService;
         //private readonly string privateKey;
-        public GroupChatMessageService(MongoDbService db, AesService hybridEncryptionService)
+        public GroupChatMessageService(MongoDbService db, AesService aesService)
         {
             groupChatMessage = db.GroupChatMessage;
-            encryptionService = hybridEncryptionService;
+            encryptionService = aesService;
             
         }
 

@@ -20,6 +20,10 @@ namespace NetStudy.Services
             Timeout = TimeSpan.FromMinutes(5)
         };
         private string accessToken;
+        public UserService()
+        {
+
+        }
         public UserService(string token) {
             accessToken = token;
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
@@ -184,7 +188,15 @@ namespace NetStudy.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var user = userInfo["userFound"].ToObject<User>();
+                    
+                    var user = new User
+                    {
+                        Name = userInfo["userFound"]["name"].ToString(),
+                        Username = userInfo["userFound"]["username"].ToString(),
+                        Email = userInfo["userFound"]["email"].ToString(),
+                        Avatar = userInfo["userFound"]["avatar"].ToString(),
+                        PublicKey = userInfo["userFound"]["publicKey"].ToString()
+                    };
                     return user;
                 }
                 else

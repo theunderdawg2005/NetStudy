@@ -45,7 +45,7 @@
             groupBox_doanchat.ForeColor = SystemColors.Control;
             groupBox_doanchat.Location = new Point(12, 51);
             groupBox_doanchat.Name = "groupBox_doanchat";
-            groupBox_doanchat.Size = new Size(371, 632);
+            groupBox_doanchat.Size = new Size(371, 722);
             groupBox_doanchat.TabIndex = 4;
             groupBox_doanchat.TabStop = false;
             groupBox_doanchat.Text = "Đoạn chat";
@@ -84,7 +84,7 @@
             textBox_showmsg.Location = new Point(389, 51);
             textBox_showmsg.Multiline = true;
             textBox_showmsg.Name = "textBox_showmsg";
-            textBox_showmsg.Size = new Size(804, 595);
+            textBox_showmsg.Size = new Size(1027, 685);
             textBox_showmsg.TabIndex = 5;
             // 
             // textBox_msg
@@ -93,9 +93,9 @@
             textBox_msg.BorderStyle = BorderStyle.FixedSingle;
             textBox_msg.Font = new Font("Arial", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
             textBox_msg.ForeColor = SystemColors.Control;
-            textBox_msg.Location = new Point(389, 654);
+            textBox_msg.Location = new Point(389, 742);
             textBox_msg.Name = "textBox_msg";
-            textBox_msg.Size = new Size(648, 30);
+            textBox_msg.Size = new Size(871, 30);
             textBox_msg.TabIndex = 6;
             textBox_msg.TextChanged += textBox_msg_TextChanged;
             // 
@@ -104,7 +104,7 @@
             button_send.BackColor = Color.FromArgb(34, 33, 74);
             button_send.Font = new Font("Arial", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button_send.ForeColor = SystemColors.Control;
-            button_send.Location = new Point(1043, 652);
+            button_send.Location = new Point(1266, 742);
             button_send.Name = "button_send";
             button_send.Size = new Size(150, 31);
             button_send.TabIndex = 7;
@@ -132,7 +132,7 @@
             textBox_otherstatus.BorderStyle = BorderStyle.None;
             textBox_otherstatus.Font = new Font("Arial", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
             textBox_otherstatus.ForeColor = SystemColors.Control;
-            textBox_otherstatus.Location = new Point(1043, 12);
+            textBox_otherstatus.Location = new Point(1266, 15);
             textBox_otherstatus.Name = "textBox_otherstatus";
             textBox_otherstatus.ReadOnly = true;
             textBox_otherstatus.Size = new Size(150, 23);
@@ -144,7 +144,7 @@
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(26, 25, 62);
-            ClientSize = new Size(1205, 695);
+            ClientSize = new Size(1428, 785);
             Controls.Add(textBox_otherstatus);
             Controls.Add(comboBox_mystatus);
             Controls.Add(button_send);

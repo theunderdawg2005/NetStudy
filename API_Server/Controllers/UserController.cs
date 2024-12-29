@@ -233,9 +233,15 @@ namespace API_Server.Controllers
             var result = await _userService.UpdateUserStatusAsync(request.Username, request.OpStatus.Value);
             if (result)
             {
-                return Ok();
+                return Ok(new
+                {
+                    message = "Cập nhật thành công!"
+                });
             }
-            return BadRequest("Không thể cập nhật trạng thái.");
+            return BadRequest(new
+            {
+                message = "Không thể cập nhật trạng thái."
+            });
         }
 
         
@@ -269,7 +275,8 @@ namespace API_Server.Controllers
                 name = user.Name,
                 username = user.Username,
                 email = user.Email,
-                avatar = user.Avatar
+                avatar = user.Avatar,
+                publicKey = user.PublicKey,
             };
             return Ok(new
             {

@@ -52,7 +52,7 @@
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1205, 68);
+            panel1.Size = new Size(1428, 68);
             panel1.TabIndex = 0;
             // 
             // btnSearch
@@ -99,7 +99,7 @@
             linkCreateGroup.Cursor = Cursors.Hand;
             linkCreateGroup.Font = new Font("Cambria", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
             linkCreateGroup.LinkColor = Color.FromArgb(128, 128, 255);
-            linkCreateGroup.Location = new Point(1010, 19);
+            linkCreateGroup.Location = new Point(1211, 17);
             linkCreateGroup.Name = "linkCreateGroup";
             linkCreateGroup.Size = new Size(196, 26);
             linkCreateGroup.TabIndex = 0;
@@ -114,9 +114,9 @@
             panel2.Controls.Add(comboBox1);
             panel2.Controls.Add(lblPage);
             panel2.Dock = DockStyle.Bottom;
-            panel2.Location = new Point(0, 621);
+            panel2.Location = new Point(0, 711);
             panel2.Name = "panel2";
-            panel2.Size = new Size(1205, 74);
+            panel2.Size = new Size(1428, 74);
             panel2.TabIndex = 1;
             // 
             // lblName
@@ -133,7 +133,7 @@
             // comboBox1
             // 
             comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(1000, 21);
+            comboBox1.Location = new Point(1234, 21);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(182, 33);
             comboBox1.TabIndex = 4;
@@ -144,7 +144,7 @@
             lblPage.AutoSize = true;
             lblPage.Font = new Font("Bahnschrift SemiBold", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblPage.ForeColor = Color.Gainsboro;
-            lblPage.Location = new Point(917, 22);
+            lblPage.Location = new Point(1151, 22);
             lblPage.Name = "lblPage";
             lblPage.Size = new Size(77, 27);
             lblPage.TabIndex = 3;
@@ -156,7 +156,7 @@
             flowLayoutPanel1.Dock = DockStyle.Fill;
             flowLayoutPanel1.Location = new Point(0, 68);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(1205, 553);
+            flowLayoutPanel1.Size = new Size(1428, 643);
             flowLayoutPanel1.TabIndex = 2;
             // 
             // FormGroups
@@ -164,7 +164,7 @@
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(34, 33, 74);
-            ClientSize = new Size(1205, 695);
+            ClientSize = new Size(1428, 785);
             Controls.Add(flowLayoutPanel1);
             Controls.Add(panel2);
             Controls.Add(panel1);

@@ -7,9 +7,8 @@ namespace API_Server.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
-        public string Username { get; set; }
-        public string GroupId { get; set; }
-        public string Key { get; set; }
+        public string? Id { get; set; }
+        public string? Username1 { get; set; }
+        public string? Key { get; set; }
     }
 }

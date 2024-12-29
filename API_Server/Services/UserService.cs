@@ -14,8 +14,6 @@ namespace API_Server.Services
         private EmailService emailService;
         private ImageService imageService;
         private readonly Dictionary<string, User> _users;
-        private string? _currentOtp;
-        private string? _currentEmail;
 
 
         public UserService(MongoDbService db, EmailService email, ImageService imgService) {

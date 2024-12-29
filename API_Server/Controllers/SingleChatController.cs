@@ -1,4 +1,5 @@
-﻿using API_Server.Models;
+﻿using API_Server.DTOs;
+using API_Server.Models;
 using API_Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,17 +21,40 @@ namespace API_Server.Controllers
         // API to send a message
         [Authorize]
         [HttpPost("send")]
-        public async Task<IActionResult> SendMessage([FromBody] SingleChat chatMessage)
+        public async Task<IActionResult> SendMessage([FromBody] SendMessage chatMessage)
         {
-            if (chatMessage == null || string.IsNullOrEmpty(chatMessage.Sender) || string.IsNullOrEmpty(chatMessage.Receiver) || string.IsNullOrEmpty(chatMessage.Content))
+            try
             {
-                return BadRequest("Invalid message information.");
+                if (chatMessage == null || string.IsNullOrEmpty(chatMessage.Sender) || string.IsNullOrEmpty(chatMessage.Receiver) || string.IsNullOrEmpty(chatMessage.Content))
+                {
+                    return BadRequest(new
+                    {
+                        message = "Tin nhắn không hợp lệ"
+                    });
+                }
+                var msg = new SingleChat
+                {
+                    Sender = chatMessage.Sender,
+                    Receiver = chatMessage.Receiver,
+                    Content = chatMessage.Content,
+                    SessionKeyEncrypted = chatMessage.SessionKeyEncrypted,
+                    Timestamp = DateTime.UtcNow
+                };
+                await _chatService.SendMessageAsync(msg);
+
+                return Ok(new
+                {
+                    message = "Gửi tin nhắn thành công",
+                    contentMsg = msg
+                });
             }
-
-            chatMessage.Timestamp = DateTime.UtcNow;
-            await _chatService.SendMessageAsync(chatMessage);
-
-            return Ok("Message sent successfully.");
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                });
+            }
         }
 
         // API to get chat history
@@ -38,7 +62,11 @@ namespace API_Server.Controllers
         public async Task<IActionResult> GetChatHistory([FromQuery] string user1, [FromQuery] string user2)
         {
             var messages = await _chatService.GetMessagesAsync(user1, user2);
-            return Ok(messages);
+            return Ok(new
+            {
+                message = "Lấy tin nhắn thành công!",
+                data = messages
+            });
         }
     }
 }

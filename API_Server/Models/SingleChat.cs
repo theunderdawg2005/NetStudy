@@ -13,6 +13,7 @@ namespace API_Server.Models
         public string Sender { get; set; }
         public string Receiver { get; set; }
         public string Content { get; set; }
+        public Dictionary<string, string> SessionKeyEncrypted { get; set; } = new Dictionary<string, string>();
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 }

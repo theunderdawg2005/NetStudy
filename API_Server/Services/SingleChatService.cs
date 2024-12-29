@@ -17,9 +17,10 @@ namespace API_Server.Services
         // Send a message
         public async Task SendMessageAsync(SingleChat message)
         {
+            
             await _messages.InsertOneAsync(message);
         }
-
+        
         // Get messages between two users
         public async Task<List<SingleChat>> GetMessagesAsync(string user1, string user2)
         {

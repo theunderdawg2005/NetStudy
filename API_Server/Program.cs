@@ -56,7 +56,13 @@ builder.Services.AddSignalR()
     {
         options.EnableDetailedErrors = true;
     }
-    );
+);
+builder.Services.AddSignalR()
+    .AddHubOptions<ChatHub>(options =>
+    {
+        options.EnableDetailedErrors = true;
+    }
+);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -95,6 +101,20 @@ builder.Services.AddAuthentication(options =>
             }
             return Task.CompletedTask;
         }
+       
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Headers["accessToken"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
 
     };
 });
@@ -119,6 +139,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseCors(builder =>
+{
+    builder.AllowAnyHeader()
+           .AllowAnyMethod()
+           .SetIsOriginAllowed(origin => true)
+           .AllowCredentials();
+});
 
 app.MapHub<ChatHub>("/chatHub");
 app.MapHub<GroupChatHub>("/groupChatHub");

@@ -148,6 +148,13 @@ namespace NetStudy.Services
             }
         }
 
+        public string GenerateAesKey()
+        {
 
+            using var aes = Aes.Create();
+            aes.GenerateKey();
+            return Convert.ToBase64String(aes.Key);
+
+        }
     }
 }

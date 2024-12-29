@@ -64,10 +64,10 @@ namespace NetStudy
                 Invoke(async () =>
                 {
                     DateTime timeStamp = DateTime.Now;
-
+                    var content = aesService.DecryptMessage(message, aesKey);
                     listMsg.Items.Add(" ");
                     listMsg.Items.Add(timeStamp.ToString("dd/MM/yyyy hh:mm tt"));
-                    listMsg.Items.Add($"{user}: {message}");
+                    listMsg.Items.Add($"{user}: {content}");
                 });
             });
 
@@ -78,8 +78,9 @@ namespace NetStudy
         private async void btnSend_Click(object sender, EventArgs e)
         {
             DateTime timeStamp = DateTime.UtcNow;
-            await connection.InvokeAsync("SendMessageGroup", groupId, UserInfo["name"].ToString(), txtMessage.Text);
             var content = aesService.EncryptMessage(txtMessage.Text, aesKey);
+            await connection.InvokeAsync("SendMessageGroup", groupId, UserInfo["name"].ToString(), content);
+            
             await groupService.SendMessage(groupId, UserInfo["name"].ToString(), content, timeStamp);
             txtMessage.Clear();
         }

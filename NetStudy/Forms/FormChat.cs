@@ -5,9 +5,14 @@ using System.Drawing;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NetStudy.Models;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using NetStudy.Services;
+using Org.BouncyCastle.Tls;
 
 namespace NetStudy.Forms
 {
@@ -17,13 +22,25 @@ namespace NetStudy.Forms
         private string _currentUser;
         private string _currentChatUser;
         private string _accessToken;
+        private string _key;
+        private readonly AesService _aesService;
+        private readonly RsaService _rsaService;
+        private readonly UserService _userService;
+        private readonly SingleChatService singleChatService;
+        private string aesKey;
 
-        public FormChat(string accessToken, string username)
+        public FormChat(string accessToken, string username, string key)
         {
             InitializeComponent();
             CustomizeGroupBox();
             _accessToken = accessToken;
+            singleChatService = new SingleChatService(accessToken);
+            _aesService = new AesService();
+            _rsaService = new RsaService();
+            _userService = new UserService();
             _currentUser = username;
+            _key = key;
+            aesKey = _aesService.GenerateAesKey();
             textBox_myusrname.Text = _currentUser;
             InitializeSignalR();
             LoadFriends();
@@ -38,31 +55,59 @@ namespace NetStudy.Forms
         private async void InitializeSignalR()
         {
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:7070/chatHub", options =>
+                .WithUrl($"https://localhost:7070/chatHub?username={_currentUser}", options =>
                 {
                     options.AccessTokenProvider = () => Task.FromResult(_accessToken);
                 })
                 .Build();
 
-            _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+            _hubConnection.On<string, SingleChat>("ReceiveMessage", (user, message) =>
             {
                 Invoke((Action)(() =>
                 {
+                    string deKey = _rsaService.Decrypt(message.SessionKeyEncrypted[_currentUser], _key);
+                    var content = _aesService.DecryptMessage(message.Content, deKey);
                     var timestamp = DateTime.Now.ToString("HH:mm:ss - dd/MM/yyyy");
-                    textBox_showmsg.AppendText($"{timestamp}: {user}: {message}{Environment.NewLine}");
+                    textBox_showmsg.AppendText($"{timestamp}: {user}: {content}{Environment.NewLine}");
                 }));
             });
+
+            _hubConnection.On<string, string>("ReceiveStatusUpdate", (username, status) =>
+            {
+                Invoke((Action)(() =>
+                {
+                    // Cập nhật trạng thái bạn bè
+                    LoadFriends();
+                }));
+            });
+
+            _hubConnection.Closed += async (error) =>
+            {
+                await Task.Delay(1000);
+                await _hubConnection.StartAsync();
+            };
 
             await _hubConnection.StartAsync();
         }
 
+
         private async void button_send_Click(object sender, EventArgs e)
         {
+            if (_hubConnection.State != HubConnectionState.Connected)
+            {
+                MessageBox.Show("Không thể gửi tin nhắn. Kết nối đang bị gián đoạn.");
+                return;
+            }
+
             var message = textBox_msg.Text;
-            var localTime = DateTime.UtcNow.AddHours(7);
-            var timestamp = localTime.ToString("HH:mm:ss - dd/MM/yyyy");
-            textBox_showmsg.AppendText($"{timestamp}: {_currentUser}: {message}{Environment.NewLine}");
-            await _hubConnection.InvokeAsync("SendMessage", _currentUser, _currentChatUser, message);
+            
+            var content = _aesService.EncryptMessage(message, aesKey);
+            var senderUser = await _userService.GetUserByUsername(_currentUser);
+            var receiverUser = await _userService.GetUserByUsername(_currentChatUser);
+            var senderKey = _rsaService.Encrypt(aesKey, senderUser.PublicKey);
+            var receiverKey = _rsaService.Encrypt(aesKey, receiverUser.PublicKey);
+            await _hubConnection.InvokeAsync("SendMessage", _currentUser, _currentChatUser, content, senderKey, receiverKey);
+            //await singleChatService.SendMessage(_currentUser , _currentChatUser , message);
             textBox_msg.Clear();
         }
 
@@ -74,18 +119,16 @@ namespace NetStudy.Forms
             }
 
             var messages = await _hubConnection.InvokeAsync<List<SingleChat>>("GetChatHistory", _currentUser, _currentChatUser);
-
-            if (messages == null || messages.Count == 0)
-            {
-                MessageBox.Show("Đây là đoạn chat mới chưa có tin nhắn nào.");
-                return;
-            }
-
+            
             foreach (var message in messages)
             {
+
                 var localTime = message.Timestamp.AddHours(7);
                 var timestamp = localTime.ToString("HH:mm:ss - dd/MM/yyyy");
-                textBox_showmsg.AppendText($"{timestamp}: {message.Sender}: {message.Content}{Environment.NewLine}");
+                var enKey = message.SessionKeyEncrypted[_currentUser];
+                var key = _rsaService.Decrypt(enKey, _key);
+                var contentMSG = _aesService.DecryptMessage(message.Content, key);
+                textBox_showmsg.AppendText($"{timestamp}: {message.Sender}: {contentMSG}{Environment.NewLine}");
             }
         }
 
@@ -104,7 +147,7 @@ namespace NetStudy.Forms
                 var responseBody = await response.Content.ReadAsStringAsync();
                 //MessageBox.Show(responseBody);
 
-                var jsonResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
+                var jsonResponse = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(responseBody);
                 var friends = jsonResponse.GetProperty("data").EnumerateArray().Select(f => f.GetString()).ToList();
                 var totalFriends = jsonResponse.GetProperty("total").GetInt32();
 
@@ -160,7 +203,7 @@ namespace NetStudy.Forms
                 if (response.IsSuccessStatusCode)
                 {
                     var responseBody = await response.Content.ReadAsStringAsync();
-                    var jsonResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
+                    var jsonResponse = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(responseBody);
                     return jsonResponse.GetProperty("opStatus").GetBoolean();
                 }
                 return false;
@@ -191,12 +234,15 @@ namespace NetStudy.Forms
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
                 var url = $"https://localhost:7070/api/user/updateStatus";
-                var content = new StringContent(JsonSerializer.Serialize(new { Username = _currentUser, OpStatus = opstatus }), System.Text.Encoding.UTF8, "application/json");
+                var json = JsonConvert.SerializeObject(new { Username = _currentUser, OpStatus = opstatus });
+                var content = new StringContent(json, Encoding.UTF8 , "application/json");
                 var response = await client.PostAsync(url, content);
-                if (!response.IsSuccessStatusCode)
-                {
-                    MessageBox.Show($"Error: {response.StatusCode} - {response.ReasonPhrase}");
-                }
+                var res = await response.Content.ReadAsStringAsync();
+                string msg = JObject.Parse(res)["message"].ToString();
+                //if (!response.IsSuccessStatusCode)
+                //{
+                //    MessageBox.Show($"Error: {msg}");
+                //}
             }
         }
 
