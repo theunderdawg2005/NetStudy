@@ -15,7 +15,7 @@ namespace NetStudy.Services
     {
         public static readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri(@"https://localhost:7070/"),
+            BaseAddress = new Uri(@"https://localhost:7103/"),
             Timeout = TimeSpan.FromMinutes(5)
         };
         private string accessToken;
@@ -30,6 +30,11 @@ namespace NetStudy.Services
             try
             {
                 var response = await httpClient.PostAsync($"api/questions/{username}/create-question", new StringContent(JsonConvert.SerializeObject(question), Encoding.UTF8, "application/json"));
+                if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
+                }
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -66,6 +71,11 @@ namespace NetStudy.Services
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadAsStringAsync();
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
                 }
                 else
                 {
@@ -105,6 +115,11 @@ namespace NetStudy.Services
                         Data = new List<QuestionDto>()
                     };
                 }
+                else if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
+                }
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
@@ -141,6 +156,11 @@ namespace NetStudy.Services
                         Data = apiResponse.Info
                     };
                 }
+                else if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
+                }
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
@@ -172,6 +192,11 @@ namespace NetStudy.Services
                         Message = apiResponse.Message,
                         Data = apiResponse.Info
                     };
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
                 }
                 else
                 {
@@ -213,6 +238,11 @@ namespace NetStudy.Services
                         Data = new List<QuestionDto>()
                     };
                 }
+                else if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
+                }
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
@@ -240,6 +270,11 @@ namespace NetStudy.Services
                 {
                     return await response.Content.ReadAsStringAsync();
                 }
+                else if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
+                }
                 else
                 {
                     var error = await response.Content.ReadAsStringAsync();
@@ -262,6 +297,11 @@ namespace NetStudy.Services
             };
 
             var response = await httpClient.SendAsync(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+            {
+                MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
 
             return response.IsSuccessStatusCode;
         }
@@ -285,7 +325,11 @@ namespace NetStudy.Services
             };
 
             var response = await httpClient.SendAsync(request);
-
+            if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+            {
+                MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
             return response.IsSuccessStatusCode;
         }
 

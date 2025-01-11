@@ -55,7 +55,7 @@ namespace NetStudy.Forms
         private async void InitializeSignalR()
         {
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl($"https://localhost:7070/chatHub?username={_currentUser}", options =>
+                .WithUrl($"https://localhost:7103/chatHub?username={_currentUser}", options =>
                 {
                     options.AccessTokenProvider = () => Task.FromResult(_accessToken);
                 })
@@ -137,7 +137,7 @@ namespace NetStudy.Forms
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-                var url = $"https://localhost:7070/api/user/get-friend-list/{_currentUser}";
+                var url = $"https://localhost:7103/api/user/get-friend-list/{_currentUser}";
                 var response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -198,7 +198,7 @@ namespace NetStudy.Forms
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-                var url = $"https://localhost:7070/api/user/get-status/{username}";
+                var url = $"https://localhost:7103/api/user/get-status/{username}";
                 var response = await client.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
@@ -233,7 +233,7 @@ namespace NetStudy.Forms
             using (HttpClient client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-                var url = $"https://localhost:7070/api/user/updateStatus";
+                var url = $"https://localhost:7103/api/user/updateStatus";
                 var json = JsonConvert.SerializeObject(new { Username = _currentUser, OpStatus = opstatus });
                 var content = new StringContent(json, Encoding.UTF8 , "application/json");
                 var response = await client.PostAsync(url, content);

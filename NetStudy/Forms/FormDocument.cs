@@ -23,7 +23,7 @@ namespace NetStudy.Forms
             _accessToken = accessToken;
             textBox_myusrname.Text = _currentUser;
 
-            _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7070/") };
+            _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7103/") };
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
         }
 

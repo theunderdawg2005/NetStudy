@@ -26,7 +26,7 @@ namespace NetStudy
         private string currUsername;
         public static HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri(@"https://localhost:7070/")
+            BaseAddress = new Uri(@"https://localhost:7103/")
         };
         public FormMemberList(string token, string id,string role, string username)
         {
@@ -37,7 +37,7 @@ namespace NetStudy
             roleUser = role;
             currUsername = username;
             connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:7070/groupChatHub", opts =>
+                .WithUrl("https://localhost:7103/groupChatHub", opts =>
                 {
                     opts.AccessTokenProvider = async () => await Task.FromResult(accessToken);
                 })

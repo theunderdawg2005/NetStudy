@@ -19,7 +19,7 @@ namespace NetStudy
         
         public static readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri(@"https://localhost:7070/"),
+            BaseAddress = new Uri(@"http://localhost:7103/"),
             Timeout = TimeSpan.FromMinutes(5)
         };
         private string _email;
@@ -35,7 +35,7 @@ namespace NetStudy
             {
                 var json = JsonConvert.SerializeObject(otpModel);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var res = await httpClient.PostAsync("api/user/Verify-Otp", content);
+                var res = await httpClient.PostAsync("api/auth/Verify-Otp", content);
                 return await res.Content.ReadAsStringAsync();
             }
             catch (Exception ex)

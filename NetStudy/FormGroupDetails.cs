@@ -32,7 +32,7 @@ namespace NetStudy
         private string roleUser;
         public static readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri(@"https://localhost:7070/"),
+            BaseAddress = new Uri(@"https://localhost:7103/"),
             Timeout = TimeSpan.FromMinutes(5)
         };
         private string _key;
@@ -54,7 +54,7 @@ namespace NetStudy
             var user = members.FirstOrDefault(u => u.Username == UserInfo["username"].ToString());
             roleUser = user.Role;
             connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:7070/groupChatHub", opts =>
+                .WithUrl("https://localhost:7103/groupChatHub", opts =>
                 {
                     opts.AccessTokenProvider = async () => await Task.FromResult(accessToken);
                 })

@@ -19,7 +19,7 @@ namespace NetStudy.Forms
         public DocumentUpload(string currentUserName, string accessToken)
         {
             InitializeComponent();
-            _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7070/") };
+            _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7103/") };
             _currentUserName = currentUserName;
             _accessToken = accessToken;
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);

@@ -20,7 +20,7 @@ namespace NetStudy.Forms
         public DocumentEdit(string documentId, string accessToken)
         {
             InitializeComponent();
-            _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7070/") };
+            _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7103/") };
             _documentId = documentId;
             _accessToken = accessToken;
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);

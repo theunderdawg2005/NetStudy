@@ -14,7 +14,7 @@ namespace NetStudy.Services
     {
         public static readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri(@"https://localhost:7070/"),
+            BaseAddress = new Uri(@"https://localhost:7103/"),
             Timeout = TimeSpan.FromMinutes(5)
         };
         private string accessToken;
@@ -43,7 +43,11 @@ namespace NetStudy.Services
                     $"api/user-task/{username}/create-task",
                     new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json")
                 );
-
+                 if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
+                }
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -69,7 +73,11 @@ namespace NetStudy.Services
             {
                 var response = await httpClient.GetAsync($"api/user-task/{username}/get-all-task");
                 var content = await response.Content.ReadAsStringAsync();
-
+                if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
+                }
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonObject = JsonConvert.DeserializeObject<JObject>(content);
@@ -92,6 +100,11 @@ namespace NetStudy.Services
             try
             {
                 var response = await httpClient.GetAsync($"api/user-task/{username}/get-task-ispending");
+                if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
+                }
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -118,6 +131,11 @@ namespace NetStudy.Services
                 string formattedDate = date.ToString("yyyy-MM-dd");
 
                 var response = await httpClient.GetAsync($"api/user-task/{username}/get-task-day?date={formattedDate}");
+                if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
+                }
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response == null)

@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API_Server", "API_Server.csproj", "{43F005D1-8C3A-4D70-96B3-68F81C573D77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API_Server", "API_Server.csproj", "{43F005D1-8C3A-4D70-96B3-68F81C573D77}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Load-Balancer", "Load-Balancer", "{51036D14-FFC2-48C9-9DBA-F1638F8EC65A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D35F6C79-3297-4977-BE9A-4D8BB6DF1C75}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yarp.LoadBalancer", "..\Yarp.LoadBalancer\Yarp.LoadBalancer.csproj", "{F483C834-09A0-47AA-99A4-D809E90D5CE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +21,17 @@ Global
 		{43F005D1-8C3A-4D70-96B3-68F81C573D77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43F005D1-8C3A-4D70-96B3-68F81C573D77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43F005D1-8C3A-4D70-96B3-68F81C573D77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F483C834-09A0-47AA-99A4-D809E90D5CE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F483C834-09A0-47AA-99A4-D809E90D5CE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F483C834-09A0-47AA-99A4-D809E90D5CE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F483C834-09A0-47AA-99A4-D809E90D5CE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{43F005D1-8C3A-4D70-96B3-68F81C573D77} = {D35F6C79-3297-4977-BE9A-4D8BB6DF1C75}
+		{F483C834-09A0-47AA-99A4-D809E90D5CE1} = {51036D14-FFC2-48C9-9DBA-F1638F8EC65A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {061E7992-135B-4E02-903D-A303ACC4AEEF}

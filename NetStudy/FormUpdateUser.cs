@@ -25,7 +25,7 @@ namespace NetStudy
         private readonly JObject UserInfo;
         public static HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri(@"https://localhost:7070/"),
+            BaseAddress = new Uri(@"https://localhost:7103/"),
         };
         public FormUpdateUser(string token, JObject info)
         {

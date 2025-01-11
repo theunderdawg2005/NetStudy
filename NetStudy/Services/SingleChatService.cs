@@ -12,7 +12,7 @@ namespace NetStudy.Services
     {
         public static HttpClient _httpClient = new HttpClient
         {
-            BaseAddress = new Uri(@"https://localhost:7070/")
+            BaseAddress = new Uri(@"https://localhost:7103/")
         };
         private readonly AesService _aesService;
         private readonly RsaService _rsaService;
@@ -51,6 +51,11 @@ namespace NetStudy.Services
                 var json = JsonConvert.SerializeObject(contentMsg);
                 var contentReq = new StringContent(json, Encoding.UTF8, "application/json");
                 var response = await _httpClient.PostAsync("api/chat/send", contentReq);
+                if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
                 var res = await response.Content.ReadAsStringAsync();
                 if (string.IsNullOrWhiteSpace(res))
                 {
@@ -77,6 +82,11 @@ namespace NetStudy.Services
                 
                 
                 var response = await _httpClient.GetAsync($"api/chat/history?user1={user1}&user2={user2}");
+                if (response.StatusCode == System.Net.HttpStatusCode.BadGateway)
+                {
+                    MessageBox.Show("Đã có lỗi gì đó! Vui lòng thử lại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return null;
+                }
                 var res = await response.Content.ReadAsStringAsync();
                 if (string.IsNullOrWhiteSpace(res))
                 {
